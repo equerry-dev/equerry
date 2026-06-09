@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Base theme for the app. The UI is Jetpack Compose (Material3); this XML theme only
+      provides the window/launch styling Android needs before Compose takes over.
+    -->
+    <style name="Theme.Equerry" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

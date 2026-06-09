@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      Internet is required for the provider drivers (chat/vision/STT/TTS backends).
+      No SMS / contacts / call-log permissions: side-effecting actions hand off to the
+      system compose UIs via public intents (see spec §5, §8).
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name=".EquerryApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Equerry">
+
+        <!--
+          TODO(Phase 0/1): register the VoiceInteractionService + VoiceInteractionSession
+          so Equerry can be set as the system default digital assistant (spec §10).
+          The launcher Activity below is the settings/onboarding entry point.
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Equerry">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

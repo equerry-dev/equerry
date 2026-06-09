@@ -1,0 +1,78 @@
+[project]
+  name = "Equerry"
+  version = "0.1.0.0"
+  description = "Bring-your-own-backend Android assistant: registers as the system default digital assistant and routes requests to user-configured AI backends instead of Gemini."
+  created = "2026-06-09"
+
+[stack]
+
+  [[stack.locked]]
+    choice = "Kotlin + Jetpack Compose (Android native)"
+    why = "Spec-locked. Native Android is required for the VoiceInteractionService/Assist API assistant role; Compose is the modern idiomatic UI toolkit."
+    locked_at = "2026-06-09"
+
+  [[stack.locked]]
+    choice = "Hilt for DI, Coroutines + Flow for async"
+    why = "Spec-locked. Standard Android DI and structured-concurrency choices; keep drivers and slot routing testable and injectable."
+    locked_at = "2026-06-09"
+
+  [[stack.locked]]
+    choice = "Min SDK 29, Target SDK 36"
+    why = "Play requires API 36 targeting by Aug 2026 — start there. Min 29 balances reach against the Assist/security APIs relied upon."
+    locked_at = "2026-06-09"
+
+  [[stack.locked]]
+    choice = "DataStore for settings, Keystore-backed EncryptedSharedPreferences for secrets"
+    why = "Keys are secrets (constraint §5): encrypted at rest, never logged. DataStore for non-secret settings. Room deferred until conversation history outgrows trivial."
+    locked_at = "2026-06-09"
+
+  [[stack.locked]]
+    choice = "Networking: Retrofit + OkHttp (okhttp-sse for streaming)"
+    why = "Spec default. Largest Android community + docs for a solo maintainer; OkHttp interceptors map cleanly onto the never-log-keys constraint (per-provider auth header injection + log redaction). Token streaming handled via the okhttp-sse EventSource module."
+    locked_at = "2026-06-09"
+
+  [[stack.locked]]
+    choice = "License GPL-3.0; package dev.equerry.app; distributed via Google Play + F-Droid"
+    why = "GPL keeps every fork open — that IS the privacy pitch. Package ID is permanent once published and stands alone for brand transferability. CLA required from first external contribution to preserve sale/dual-license optionality."
+    locked_at = "2026-06-09"
+
+  [[stack.locked]]
+    choice = "v1 provider types: core three (Ollama, Anthropic, OpenAI-compatible) + OpenRouter"
+    why = "OpenRouter is near-free — a base-URL preset on the OpenAI-compatible driver, no new code. Remote Whisper STT and remote TTS deferred to a later phase; the Capability Slot architecture makes adding drivers cheap, so Phase 1 stays lean (system STT/TTS cover the zero-key path)."
+    locked_at = "2026-06-09"
+
+  [[stack.locked]]
+    choice = "Tip jar: Liberapay + GitHub Sponsors (Phase 4)"
+    why = "Liberapay matches the FOSS/F-Droid audience and has a native F-Droid donate field; GitHub Sponsors is lowest-friction given the repo lives on GitHub. FUNDING.yml and F-Droid metadata both support listing more than one."
+    locked_at = "2026-06-09"
+
+[runtime]
+  mode = "native"
+  dev_command = "./gradlew :app:installDebug"
+  test_command = "./gradlew testDebugUnitTest"
+  typecheck_command = "./gradlew :app:compileDebugKotlin"
+  lint_command = "./gradlew :app:lintDebug"
+  build_command = "./gradlew :app:assembleDebug"
+
+[repo]
+  layout = "single"
+  git_main_branch = "main"
+  squash_merge = false
+
+[remote]
+  url = "https://github.com/equerry-dev/equerry"
+  provider = "github"
+  public = true
+  api_base = "https://api.github.com"
+  log_api = true
+  auth_env = "GITHUB_TOKEN"
+
+[paths]
+
+[env]
+
+[goals]
+  core_value = "Privacy-first assistant where you bring your own keys/endpoints and wire different AI providers to different jobs (chat, vision, STT, TTS) — no accounts, no telemetry, all data flows only to providers you configure."
+  audience = "Privacy-conscious Android power users; people who self-host models (Ollama) or hold their own API keys; the FOSS / F-Droid crowd who want a Gemini alternative as the system default assistant."
+  non_goals = ["AccessibilityService-based automation or app-driving (read the screen, never touch it) — permanently out of scope", "On-device model inference — the phone is a thin client to remote/self-hosted models in v1", "Custom wake word / always-listening mode — invocation is gesture/button only", "Multi-user accounts, cloud sync, or a first-party hosted backend"]
+  differentiators = ["Bring-your-own-backend with per-job provider mapping (Capability Slots) — split chat/vision/STT/TTS across different providers for cost, privacy, and quality", "Privacy is the product, enforced in code: no analytics, no accounts, GPL-3.0, F-Droid-distributable", "Reads the screen via the sanctioned Assist API (never Accessibility), staying within Play policy"]

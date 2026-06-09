@@ -1,0 +1,17 @@
+[[rule]]
+  id = "r-01"
+  text = "Never add an AccessibilityService for any reason. Screen reading uses the sanctioned Assist API only (constraint §2.1, permanent non-goal)."
+  severity = "hard"
+  created = "2026-06-09"
+
+[[rule]]
+  id = "r-02"
+  text = "Side-effecting actions (send email/SMS, post anything, any irreversible action) must stage and require an explicit in-app user confirmation tap. The model drafts and stages; the human commits (§2.2)."
+  severity = "hard"
+  created = "2026-06-09"
+
+[[rule]]
+  id = "r-03"
+  text = "API keys and endpoint credentials are never logged, never placed in URLs/query strings, and are sent only to the provider they belong to; stored encrypted via Keystore-backed EncryptedSharedPreferences (§2.5)."
+  severity = "hard"
+  created = "2026-06-09"
