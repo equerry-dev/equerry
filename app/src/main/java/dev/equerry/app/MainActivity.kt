@@ -21,9 +21,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
 import dev.equerry.app.ui.providers.ProviderEditRoute
 import dev.equerry.app.ui.providers.ProviderListRoute
@@ -59,7 +61,7 @@ fun EquerryNavHost(
     providersContent: @Composable () -> Unit = {
         ProviderListRoute(
             onAdd = { navController.navigate(Route.EDIT) },
-            onEdit = { navController.navigate(Route.EDIT) },
+            onEdit = { id -> navController.navigate("${Route.EDIT}?profileId=$id") },
         )
     },
     slotsContent: @Composable () -> Unit = {
@@ -75,10 +77,20 @@ fun EquerryNavHost(
         }
         composable(Route.PROVIDERS) { providersContent() }
         composable(Route.SLOTS) { slotsContent() }
-        composable(Route.EDIT) {
+        composable(
+            route = "${Route.EDIT}?profileId={profileId}",
+            arguments = listOf(
+                navArgument("profileId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+        ) { backStackEntry ->
             ProviderEditRoute(
                 onBack = { navController.popBackStack() },
                 onSaved = { navController.popBackStack() },
+                profileId = backStackEntry.arguments?.getString("profileId"),
             )
         }
     }

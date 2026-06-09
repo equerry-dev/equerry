@@ -7,11 +7,13 @@ import dev.equerry.app.providers.FieldError
 import dev.equerry.app.providers.ProfileDraft
 import dev.equerry.app.providers.ProfileField
 import dev.equerry.app.providers.ProfileValidator
+import dev.equerry.app.providers.ProviderProfile
 import dev.equerry.app.providers.ProviderRepository
 import dev.equerry.app.providers.ProviderType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,6 +27,7 @@ data class ProviderEditUiState(
     val model: String = "",
     val errors: List<FieldError> = emptyList(),
     val saved: Boolean = false,
+    val editing: Boolean = false,
 ) {
     val keyFieldVisible: Boolean get() = type.requiresKey
     val baseUrlLocked: Boolean get() = type.baseUrlLocked
@@ -44,8 +47,26 @@ class ProviderEditViewModel @Inject constructor(
     private val _state = MutableStateFlow(ProviderEditUiState())
     val state: StateFlow<ProviderEditUiState> = _state.asStateFlow()
 
+    private var editingId: String? = null
+
     init {
         selectType(ProviderType.OLLAMA)
+    }
+
+    /** Loads an existing profile into the form for editing. The key stays in the secret store. */
+    fun load(profileId: String) {
+        viewModelScope.launch {
+            val profile = repository.observeProfiles().first().firstOrNull { it.id == profileId } ?: return@launch
+            editingId = profile.id
+            _state.value = ProviderEditUiState(
+                label = profile.label,
+                type = profile.type,
+                baseUrl = profile.baseUrl,
+                key = "",
+                model = profile.model,
+                editing = true,
+            )
+        }
     }
 
     fun onLabelChange(value: String) = clearAnd(ProfileField.LABEL) { it.copy(label = value) }
@@ -67,13 +88,25 @@ class ProviderEditViewModel @Inject constructor(
     fun save() {
         val current = _state.value
         val draft = ProfileDraft(current.label, current.type, current.baseUrl, current.key, current.model)
-        val errors = ProfileValidator.validate(draft)
+        val id = editingId
+        var errors = ProfileValidator.validate(draft)
+        // When editing, a blank key means "keep the saved secret" — don't require one.
+        if (id != null && current.key.isBlank()) {
+            errors = errors.filterNot { it.field == ProfileField.KEY }
+        }
         if (errors.isNotEmpty()) {
             _state.update { it.copy(errors = errors) }
             return
         }
         viewModelScope.launch {
-            repository.addProfile(draft)
+            if (id != null) {
+                repository.updateProfile(
+                    ProviderProfile(id, current.label, current.type, current.baseUrl, current.model),
+                    newKey = current.key.ifBlank { null },
+                )
+            } else {
+                repository.addProfile(draft)
+            }
             _state.update { it.copy(saved = true) }
         }
     }

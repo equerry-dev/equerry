@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import dev.equerry.app.data.ProfileStore
 import dev.equerry.app.data.SecretStore
 import dev.equerry.app.data.SlotMappingStore
+import dev.equerry.app.providers.ProfileDraft
 import dev.equerry.app.providers.ProfileField
 import dev.equerry.app.providers.ProviderRepository
 import dev.equerry.app.providers.ProviderType
@@ -98,5 +99,36 @@ class ProviderEditViewModelTest {
         val profiles = repository.observeProfiles().first { it.isNotEmpty() }
         assertEquals(1, profiles.size)
         assertEquals("Home Ollama", profiles.first().label)
+    }
+
+    @Test
+    fun load_prefills_the_form_and_marks_editing_without_exposing_the_key() = runBlocking {
+        val created = repository.addProfile(
+            ProfileDraft("Work Claude", ProviderType.ANTHROPIC, "https://api.anthropic.com", "sk-secret", "claude-opus-4-8"),
+        )
+
+        vm.load(created.id)
+        val s = vm.state.first { it.editing }
+
+        assertEquals("Work Claude", s.label)
+        assertEquals(ProviderType.ANTHROPIC, s.type)
+        assertEquals("claude-opus-4-8", s.model)
+        assertEquals("", s.key) // the saved secret is never loaded into the form
+    }
+
+    @Test
+    fun editing_updates_in_place_with_a_blank_key_kept() = runBlocking {
+        val created = repository.addProfile(
+            ProfileDraft("Old Label", ProviderType.ANTHROPIC, "https://api.anthropic.com", "sk-secret", "claude-sonnet-4-6"),
+        )
+
+        vm.load(created.id)
+        vm.state.first { it.editing }
+        vm.onLabelChange("New Label")
+        vm.save() // key left blank — allowed when editing (keeps the saved secret)
+
+        val profiles = repository.observeProfiles().first { list -> list.any { it.label == "New Label" } }
+        assertEquals(1, profiles.size) // updated in place, not duplicated
+        assertEquals(created.id, profiles.first().id)
     }
 }

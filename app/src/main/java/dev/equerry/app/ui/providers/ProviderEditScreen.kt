@@ -49,9 +49,11 @@ import dev.equerry.app.providers.ProviderType
 fun ProviderEditRoute(
     onBack: () -> Unit,
     onSaved: () -> Unit,
+    profileId: String? = null,
     viewModel: ProviderEditViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    androidx.compose.runtime.LaunchedEffect(profileId) { if (profileId != null) viewModel.load(profileId) }
     androidx.compose.runtime.LaunchedEffect(state.saved) { if (state.saved) onSaved() }
     ProviderEditScreen(
         state = state,
@@ -92,7 +94,7 @@ fun ProviderEditScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("New provider") },
+                title = { Text(if (state.editing) "Edit provider" else "New provider") },
                 navigationIcon = {
                     IconButton(onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Back") }
                 },
@@ -159,7 +161,14 @@ fun ProviderEditScreen(
                         }
                     },
                     isError = state.errorFor(ProfileField.KEY) != null,
-                    supportingText = { state.errorFor(ProfileField.KEY)?.let { Text(it) } },
+                    supportingText = {
+                        val err = state.errorFor(ProfileField.KEY)
+                        when {
+                            err != null -> Text(err)
+                            state.editing -> Text("Leave blank to keep the saved key.")
+                            else -> {}
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
