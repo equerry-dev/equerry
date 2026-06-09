@@ -70,6 +70,24 @@
       ],
       "commit": "d01f0a3",
       "completed_at": "2026-06-09T16:56:40.192899Z"
+    },
+    "t-8": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderListScreen.kt",
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt",
+        "app/src/test/java/dev/equerry/app/ui/providers/ProviderListScreenTest.kt",
+        "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditScreenTest.kt",
+        "app/src/main/java/dev/equerry/app/ui/components/TypeBadge.kt",
+        "app/src/main/java/dev/equerry/app/ui/components/ProfileCard.kt",
+        "app/src/main/java/dev/equerry/app/ui/theme/Color.kt",
+        "app/src/main/java/dev/equerry/app/ui/theme/Type.kt",
+        "app/src/main/java/dev/equerry/app/ui/theme/Theme.kt",
+        "gradle/libs.versions.toml",
+        "app/build.gradle.kts",
+        "app/src/main/res/font"
+      ],
+      "commit": "bbf25c5",
+      "completed_at": "2026-06-09T17:51:07.491478Z"
     }
   }
 }

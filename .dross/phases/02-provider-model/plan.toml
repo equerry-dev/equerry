@@ -83,7 +83,7 @@
   covers = ["c-1", "c-3", "c-6"]
   depends_on = ["t-6"]
   test_contract = ["Under Robolectric Compose test, ProviderEditScreen renders the OLLAMA variant with NO API-key field and the ANTHROPIC variant WITH a required key field, and an invalid submit shows the inline error node; ProviderEditScreenTest fails otherwise.", "ProviderEditScreen renders a model input that offers the selected type's preset model ids (e.g. choosing ANTHROPIC shows its presets) while still accepting free-text; ProviderEditScreenTest fails if the model input or its presets are absent.", "ProviderListScreen renders one row per saved profile label with a delete affordance; ProviderListScreenTest fails if a saved profile is missing from the rendered list."]
-  status = "pending"
+  status = "done"
 
 [[task]]
   id = "t-9"
