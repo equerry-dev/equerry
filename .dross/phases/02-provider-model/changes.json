@@ -52,6 +52,16 @@
       ],
       "commit": "df29673",
       "completed_at": "2026-06-09T16:43:50.516019Z"
+    },
+    "t-6": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderListViewModel.kt",
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt",
+        "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditViewModelTest.kt",
+        "app/src/test/java/dev/equerry/app/ui/providers/ProviderListViewModelTest.kt"
+      ],
+      "commit": "bd77192",
+      "completed_at": "2026-06-09T16:48:09.238182Z"
     }
   }
 }

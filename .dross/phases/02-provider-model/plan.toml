@@ -61,7 +61,7 @@
   covers = ["c-1", "c-3", "c-6"]
   depends_on = ["t-5"]
   test_contract = ["ProviderEditViewModel: selecting type ANTHROPIC prefills its default base URL and marks the key field required; submitting with an empty key exposes the inline key error and does NOT call repository.addProfile; a valid OLLAMA draft with no key calls addProfile exactly once; ProviderEditViewModelTest fails on any branch.", "Selecting a type exposes that type's hardcoded model presets in the edit state (e.g. ANTHROPIC surfaces its preset model ids) while keeping the model field free-text; ProviderEditViewModelTest fails if a type's presets are missing from the state.", "ProviderListViewModel exposes saved profiles by label and delete invokes repository.deleteProfile; ProviderListViewModelTest fails otherwise."]
-  status = "pending"
+  status = "done"
 
 [[task]]
   id = "t-7"
