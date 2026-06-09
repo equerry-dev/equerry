@@ -3,8 +3,8 @@
   "current_milestone": "v0.1",
   "current_phase": "02-provider-model",
   "current_phase_status": "planned",
-  "last_activity": "2026-06-09T15:02:54.50645Z",
-  "last_action": "plan reviewed: 02-provider-model (0 blocking, 4 flags)",
+  "last_activity": "2026-06-09T15:05:06.308411Z",
+  "last_action": "plan amended per review: 02-provider-model (model-preset + observeProfiles contracts sharpened)",
   "history": [
     {
       "at": "2026-06-09T09:44:52.562646Z",
@@ -49,6 +49,10 @@
     {
       "at": "2026-06-09T15:02:54.50645Z",
       "action": "plan reviewed: 02-provider-model (0 blocking, 4 flags)"
+    },
+    {
+      "at": "2026-06-09T15:05:06.308411Z",
+      "action": "plan amended per review: 02-provider-model (model-preset + observeProfiles contracts sharpened)"
     }
   ]
 }

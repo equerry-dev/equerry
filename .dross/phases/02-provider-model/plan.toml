@@ -121,7 +121,7 @@ covers        = ["c-1", "c-2", "c-3", "c-4"]
 test_contract = [
   "addProfile persists the profile via ProfileStore and the API key via SecretStore separately; the payload handed to ProfileStore contains no occurrence of the key string; ProviderRepositoryTest fails if the key leaks into profile storage.",
   "deleteProfile removes the profile's secret AND clears any capability-slot mapping pointing at it; observeChatMapping() emits null after the mapped profile is deleted.",
-  "observeProfiles() emits the updated list after addProfile, updateProfile, and deleteProfile.",
+  "observeProfiles() reflects each mutation: after addProfile the new id is present, after updateProfile the changed label appears on the matching id, and after deleteProfile that id is absent; ProviderRepositoryTest fails otherwise.",
 ]
 status        = "pending"
 
@@ -144,6 +144,7 @@ save. ListVM exposes the saved profiles and delete.
 covers        = ["c-1", "c-3", "c-6"]
 test_contract = [
   "ProviderEditViewModel: selecting type ANTHROPIC prefills its default base URL and marks the key field required; submitting with an empty key exposes the inline key error and does NOT call repository.addProfile; a valid OLLAMA draft with no key calls addProfile exactly once; ProviderEditViewModelTest fails on any branch.",
+  "Selecting a type exposes that type's hardcoded model presets in the edit state (e.g. ANTHROPIC surfaces its preset model ids) while keeping the model field free-text; ProviderEditViewModelTest fails if a type's presets are missing from the state.",
   "ProviderListViewModel exposes saved profiles by label and delete invokes repository.deleteProfile; ProviderListViewModelTest fails otherwise.",
 ]
 status        = "pending"
@@ -187,6 +188,7 @@ validation errors. List screen shows profiles by label with edit/delete.
 covers        = ["c-1", "c-3", "c-6"]
 test_contract = [
   "Under Robolectric Compose test, ProviderEditScreen renders the OLLAMA variant with NO API-key field and the ANTHROPIC variant WITH a required key field, and an invalid submit shows the inline error node; ProviderEditScreenTest fails otherwise.",
+  "ProviderEditScreen renders a model input that offers the selected type's preset model ids (e.g. choosing ANTHROPIC shows its presets) while still accepting free-text; ProviderEditScreenTest fails if the model input or its presets are absent.",
   "ProviderListScreen renders one row per saved profile label with a delete affordance; ProviderListScreenTest fails if a saved profile is missing from the rendered list.",
 ]
 status        = "pending"
