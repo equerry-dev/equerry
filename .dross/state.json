@@ -3,8 +3,8 @@
   "current_milestone": "v0.1",
   "current_phase": "02-provider-model",
   "current_phase_status": "planned",
-  "last_activity": "2026-06-09T17:51:07.505668Z",
-  "last_action": "executed t-8 (provider screens + design-handoff theme/fonts/components folded in)",
+  "last_activity": "2026-06-09T18:19:38.682703Z",
+  "last_action": "executed t-9 (Capability Slots screen + picker); stabilized VM/screen test dispatcher race",
   "history": [
     {
       "at": "2026-06-09T09:44:52.562646Z",
@@ -85,6 +85,10 @@
     {
       "at": "2026-06-09T17:51:07.505668Z",
       "action": "executed t-8 (provider screens + design-handoff theme/fonts/components folded in)"
+    },
+    {
+      "at": "2026-06-09T18:19:38.682703Z",
+      "action": "executed t-9 (Capability Slots screen + picker); stabilized VM/screen test dispatcher race"
     }
   ]
 }

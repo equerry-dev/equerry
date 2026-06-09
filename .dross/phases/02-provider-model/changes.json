@@ -88,6 +88,15 @@
       ],
       "commit": "bbf25c5",
       "completed_at": "2026-06-09T17:51:07.491478Z"
+    },
+    "t-9": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/slots/SlotsScreen.kt",
+        "app/src/main/java/dev/equerry/app/ui/components/SlotRow.kt",
+        "app/src/test/java/dev/equerry/app/ui/slots/SlotsScreenTest.kt"
+      ],
+      "commit": "d26e398",
+      "completed_at": "2026-06-09T18:19:38.669968Z"
     }
   }
 }

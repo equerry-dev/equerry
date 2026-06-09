@@ -94,7 +94,7 @@
   covers = ["c-4", "c-5"]
   depends_on = ["t-7"]
   test_contract = ["Under Robolectric Compose test, SlotsScreen renders CHAT as enabled and the other slots as disabled with a 'coming soon' marker, and renders the guidance text node when no CHAT profile is mapped; SlotsScreenTest fails otherwise.", "Tapping the CHAT slot opens a picker listing the saved profile labels; SlotsScreenTest fails if the picker does not show a saved profile."]
-  status = "pending"
+  status = "done"
 
 [[task]]
   id = "t-10"
