@@ -1,8 +1,10 @@
 {
   "version": "0.1.0.2",
   "current_milestone": "v0.1",
-  "last_activity": "2026-06-09T19:30:40.832175Z",
-  "last_action": "completed 02-provider-model",
+  "current_phase": "03-assist-probe",
+  "current_phase_status": "created",
+  "last_activity": "2026-06-09T19:45:24.336557Z",
+  "last_action": "spec locked: 03-assist-probe",
   "history": [
     {
       "at": "2026-06-09T09:44:52.562646Z",
@@ -131,6 +133,18 @@
     {
       "at": "2026-06-09T19:30:40.832175Z",
       "action": "completed 02-provider-model"
+    },
+    {
+      "at": "2026-06-09T19:36:12.14019Z",
+      "action": "created 03-assist-probe"
+    },
+    {
+      "at": "2026-06-09T19:45:24.32946Z",
+      "action": "set current_phase=03-assist-probe"
+    },
+    {
+      "at": "2026-06-09T19:45:24.336557Z",
+      "action": "spec locked: 03-assist-probe"
     }
   ]
 }

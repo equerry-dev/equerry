@@ -1,0 +1,52 @@
+[phase]
+id        = "03-assist-probe"
+title     = "Assist probe"
+milestone = "v0.1"
+
+[[criteria]]
+id   = "c-1"
+text = "Equerry appears in Android's Digital assistant app picker and, once selected, becomes the active assistant."
+
+[[criteria]]
+id   = "c-2"
+text = "Performing the assist gesture/button launches Equerry's session UI (a visible Compose screen), not Gemini."
+
+[[criteria]]
+id   = "c-3"
+text = "On invocation, Equerry records whether AssistStructure was provided and its text-node count for the foreground app."
+
+[[criteria]]
+id   = "c-4"
+text = "On invocation, Equerry records whether an assist screenshot was provided or blocked for the foreground app."
+
+[[criteria]]
+id   = "c-5"
+text = "Phase-0 probe results (per app: AssistStructure y/n + node count, screenshot arrived/blocked) are shown in an on-screen log that can be exported for review."
+
+[[decisions]]
+key    = "probe_persistence"
+choice = "Persist probe records via DataStore, one record appended per invocation."
+why    = "Table accumulates across many separate invocations over time; must survive process death/restarts. DataStore is the locked settings store — no new dependency."
+locked = true
+
+[[decisions]]
+key    = "export_format"
+choice = "Export the results table as CSV via the Android share-sheet."
+why    = "Tabular data reviews cleanly in a spreadsheet; share-sheet routes it to any app (email/notes/Drive) for review."
+locked = true
+
+[[decisions]]
+key    = "screenshot_retention"
+choice = "Record only whether a screenshot arrived/was blocked plus non-sensitive metadata (dimensions); never persist the bitmap."
+why    = "Privacy is the product (core value); storing raw screen bitmaps in a log would undermine it. Metadata still confirms a real bitmap came through (c-4)."
+locked = true
+
+[[decisions]]
+key    = "session_ui"
+choice = "The assist session screen is a live probe dashboard showing the current invocation's capture: foreground app, AssistStructure arrived + node count, screenshot arrived/blocked + size."
+why    = "Gives immediate per-invocation confirmation the probe worked and satisfies c-2 with real content rather than a placeholder."
+locked = true
+
+[[deferred]]
+text = "Not-default-assistant guidance UI (prompt/direct the user to set Equerry as default when it isn't)."
+why  = "Out of scope for the probe phase — if the app isn't default, it's simply not default."
