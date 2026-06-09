@@ -1,0 +1,231 @@
+[phase]
+id = "02-provider-model"
+
+[[task]]
+id            = "t-1"
+wave          = 1
+title         = "Provider domain model + per-type rules + validation"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt",
+  "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",
+  "app/src/main/java/dev/equerry/app/providers/CapabilitySlot.kt",
+  "app/src/main/java/dev/equerry/app/providers/ProfileValidator.kt",
+  "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt",
+  "app/src/test/java/dev/equerry/app/providers/ProfileValidatorTest.kt",
+]
+description   = """
+Pure-Kotlin domain layer (no Android deps). ProviderProfile (id, label, type,
+baseUrl, model — deliberately NO key field). ProviderType enum {OLLAMA, ANTHROPIC,
+OPENAI_COMPATIBLE, OPENROUTER} carrying per-type metadata: requiresKey,
+defaultBaseUrl, baseUrlLocked, driverType (OPENROUTER -> OPENAI_COMPATIBLE),
+modelPresets. CapabilitySlot enum {CHAT, VISION, STT, TTS, OCR, EMBEDDINGS} with an
+`active` flag (only CHAT true). ProfileValidator applies per-type field rules.
+"""
+covers        = ["c-6"]
+test_contract = [
+  "ProfileValidator returns a label error for a blank label, a key error for an ANTHROPIC or OPENAI_COMPATIBLE draft with empty key, and a base-URL error for an OLLAMA draft with empty base URL; ProfileValidatorTest fails if a rule is dropped or fires for the wrong type.",
+  "ProviderType metadata is correct: OLLAMA.requiresKey=false, ANTHROPIC and OPENAI_COMPATIBLE.requiresKey=true, OPENROUTER.driverType==OPENAI_COMPATIBLE with the OpenRouter default base URL prefilled; ProviderTypeTest fails on a wrong row.",
+  "CapabilitySlot.CHAT.active==true and VISION/STT/TTS/OCR/EMBEDDINGS.active==false; ProviderTypeTest fails otherwise.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-2"
+wave          = 1
+title         = "Dependencies + JVM test infrastructure"
+files         = [
+  "gradle/libs.versions.toml",
+  "app/build.gradle.kts",
+  "app/src/test/java/dev/equerry/app/ToolchainSmokeTest.kt",
+]
+description   = """
+Sole owner of Gradle edits this phase (prevents build-file conflicts between later
+tasks). Adds runtime deps: lifecycle-viewmodel-ktx, lifecycle-viewmodel-compose,
+navigation-compose. Adds JVM (testImplementation) deps: robolectric,
+kotlinx-coroutines-test, compose-ui-test-junit4, navigation-testing,
+androidx-test-core. Sets testOptions.unitTests.isIncludeAndroidResources = true so
+Robolectric + Compose UI tests run under ./gradlew testDebugUnitTest.
+"""
+covers        = []
+test_contract = [
+  "A Robolectric-runner test resolving the application Context and a minimal Compose-UI test (createComposeRule rendering one node) both execute under ./gradlew testDebugUnitTest; if any added dependency or the testOptions config is missing, ToolchainSmokeTest fails to compile or run.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-3"
+wave          = 2
+depends_on    = ["t-2"]
+title         = "Encrypted SecretStore + DI"
+files         = [
+  "app/src/main/java/dev/equerry/app/data/SecretStore.kt",
+  "app/src/main/java/dev/equerry/app/data/EncryptedSecretStore.kt",
+  "app/src/main/java/dev/equerry/app/di/SecretStoreModule.kt",
+  "app/src/test/java/dev/equerry/app/data/EncryptedSecretStoreTest.kt",
+]
+description   = """
+SecretStore interface (put/getKey/remove by profile id) + EncryptedSecretStore impl
+backed by Keystore-backed EncryptedSharedPreferences (rule r-03). DI binding.
+RISK: security-crypto's Tink/Keystore path may not run under Robolectric. Fallback
+if so: the real-impl test lands as a connected androidTest (device coverage) and the
+JVM gate keeps the SecretStore-contract (fake) + the t-5 no-plaintext guarantee.
+"""
+covers        = ["c-2"]
+test_contract = [
+  "EncryptedSecretStore round-trips put/getKey/remove against the real androidx EncryptedSharedPreferences under Robolectric; getKey returns the stored key, and getKey returns null after remove(profileId); EncryptedSecretStoreTest fails otherwise.",
+  "The key is written through the encrypted prefs instance, not plain SharedPreferences; the test fails if a key is found in readable plaintext.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-4"
+wave          = 2
+depends_on    = ["t-1", "t-2"]
+title         = "Profile + slot DataStore persistence + DI"
+files         = [
+  "app/src/main/java/dev/equerry/app/data/ProfileStore.kt",
+  "app/src/main/java/dev/equerry/app/data/SlotMappingStore.kt",
+  "app/src/main/java/dev/equerry/app/di/PersistenceModule.kt",
+  "app/src/test/java/dev/equerry/app/data/ProfileStoreTest.kt",
+  "app/src/test/java/dev/equerry/app/data/SlotMappingStoreTest.kt",
+]
+description   = """
+Non-secret persistence on DataStore. ProfileStore serializes the profile list
+(no key field). SlotMappingStore persists slot -> profileId (CHAT only used now).
+Underpins c-1/c-3/c-4 (delivered through the repository + UI).
+"""
+covers        = []
+test_contract = [
+  "ProfileStore.save then load round-trips a list of ProviderProfile with no API-key field present on the model; ProfileStoreTest fails if a profile is lost or mutated across reload.",
+  "SlotMappingStore persists a CHAT->profileId mapping that survives reload and returns null after the mapping is cleared; SlotMappingStoreTest fails otherwise.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-5"
+wave          = 3
+depends_on    = ["t-3", "t-4"]
+title         = "ProviderRepository (CRUD + key-split + cascade)"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt",
+  "app/src/main/java/dev/equerry/app/di/RepositoryModule.kt",
+  "app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt",
+]
+description   = """
+Orchestrates ProfileStore + SecretStore + SlotMappingStore. addProfile(draft, key),
+updateProfile, deleteProfile (cascades: removes secret + clears slot mappings
+referencing the profile), observeProfiles(): Flow, setChatSlot(profileId),
+observeChatMapping(). Tested with fakes — fully JVM.
+"""
+covers        = ["c-1", "c-2", "c-3", "c-4"]
+test_contract = [
+  "addProfile persists the profile via ProfileStore and the API key via SecretStore separately; the payload handed to ProfileStore contains no occurrence of the key string; ProviderRepositoryTest fails if the key leaks into profile storage.",
+  "deleteProfile removes the profile's secret AND clears any capability-slot mapping pointing at it; observeChatMapping() emits null after the mapped profile is deleted.",
+  "observeProfiles() emits the updated list after addProfile, updateProfile, and deleteProfile.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-6"
+wave          = 4
+depends_on    = ["t-5"]
+title         = "Provider list + adaptive edit ViewModels"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/providers/ProviderListViewModel.kt",
+  "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt",
+  "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditViewModelTest.kt",
+  "app/src/test/java/dev/equerry/app/ui/providers/ProviderListViewModelTest.kt",
+]
+description   = """
+ViewModels exposing UI state. EditVM applies per-type defaults (prefill base URL,
+hide key for Ollama) and runs ProfileValidator, surfacing field errors and gating
+save. ListVM exposes the saved profiles and delete.
+"""
+covers        = ["c-1", "c-3", "c-6"]
+test_contract = [
+  "ProviderEditViewModel: selecting type ANTHROPIC prefills its default base URL and marks the key field required; submitting with an empty key exposes the inline key error and does NOT call repository.addProfile; a valid OLLAMA draft with no key calls addProfile exactly once; ProviderEditViewModelTest fails on any branch.",
+  "ProviderListViewModel exposes saved profiles by label and delete invokes repository.deleteProfile; ProviderListViewModelTest fails otherwise.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-7"
+wave          = 4
+depends_on    = ["t-5"]
+title         = "Capability Slots ViewModel"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/slots/SlotsViewModel.kt",
+  "app/src/test/java/dev/equerry/app/ui/slots/SlotsViewModelTest.kt",
+]
+description   = """
+ViewModel for the Capability Slots screen: exposes slot list with CHAT active and
+the rest disabled, the current CHAT mapping, an unconfigured flag for guidance, and
+setChatSlot.
+"""
+covers        = ["c-4", "c-5"]
+test_contract = [
+  "SlotsViewModel marks CHAT active and the other five slots disabled; with no CHAT mapping its state sets chatUnconfigured=true; selecting a profile calls repository.setChatSlot and flips chatUnconfigured=false; SlotsViewModelTest fails on any.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-8"
+wave          = 5
+depends_on    = ["t-6"]
+title         = "Provider list + adaptive edit screens (Compose)"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/providers/ProviderListScreen.kt",
+  "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt",
+  "app/src/test/java/dev/equerry/app/ui/providers/ProviderListScreenTest.kt",
+  "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditScreenTest.kt",
+]
+description   = """
+Compose screens rendering the ViewModel state. Edit form adapts fields per type
+(hide key for Ollama, prefill base URL for Anthropic/OpenRouter) and shows inline
+validation errors. List screen shows profiles by label with edit/delete.
+"""
+covers        = ["c-1", "c-3", "c-6"]
+test_contract = [
+  "Under Robolectric Compose test, ProviderEditScreen renders the OLLAMA variant with NO API-key field and the ANTHROPIC variant WITH a required key field, and an invalid submit shows the inline error node; ProviderEditScreenTest fails otherwise.",
+  "ProviderListScreen renders one row per saved profile label with a delete affordance; ProviderListScreenTest fails if a saved profile is missing from the rendered list.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-9"
+wave          = 5
+depends_on    = ["t-7"]
+title         = "Capability Slots screen + CHAT picker (Compose)"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/slots/SlotsScreen.kt",
+  "app/src/test/java/dev/equerry/app/ui/slots/SlotsScreenTest.kt",
+]
+description   = """
+Compose Capability Slots screen: CHAT enabled, the other slots greyed 'coming soon';
+shows guidance when CHAT is unmapped; tapping CHAT opens a picker of saved profiles.
+"""
+covers        = ["c-4", "c-5"]
+test_contract = [
+  "Under Robolectric Compose test, SlotsScreen renders CHAT as enabled and the other slots as disabled with a 'coming soon' marker, and renders the guidance text node when no CHAT profile is mapped; SlotsScreenTest fails otherwise.",
+  "Tapping the CHAT slot opens a picker listing the saved profile labels; SlotsScreenTest fails if the picker does not show a saved profile.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-10"
+wave          = 6
+depends_on    = ["t-8", "t-9"]
+title         = "Navigation host + entry points"
+files         = [
+  "app/src/main/java/dev/equerry/app/MainActivity.kt",
+  "app/src/test/java/dev/equerry/app/NavigationTest.kt",
+]
+description   = """
+Replace the placeholder MainActivity body with a NavHost: home entry routes to the
+provider-list screen and the capability-slots screen. Makes c-1/c-4/c-5 reachable.
+"""
+covers        = []
+test_contract = [
+  "Using a Robolectric TestNavHostController, from the home destination the NavHost navigates to the provider-list route and to the capability-slots route; currentDestination.route matches the expected route after each action; NavigationTest fails if a destination is unreachable.",
+]
+status        = "pending"

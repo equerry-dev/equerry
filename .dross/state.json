@@ -2,9 +2,9 @@
   "version": "0.1.0.0",
   "current_milestone": "v0.1",
   "current_phase": "02-provider-model",
-  "current_phase_status": "created",
-  "last_activity": "2026-06-09T14:33:25.610225Z",
-  "last_action": "spec locked: 02-provider-model",
+  "current_phase_status": "planned",
+  "last_activity": "2026-06-09T15:00:57.296342Z",
+  "last_action": "plan locked: 02-provider-model (10 tasks across 6 waves)",
   "history": [
     {
       "at": "2026-06-09T09:44:52.562646Z",
@@ -37,6 +37,14 @@
     {
       "at": "2026-06-09T14:33:25.610225Z",
       "action": "spec locked: 02-provider-model"
+    },
+    {
+      "at": "2026-06-09T15:00:57.28893Z",
+      "action": "set current_phase_status=planned"
+    },
+    {
+      "at": "2026-06-09T15:00:57.296342Z",
+      "action": "plan locked: 02-provider-model (10 tasks across 6 waves)"
     }
   ]
 }
