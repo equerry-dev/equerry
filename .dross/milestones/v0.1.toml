@@ -1,0 +1,11 @@
+phases = ["00-assist-probe", "01-provider-model", "02-chat-drivers", "03-voice-roundtrip"]
+
+[milestone]
+  version = "v0.1"
+  title = "Assist probe + first spoken chat round-trip"
+  status = "active"
+  started = "2026-06-09"
+
+[scope]
+  success_criteria = ["The app can be set as Android's default digital assistant and is invoked by the assist gesture, showing Equerry's session UI.", "[HARD GATE] A Phase-0 results table exists and is reviewed: per ~10 real apps, whether AssistStructure arrived (and its text-node count) and whether an assist screenshot arrived or was blocked.", "A user can create/edit a Provider Profile (type, baseUrl, key, model), have its key stored encrypted, and map it to the CHAT slot via the settings UI; an unconfigured slot shows clear guidance.", "With one configured chat provider, a user can hold a spoken Q&A end to end: gesture -> system STT -> CHAT reply -> spoken back via system TTS and rendered in the session."]
+  non_goals = ["No tools/actions (timers, alarms, calendar, draft email/SMS) — Phase 2 / v0.2.", "No screen-context feature (sending screen content to VISION or OCR+CHAT) — Phase 0 only probes availability; the feature is Phase 3.", "No remote Whisper STT or remote TTS drivers — system STT/TTS only for v0.1.", "No release polish, onboarding flow, or store listing — the release milestone."]
