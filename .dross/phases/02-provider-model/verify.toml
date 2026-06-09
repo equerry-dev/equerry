@@ -1,0 +1,85 @@
+[verify]
+  phase = "02-provider-model"
+  generated_at = 2026-06-09T18:51:30.404342Z
+  verdict = "pass"
+
+[summary]
+  mutation_status = "skipped"
+  mutation_score = 0.0
+  mutants_killed = 0
+  mutants_survived = 0
+  mutants_not_covered = 0
+  criteria_total = 6
+  criteria_covered = 6
+  criteria_uncovered = 0
+
+[[criterion]]
+  id = "c-1"
+  status = "covered"
+  tests = [
+    "ui/providers/ProviderEditViewModelTest.kt:valid_ollama_save_adds_exactly_one_profile",
+    "ui/providers/ProviderListScreenTest.kt:renders_a_row_per_profile_label",
+    "ui/providers/ProviderEditScreenTest.kt:ollama_hides_the_api_key_field",
+  ]
+  notes = "Create via the form persists a profile; list screen renders it; edit form shows type-appropriate fields."
+
+[[criterion]]
+  id = "c-2"
+  status = "covered"
+  tests = [
+    "providers/ProviderRepositoryTest.kt:addProfile_stores_key_in_secret_store_not_in_profile_payload",
+    "androidTest data/EncryptedSecretStoreInstrumentedTest.kt:backing_file_holds_neither_alias_nor_secret_in_cleartext",
+  ]
+  notes = "No-plaintext-in-DataStore is JVM-gated via the repository test. Real EncryptedSharedPreferences encryption is proven by an androidTest (device/CI) — Robolectric cannot host the Android Keystore, so that half does not run on the testDebugUnitTest gate."
+
+[[criterion]]
+  id = "c-3"
+  status = "covered"
+  tests = [
+    "ui/providers/ProviderEditViewModelTest.kt:editing_updates_in_place_with_a_blank_key_kept",
+    "ui/providers/ProviderListViewModelTest.kt:delete_removes_a_profile",
+    "data/ProfileStoreTest.kt:saved_profiles_round_trip_across_a_reload",
+  ]
+  notes = "Edit-load + updateProfile (quick-1), delete, and reload-survival via a second DataStore instance over the same file."
+
+[[criterion]]
+  id = "c-4"
+  status = "covered"
+  tests = [
+    "ui/slots/SlotsViewModelTest.kt:mapping_a_profile_clears_the_unconfigured_state",
+    "data/SlotMappingStoreTest.kt:chat_mapping_survives_a_reload",
+    "ui/slots/SlotsScreenTest.kt:tapping_chat_opens_a_picker_listing_profiles",
+  ]
+  notes = "CHAT mapping set via VM + picker UI; persistence across reload via SlotMappingStore."
+
+[[criterion]]
+  id = "c-5"
+  status = "covered"
+  tests = [
+    "ui/slots/SlotsScreenTest.kt:chat_is_active_others_are_coming_soon_with_guidance_when_unmapped",
+    "ui/slots/SlotsViewModelTest.kt:chat_is_unconfigured_when_no_profile_is_mapped",
+  ]
+  notes = "Unmapped CHAT sets chatUnconfigured and renders the guidance banner node."
+
+[[criterion]]
+  id = "c-6"
+  status = "covered"
+  tests = [
+    "providers/ProfileValidatorTest.kt:anthropic_with_empty_key_is_flagged",
+    "providers/ProfileValidatorTest.kt:ollama_with_empty_base_url_is_flagged",
+    "ui/providers/ProviderEditViewModelTest.kt:empty_key_blocks_save_and_shows_inline_error",
+    "ui/providers/ProviderEditScreenTest.kt:invalid_submit_surfaces_an_inline_error",
+  ]
+  notes = "Per-type validation rules + save-gating in the VM + inline error node in the screen."
+
+[[finding]]
+  severity = "NOTE"
+  text = "Mutation efficacy unmeasured: no Kotlin mutation adapter (dross mutation supports JS/TS/Svelte only). Verdict rests on criterion-to-test coverage."
+
+[[finding]]
+  severity = "FLAG"
+  text = "c-2's real EncryptedSharedPreferences encryption is verified only by an androidTest (connectedDebugAndroidTest), which does not run on the JVM testDebugUnitTest gate. CI must run instrumentation tests on a device/emulator to gate that half."
+
+[[finding]]
+  severity = "NOTE"
+  text = "UI assertions adapt to Robolectric: dropdown/popup/off-screen nodes asserted via assertExists (present in the semantics tree) rather than assertIsDisplayed, since Robolectric popups/scroll have no real geometry."
