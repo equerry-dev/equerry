@@ -32,6 +32,17 @@
       ],
       "commit": "8044a8a",
       "completed_at": "2026-06-09T15:32:39.565015Z"
+    },
+    "t-4": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/data/ProfileStore.kt",
+        "app/src/main/java/dev/equerry/app/data/SlotMappingStore.kt",
+        "app/src/main/java/dev/equerry/app/di/PersistenceModule.kt",
+        "app/src/test/java/dev/equerry/app/data/ProfileStoreTest.kt",
+        "app/src/test/java/dev/equerry/app/data/SlotMappingStoreTest.kt"
+      ],
+      "commit": "0011086",
+      "completed_at": "2026-06-09T16:36:19.026907Z"
     }
   }
 }

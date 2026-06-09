@@ -39,7 +39,7 @@
   description = "Non-secret persistence on DataStore. ProfileStore serializes the profile list\n(no key field). SlotMappingStore persists slot -> profileId (CHAT only used now).\nUnderpins c-1/c-3/c-4 (delivered through the repository + UI).\n"
   depends_on = ["t-1", "t-2"]
   test_contract = ["ProfileStore.save then load round-trips a list of ProviderProfile with no API-key field present on the model; ProfileStoreTest fails if a profile is lost or mutated across reload.", "SlotMappingStore persists a CHAT->profileId mapping that survives reload and returns null after the mapping is cleared; SlotMappingStoreTest fails otherwise."]
-  status = "pending"
+  status = "done"
 
 [[task]]
   id = "t-5"
