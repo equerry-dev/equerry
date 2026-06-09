@@ -19,7 +19,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -62,8 +63,8 @@ class ProviderEditScreenTest {
 
     @After
     fun tearDown() {
+        runBlocking { scope.coroutineContext[Job]!!.cancelAndJoin() }
         Dispatchers.resetMain()
-        scope.cancel()
     }
 
     private fun newViewModel(): ProviderEditViewModel {
