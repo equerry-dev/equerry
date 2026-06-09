@@ -12,6 +12,15 @@
       ],
       "commit": "f35dbdb",
       "completed_at": "2026-06-09T15:12:47.121975Z"
+    },
+    "t-2": {
+      "files": [
+        "gradle/libs.versions.toml",
+        "app/build.gradle.kts",
+        "app/src/test/java/dev/equerry/app/ToolchainSmokeTest.kt"
+      ],
+      "commit": "27a606a",
+      "completed_at": "2026-06-09T15:18:35.911087Z"
     }
   }
 }

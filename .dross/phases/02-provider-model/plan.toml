@@ -18,7 +18,7 @@
   files = ["gradle/libs.versions.toml", "app/build.gradle.kts", "app/src/test/java/dev/equerry/app/ToolchainSmokeTest.kt"]
   description = "Sole owner of Gradle edits this phase (prevents build-file conflicts between later\ntasks). Adds runtime deps: lifecycle-viewmodel-ktx, lifecycle-viewmodel-compose,\nnavigation-compose. Adds JVM (testImplementation) deps: robolectric,\nkotlinx-coroutines-test, compose-ui-test-junit4, navigation-testing,\nandroidx-test-core. Sets testOptions.unitTests.isIncludeAndroidResources = true so\nRobolectric + Compose UI tests run under ./gradlew testDebugUnitTest.\n"
   test_contract = ["A Robolectric-runner test resolving the application Context and a minimal Compose-UI test (createComposeRule rendering one node) both execute under ./gradlew testDebugUnitTest; if any added dependency or the testOptions config is missing, ToolchainSmokeTest fails to compile or run."]
-  status = "pending"
+  status = "done"
 
 [[task]]
   id = "t-3"
