@@ -6,50 +6,111 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
+import dev.equerry.app.ui.providers.ProviderEditRoute
+import dev.equerry.app.ui.providers.ProviderListRoute
+import dev.equerry.app.ui.slots.SlotsRoute
 import dev.equerry.app.ui.theme.EquerryTheme
 
-/**
- * Settings / onboarding entry point. The assistant invocation path (Assist API) is added
- * in Phase 0/1 via a VoiceInteractionService; this Activity hosts the provider/slot UI.
- */
+/** Settings / onboarding host. Owns the navigation graph over the provider + slot screens. */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            EquerryTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Text(text = "Equerry", style = MaterialTheme.typography.headlineMedium)
-                        Text(text = "Bring your own backend.", style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
-            }
+            EquerryTheme { EquerryNavHost() }
         }
     }
 }
 
-@Preview(showBackground = true)
+object Route {
+    const val HOME = "home"
+    const val PROVIDERS = "providers"
+    const val SLOTS = "slots"
+    const val EDIT = "edit"
+}
+
+/**
+ * App navigation graph. The provider/slot destinations are injectable so tests can
+ * exercise the graph without the Hilt-backed routes; production uses the real screens.
+ */
 @Composable
-private fun MainPreview() {
-    EquerryTheme {
-        Text("Equerry")
+fun EquerryNavHost(
+    navController: NavHostController = rememberNavController(),
+    providersContent: @Composable () -> Unit = {
+        ProviderListRoute(
+            onAdd = { navController.navigate(Route.EDIT) },
+            onEdit = { navController.navigate(Route.EDIT) },
+        )
+    },
+    slotsContent: @Composable () -> Unit = {
+        SlotsRoute(onAddProvider = { navController.navigate(Route.EDIT) })
+    },
+) {
+    NavHost(navController = navController, startDestination = Route.HOME) {
+        composable(Route.HOME) {
+            HomeScreen(
+                onProviders = { navController.navigate(Route.PROVIDERS) },
+                onSlots = { navController.navigate(Route.SLOTS) },
+            )
+        }
+        composable(Route.PROVIDERS) { providersContent() }
+        composable(Route.SLOTS) { slotsContent() }
+        composable(Route.EDIT) {
+            ProviderEditRoute(
+                onBack = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HomeScreen(onProviders: () -> Unit, onSlots: () -> Unit) {
+    Scaffold(topBar = { TopAppBar(title = { Text("Equerry") }) }) { pad ->
+        Column(
+            Modifier.padding(pad).padding(16.dp).fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                "Bring your own backend.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(4.dp))
+            HomeEntry("Providers", "Manage your AI backend profiles", onProviders)
+            HomeEntry("Capability slots", "Route jobs to your providers", onSlots)
+        }
+    }
+}
+
+@Composable
+private fun HomeEntry(title: String, subtitle: String, onClick: () -> Unit) {
+    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(2.dp))
+            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }
