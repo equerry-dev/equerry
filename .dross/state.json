@@ -3,8 +3,8 @@
   "current_milestone": "v0.1",
   "current_phase": "02-provider-model",
   "current_phase_status": "planned",
-  "last_activity": "2026-06-09T16:48:09.24936Z",
-  "last_action": "executed t-6 (Provider list + adaptive edit ViewModels)",
+  "last_activity": "2026-06-09T16:56:40.204834Z",
+  "last_action": "executed t-7 (Capability Slots ViewModel)",
   "history": [
     {
       "at": "2026-06-09T09:44:52.562646Z",
@@ -77,6 +77,10 @@
     {
       "at": "2026-06-09T16:48:09.24936Z",
       "action": "executed t-6 (Provider list + adaptive edit ViewModels)"
+    },
+    {
+      "at": "2026-06-09T16:56:40.204834Z",
+      "action": "executed t-7 (Capability Slots ViewModel)"
     }
   ]
 }

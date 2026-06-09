@@ -72,7 +72,7 @@
   covers = ["c-4", "c-5"]
   depends_on = ["t-5"]
   test_contract = ["SlotsViewModel marks CHAT active and the other five slots disabled; with no CHAT mapping its state sets chatUnconfigured=true; selecting a profile calls repository.setChatSlot and flips chatUnconfigured=false; SlotsViewModelTest fails on any."]
-  status = "pending"
+  status = "done"
 
 [[task]]
   id = "t-8"
