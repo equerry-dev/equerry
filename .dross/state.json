@@ -1,10 +1,8 @@
 {
   "version": "0.1.0.2",
   "current_milestone": "v0.1",
-  "current_phase": "02-provider-model",
-  "current_phase_status": "verified",
-  "last_activity": "2026-06-09T18:53:06.882344Z",
-  "last_action": "verified 02-provider-model: pass (6/6 covered; mutation skipped — no Kotlin adapter)",
+  "last_activity": "2026-06-09T19:30:40.832175Z",
+  "last_action": "completed 02-provider-model",
   "history": [
     {
       "at": "2026-06-09T09:44:52.562646Z",
@@ -125,6 +123,14 @@
     {
       "at": "2026-06-09T18:53:06.882344Z",
       "action": "verified 02-provider-model: pass (6/6 covered; mutation skipped — no Kotlin adapter)"
+    },
+    {
+      "at": "2026-06-09T18:59:30.024363Z",
+      "action": "shipped 02-provider-model → https://github.com/equerry-dev/equerry/pull/1"
+    },
+    {
+      "at": "2026-06-09T19:30:40.832175Z",
+      "action": "completed 02-provider-model"
     }
   ]
 }
