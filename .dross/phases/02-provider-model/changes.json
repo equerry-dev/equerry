@@ -13,6 +13,14 @@
       "commit": "f35dbdb",
       "completed_at": "2026-06-09T15:12:47.121975Z"
     },
+    "t-10": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/MainActivity.kt",
+        "app/src/test/java/dev/equerry/app/NavigationTest.kt"
+      ],
+      "commit": "5af86df",
+      "completed_at": "2026-06-09T18:28:17.338614Z"
+    },
     "t-2": {
       "files": [
         "gradle/libs.versions.toml",

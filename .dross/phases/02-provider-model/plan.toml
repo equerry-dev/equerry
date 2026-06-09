@@ -104,4 +104,4 @@
   description = "Replace the placeholder MainActivity body with a NavHost: home entry routes to the\nprovider-list screen and the capability-slots screen. Makes c-1/c-4/c-5 reachable.\n"
   depends_on = ["t-8", "t-9"]
   test_contract = ["Using a Robolectric TestNavHostController, from the home destination the NavHost navigates to the provider-list route and to the capability-slots route; currentDestination.route matches the expected route after each action; NavigationTest fails if a destination is unreachable."]
-  status = "pending"
+  status = "done"

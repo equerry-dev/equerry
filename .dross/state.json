@@ -3,8 +3,8 @@
   "current_milestone": "v0.1",
   "current_phase": "02-provider-model",
   "current_phase_status": "planned",
-  "last_activity": "2026-06-09T18:19:38.682703Z",
-  "last_action": "executed t-9 (Capability Slots screen + picker); stabilized VM/screen test dispatcher race",
+  "last_activity": "2026-06-09T18:28:17.351431Z",
+  "last_action": "executed t-10 (Navigation host + entry points)",
   "history": [
     {
       "at": "2026-06-09T09:44:52.562646Z",
@@ -89,6 +89,10 @@
     {
       "at": "2026-06-09T18:19:38.682703Z",
       "action": "executed t-9 (Capability Slots screen + picker); stabilized VM/screen test dispatcher race"
+    },
+    {
+      "at": "2026-06-09T18:28:17.351431Z",
+      "action": "executed t-10 (Navigation host + entry points)"
     }
   ]
 }
