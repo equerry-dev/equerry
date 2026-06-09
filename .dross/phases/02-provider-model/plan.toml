@@ -29,7 +29,7 @@
   covers = ["c-2"]
   depends_on = ["t-2"]
   test_contract = ["EncryptedSecretStore round-trips put/getKey/remove against the real androidx EncryptedSharedPreferences under Robolectric; getKey returns the stored key, and getKey returns null after remove(profileId); EncryptedSecretStoreTest fails otherwise.", "The key is written through the encrypted prefs instance, not plain SharedPreferences; the test fails if a key is found in readable plaintext."]
-  status = "pending"
+  status = "done"
 
 [[task]]
   id = "t-4"
