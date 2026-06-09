@@ -50,7 +50,7 @@
   covers = ["c-1", "c-2", "c-3", "c-4"]
   depends_on = ["t-3", "t-4"]
   test_contract = ["addProfile persists the profile via ProfileStore and the API key via SecretStore separately; the payload handed to ProfileStore contains no occurrence of the key string; ProviderRepositoryTest fails if the key leaks into profile storage.", "deleteProfile removes the profile's secret AND clears any capability-slot mapping pointing at it; observeChatMapping() emits null after the mapped profile is deleted.", "observeProfiles() reflects each mutation: after addProfile the new id is present, after updateProfile the changed label appears on the matching id, and after deleteProfile that id is absent; ProviderRepositoryTest fails otherwise."]
-  status = "pending"
+  status = "done"
 
 [[task]]
   id = "t-6"
