@@ -12,6 +12,17 @@
       "completed_at": "2026-06-09T18:38:28.62544Z",
       "notes": "quick: wire profile editing (load-by-id + updateProfile)"
     },
+    "quick-2": {
+      "files": [
+        "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+        "app/src/main/res/values/colors.xml",
+        "app/src/main/res/values-night/ic_launcher_background.xml",
+        "app/src/main/res/mipmap-*"
+      ],
+      "commit": "40a2c2f",
+      "completed_at": "2026-06-09T18:48:13.052753Z",
+      "notes": "quick: install app launcher icons (light + dark)"
+    },
     "t-1": {
       "files": [
         "app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt",
