@@ -1,10 +1,10 @@
 {
-  "version": "0.1.0.0",
+  "version": "0.1.0.1",
   "current_milestone": "v0.1",
   "current_phase": "02-provider-model",
   "current_phase_status": "complete",
-  "last_activity": "2026-06-09T18:28:30.799501Z",
-  "last_action": "phase 02-provider-model executed (10/10 done \u0026 green); c-3 edit-load deferred to follow-up",
+  "last_activity": "2026-06-09T18:38:28.634313Z",
+  "last_action": "quick: wire profile editing (load-by-id + updateProfile)",
   "history": [
     {
       "at": "2026-06-09T09:44:52.562646Z",
@@ -101,6 +101,14 @@
     {
       "at": "2026-06-09T18:28:30.799501Z",
       "action": "phase 02-provider-model executed (10/10 done \u0026 green); c-3 edit-load deferred to follow-up"
+    },
+    {
+      "at": "2026-06-09T18:38:28.612582Z",
+      "action": "bump internal 0.1.0.0 → 0.1.0.1"
+    },
+    {
+      "at": "2026-06-09T18:38:28.634313Z",
+      "action": "quick: wire profile editing (load-by-id + updateProfile)"
     }
   ]
 }

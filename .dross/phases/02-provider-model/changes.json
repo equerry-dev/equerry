@@ -1,6 +1,17 @@
 {
   "phase": "02-provider-model",
   "tasks": {
+    "quick-1": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt",
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt",
+        "app/src/main/java/dev/equerry/app/MainActivity.kt",
+        "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditViewModelTest.kt"
+      ],
+      "commit": "649afa7",
+      "completed_at": "2026-06-09T18:38:28.62544Z",
+      "notes": "quick: wire profile editing (load-by-id + updateProfile)"
+    },
     "t-1": {
       "files": [
         "app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt",
