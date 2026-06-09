@@ -1,0 +1,17 @@
+{
+  "phase": "02-provider-model",
+  "tasks": {
+    "t-1": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt",
+        "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",
+        "app/src/main/java/dev/equerry/app/providers/CapabilitySlot.kt",
+        "app/src/main/java/dev/equerry/app/providers/ProfileValidator.kt",
+        "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt",
+        "app/src/test/java/dev/equerry/app/providers/ProfileValidatorTest.kt"
+      ],
+      "commit": "f35dbdb",
+      "completed_at": "2026-06-09T15:12:47.121975Z"
+    }
+  }
+}
