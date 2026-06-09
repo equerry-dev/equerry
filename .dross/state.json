@@ -1,8 +1,10 @@
 {
-  "version": "0.1.0.0",
+  "version": "0.1.0.2",
   "current_milestone": "v0.1",
-  "last_activity": "2026-06-09T10:24:32.640319Z",
-  "last_action": "scoped milestone v0.1: 4 criteria, 4 phases",
+  "current_phase": "02-provider-model",
+  "current_phase_status": "verified",
+  "last_activity": "2026-06-09T18:53:06.882344Z",
+  "last_action": "verified 02-provider-model: pass (6/6 covered; mutation skipped — no Kotlin adapter)",
   "history": [
     {
       "at": "2026-06-09T09:44:52.562646Z",
@@ -19,6 +21,110 @@
     {
       "at": "2026-06-09T10:24:32.640319Z",
       "action": "scoped milestone v0.1: 4 criteria, 4 phases"
+    },
+    {
+      "at": "2026-06-09T14:08:22.429884Z",
+      "action": "created 01-provider-model"
+    },
+    {
+      "at": "2026-06-09T14:09:22.400051Z",
+      "action": "set current_phase=02-provider-model"
+    },
+    {
+      "at": "2026-06-09T14:33:25.604444Z",
+      "action": "set current_phase=02-provider-model"
+    },
+    {
+      "at": "2026-06-09T14:33:25.610225Z",
+      "action": "spec locked: 02-provider-model"
+    },
+    {
+      "at": "2026-06-09T15:00:57.28893Z",
+      "action": "set current_phase_status=planned"
+    },
+    {
+      "at": "2026-06-09T15:00:57.296342Z",
+      "action": "plan locked: 02-provider-model (10 tasks across 6 waves)"
+    },
+    {
+      "at": "2026-06-09T15:02:54.50645Z",
+      "action": "plan reviewed: 02-provider-model (0 blocking, 4 flags)"
+    },
+    {
+      "at": "2026-06-09T15:05:06.308411Z",
+      "action": "plan amended per review: 02-provider-model (model-preset + observeProfiles contracts sharpened)"
+    },
+    {
+      "at": "2026-06-09T15:12:47.141158Z",
+      "action": "executed t-1 (Provider domain model + per-type rules + validation)"
+    },
+    {
+      "at": "2026-06-09T15:18:35.924273Z",
+      "action": "executed t-2 (Dependencies + JVM test infrastructure)"
+    },
+    {
+      "at": "2026-06-09T15:32:39.57869Z",
+      "action": "executed t-3 (Encrypted SecretStore; real-crypto test in androidTest per Robolectric/Keystore fallback)"
+    },
+    {
+      "at": "2026-06-09T16:36:19.041786Z",
+      "action": "executed t-4 (Profile + slot DataStore persistence + DI)"
+    },
+    {
+      "at": "2026-06-09T16:43:50.528353Z",
+      "action": "executed t-5 (ProviderRepository: CRUD + key-split + cascade)"
+    },
+    {
+      "at": "2026-06-09T16:48:09.24936Z",
+      "action": "executed t-6 (Provider list + adaptive edit ViewModels)"
+    },
+    {
+      "at": "2026-06-09T16:56:40.204834Z",
+      "action": "executed t-7 (Capability Slots ViewModel)"
+    },
+    {
+      "at": "2026-06-09T17:51:07.505668Z",
+      "action": "executed t-8 (provider screens + design-handoff theme/fonts/components folded in)"
+    },
+    {
+      "at": "2026-06-09T18:19:38.682703Z",
+      "action": "executed t-9 (Capability Slots screen + picker); stabilized VM/screen test dispatcher race"
+    },
+    {
+      "at": "2026-06-09T18:28:17.351431Z",
+      "action": "executed t-10 (Navigation host + entry points)"
+    },
+    {
+      "at": "2026-06-09T18:28:30.792927Z",
+      "action": "set current_phase_status=complete"
+    },
+    {
+      "at": "2026-06-09T18:28:30.799501Z",
+      "action": "phase 02-provider-model executed (10/10 done \u0026 green); c-3 edit-load deferred to follow-up"
+    },
+    {
+      "at": "2026-06-09T18:38:28.612582Z",
+      "action": "bump internal 0.1.0.0 → 0.1.0.1"
+    },
+    {
+      "at": "2026-06-09T18:38:28.634313Z",
+      "action": "quick: wire profile editing (load-by-id + updateProfile)"
+    },
+    {
+      "at": "2026-06-09T18:48:13.040412Z",
+      "action": "bump internal 0.1.0.1 → 0.1.0.2"
+    },
+    {
+      "at": "2026-06-09T18:48:13.060028Z",
+      "action": "quick: install app launcher icons (light + dark)"
+    },
+    {
+      "at": "2026-06-09T18:53:06.87486Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-09T18:53:06.882344Z",
+      "action": "verified 02-provider-model: pass (6/6 covered; mutation skipped — no Kotlin adapter)"
     }
   ]
 }

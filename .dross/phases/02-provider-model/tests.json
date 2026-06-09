@@ -1,0 +1,195 @@
+{
+  "phase": "02-provider-model",
+  "generated_at": "2026-06-09T18:51:30.404342Z",
+  "languages": null,
+  "skipped": [
+    {
+      "file": "app/build.gradle.kts",
+      "reason": "no mutation adapter for .kts"
+    },
+    {
+      "file": "app/src/androidTest/java/dev/equerry/app/data/EncryptedSecretStoreInstrumentedTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/MainActivity.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/data/EncryptedSecretStore.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/data/ProfileStore.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/data/SecretStore.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/data/SlotMappingStore.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/di/PersistenceModule.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/di/RepositoryModule.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/di/SecretStoreModule.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/CapabilitySlot.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/ProfileValidator.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/components/ProfileCard.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/components/SlotRow.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/components/TypeBadge.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/providers/ProviderListScreen.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/providers/ProviderListViewModel.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/slots/SlotsScreen.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/slots/SlotsViewModel.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/theme/Color.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/theme/Theme.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/theme/Type.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/res/font",
+      "reason": "no mutation adapter for "
+    },
+    {
+      "file": "app/src/main/res/mipmap-*",
+      "reason": "no mutation adapter for "
+    },
+    {
+      "file": "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "reason": "no mutation adapter for .xml"
+    },
+    {
+      "file": "app/src/main/res/values-night/ic_launcher_background.xml",
+      "reason": "no mutation adapter for .xml"
+    },
+    {
+      "file": "app/src/main/res/values/colors.xml",
+      "reason": "no mutation adapter for .xml"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/NavigationTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ToolchainSmokeTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/data/EncryptedSecretStoreTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/data/ProfileStoreTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/data/SlotMappingStoreTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/ProfileValidatorTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditScreenTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditViewModelTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/providers/ProviderListScreenTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/providers/ProviderListViewModelTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/slots/SlotsScreenTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/slots/SlotsViewModelTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "gradle/libs.versions.toml",
+      "reason": "no mutation adapter for .toml"
+    }
+  ]
+}

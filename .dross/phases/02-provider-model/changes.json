@@ -1,0 +1,132 @@
+{
+  "phase": "02-provider-model",
+  "tasks": {
+    "quick-1": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt",
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt",
+        "app/src/main/java/dev/equerry/app/MainActivity.kt",
+        "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditViewModelTest.kt"
+      ],
+      "commit": "649afa7",
+      "completed_at": "2026-06-09T18:38:28.62544Z",
+      "notes": "quick: wire profile editing (load-by-id + updateProfile)"
+    },
+    "quick-2": {
+      "files": [
+        "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+        "app/src/main/res/values/colors.xml",
+        "app/src/main/res/values-night/ic_launcher_background.xml",
+        "app/src/main/res/mipmap-*"
+      ],
+      "commit": "40a2c2f",
+      "completed_at": "2026-06-09T18:48:13.052753Z",
+      "notes": "quick: install app launcher icons (light + dark)"
+    },
+    "t-1": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt",
+        "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",
+        "app/src/main/java/dev/equerry/app/providers/CapabilitySlot.kt",
+        "app/src/main/java/dev/equerry/app/providers/ProfileValidator.kt",
+        "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt",
+        "app/src/test/java/dev/equerry/app/providers/ProfileValidatorTest.kt"
+      ],
+      "commit": "f35dbdb",
+      "completed_at": "2026-06-09T15:12:47.121975Z"
+    },
+    "t-10": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/MainActivity.kt",
+        "app/src/test/java/dev/equerry/app/NavigationTest.kt"
+      ],
+      "commit": "5af86df",
+      "completed_at": "2026-06-09T18:28:17.338614Z"
+    },
+    "t-2": {
+      "files": [
+        "gradle/libs.versions.toml",
+        "app/build.gradle.kts",
+        "app/src/test/java/dev/equerry/app/ToolchainSmokeTest.kt"
+      ],
+      "commit": "27a606a",
+      "completed_at": "2026-06-09T15:18:35.911087Z"
+    },
+    "t-3": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/data/SecretStore.kt",
+        "app/src/main/java/dev/equerry/app/data/EncryptedSecretStore.kt",
+        "app/src/main/java/dev/equerry/app/di/SecretStoreModule.kt",
+        "app/src/test/java/dev/equerry/app/data/EncryptedSecretStoreTest.kt",
+        "app/src/androidTest/java/dev/equerry/app/data/EncryptedSecretStoreInstrumentedTest.kt"
+      ],
+      "commit": "8044a8a",
+      "completed_at": "2026-06-09T15:32:39.565015Z"
+    },
+    "t-4": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/data/ProfileStore.kt",
+        "app/src/main/java/dev/equerry/app/data/SlotMappingStore.kt",
+        "app/src/main/java/dev/equerry/app/di/PersistenceModule.kt",
+        "app/src/test/java/dev/equerry/app/data/ProfileStoreTest.kt",
+        "app/src/test/java/dev/equerry/app/data/SlotMappingStoreTest.kt"
+      ],
+      "commit": "0011086",
+      "completed_at": "2026-06-09T16:36:19.026907Z"
+    },
+    "t-5": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt",
+        "app/src/main/java/dev/equerry/app/di/RepositoryModule.kt",
+        "app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt"
+      ],
+      "commit": "df29673",
+      "completed_at": "2026-06-09T16:43:50.516019Z"
+    },
+    "t-6": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderListViewModel.kt",
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt",
+        "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditViewModelTest.kt",
+        "app/src/test/java/dev/equerry/app/ui/providers/ProviderListViewModelTest.kt"
+      ],
+      "commit": "bd77192",
+      "completed_at": "2026-06-09T16:48:09.238182Z"
+    },
+    "t-7": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/slots/SlotsViewModel.kt",
+        "app/src/test/java/dev/equerry/app/ui/slots/SlotsViewModelTest.kt"
+      ],
+      "commit": "d01f0a3",
+      "completed_at": "2026-06-09T16:56:40.192899Z"
+    },
+    "t-8": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderListScreen.kt",
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt",
+        "app/src/test/java/dev/equerry/app/ui/providers/ProviderListScreenTest.kt",
+        "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditScreenTest.kt",
+        "app/src/main/java/dev/equerry/app/ui/components/TypeBadge.kt",
+        "app/src/main/java/dev/equerry/app/ui/components/ProfileCard.kt",
+        "app/src/main/java/dev/equerry/app/ui/theme/Color.kt",
+        "app/src/main/java/dev/equerry/app/ui/theme/Type.kt",
+        "app/src/main/java/dev/equerry/app/ui/theme/Theme.kt",
+        "gradle/libs.versions.toml",
+        "app/build.gradle.kts",
+        "app/src/main/res/font"
+      ],
+      "commit": "bbf25c5",
+      "completed_at": "2026-06-09T17:51:07.491478Z"
+    },
+    "t-9": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/slots/SlotsScreen.kt",
+        "app/src/main/java/dev/equerry/app/ui/components/SlotRow.kt",
+        "app/src/test/java/dev/equerry/app/ui/slots/SlotsScreenTest.kt"
+      ],
+      "commit": "d26e398",
+      "completed_at": "2026-06-09T18:19:38.669968Z"
+    }
+  }
+}

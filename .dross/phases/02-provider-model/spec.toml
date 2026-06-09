@@ -1,0 +1,66 @@
+[phase]
+id        = "02-provider-model"
+title     = "Provider profiles + CHAT slot mapping"
+milestone = "v0.1"
+
+[[criteria]]
+id   = "c-1"
+text = "A user can create a Provider Profile with a required label, a type (Ollama / Anthropic / OpenAI-compatible / OpenRouter), and the type-appropriate base URL / API key / model fields; after saving it appears in the profile list."
+
+[[criteria]]
+id   = "c-2"
+text = "A saved profile's API key is stored via Keystore-backed EncryptedSharedPreferences and never appears in logs or in DataStore in plaintext."
+
+[[criteria]]
+id   = "c-3"
+text = "A user can edit and delete an existing Provider Profile; the changes survive an app restart."
+
+[[criteria]]
+id   = "c-4"
+text = "A user can map the CHAT slot to a saved profile from the Capability Slots screen, and the mapping survives an app restart."
+
+[[criteria]]
+id   = "c-5"
+text = "When the CHAT slot has no profile mapped, the settings UI shows clear guidance pointing the user to create and map a provider."
+
+[[criteria]]
+id   = "c-6"
+text = "Saving a profile that fails type-specific validation (empty label, missing API key for Anthropic/OpenAI, or missing base URL for Ollama) is blocked with an inline error."
+
+[[decisions]]
+key    = "model_input"
+choice = "Model is a free-text field with a dropdown of hardcoded common model ids per provider type; no network call this phase."
+why    = "Keeps the phase self-contained — live /models fetch needs working drivers (Phase 03). Presets cut typos for common models without going cross-boundary."
+locked = true
+
+[[decisions]]
+key    = "profile_identity"
+choice = "Each profile carries a required user-typed label; multiple profiles per type are allowed; the label is what the slot picker displays."
+why    = "BYO-backend users run several endpoints of the same type (e.g. two OpenAI-compatible hosts); a human label disambiguates them in the slot UI."
+locked = true
+
+[[decisions]]
+key    = "adaptive_form"
+choice = "The create/edit form adapts per type: Ollama hides the API-key field and requires base URL; Anthropic/OpenAI prefill a default base URL and require a key; OpenRouter is a preset that prefills its base URL but persists as the OpenAI-compatible driver. Validation is per-type."
+why    = "Each provider has different required fields; per-type adaptation prevents invalid combos (keyless Anthropic, keyed Ollama) and encodes the locked OpenRouter-as-OpenAI-preset decision in the UX."
+locked = true
+
+[[decisions]]
+key    = "slot_mapping_ux"
+choice = "Mapping is slot-side: a Capability Slots screen lists slots; tapping CHAT opens a picker of saved profiles."
+why    = "Matches the 'this job uses this backend' mental model and scales as more slots arrive in later phases; keeps 'what is CHAT set to' visible at a glance."
+locked = true
+
+[[decisions]]
+key    = "slot_scope"
+choice = "All capability slots (CHAT/VISION/STT/TTS/OCR/EMBEDDINGS) are shown; only CHAT is active, the rest are greyed with a 'coming soon' state."
+why    = "Surfaces the Capability-Slot architecture to the user now without building non-functional mappings; sets expectations for later phases."
+locked = true
+
+[[deferred]]
+text = "Live model-list fetch from the provider's /models endpoint to populate the model dropdown."
+why  = "Needs working authenticated drivers — Phase 03. This phase uses free-text + hardcoded presets."
+
+[[deferred]]
+text = "Making the non-CHAT slots (VISION/STT/TTS/OCR/EMBEDDINGS) functional."
+why  = "Greyed 'coming soon' for v0.1; each lands in its own later phase."
