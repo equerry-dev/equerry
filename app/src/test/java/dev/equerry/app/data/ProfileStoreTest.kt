@@ -3,6 +3,8 @@ package dev.equerry.app.data
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.equerry.app.providers.ProviderProfile
 import dev.equerry.app.providers.ProviderType
 import kotlinx.coroutines.CoroutineScope
@@ -47,6 +49,48 @@ class ProfileStoreTest {
         scope2.close()
 
         assertEquals(profiles, loaded)
+    }
+
+    @Test
+    fun request_params_round_trip_across_a_reload() = runBlocking {
+        val file = File(tmp.root, "params.preferences_pb")
+        val profiles = listOf(
+            ProviderProfile(
+                "id-1", "Tuned Claude", ProviderType.ANTHROPIC, "https://api.anthropic.com",
+                "claude-sonnet-4-6", systemPrompt = "be brief", temperature = 0.7, maxTokens = 512,
+            ),
+        )
+
+        val scope1 = newScope()
+        ProfileStore(dataStore(scope1, file)).save(profiles)
+        scope1.close()
+
+        val scope2 = newScope()
+        val loaded = ProfileStore(dataStore(scope2, file)).profiles().first()
+        scope2.close()
+
+        assertEquals(profiles, loaded)
+    }
+
+    @Test
+    fun legacyJsonStillDecodes() = runBlocking {
+        val file = File(tmp.root, "legacy.preferences_pb")
+        // JSON written before the request-param fields existed (no systemPrompt/temperature/maxTokens).
+        val legacy =
+            """[{"id":"id-1","label":"Old","type":"OLLAMA","baseUrl":"http://localhost:11434","model":"llama3.2"}]"""
+
+        val scope1 = newScope()
+        dataStore(scope1, file).edit { it[stringPreferencesKey("profiles_json")] = legacy }
+        scope1.close()
+
+        val scope2 = newScope()
+        val loaded = ProfileStore(dataStore(scope2, file)).profiles().first()
+        scope2.close()
+
+        assertEquals(
+            listOf(ProviderProfile("id-1", "Old", ProviderType.OLLAMA, "http://localhost:11434", "llama3.2")),
+            loaded,
+        )
     }
 
     @Test

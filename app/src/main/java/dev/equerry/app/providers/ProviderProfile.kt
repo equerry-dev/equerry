@@ -11,6 +11,10 @@ data class ProviderProfile(
     val type: ProviderType,
     val baseUrl: String,
     val model: String,
+    /** Optional per-profile request params; null = use the provider's own default (locked `request_params`). */
+    val systemPrompt: String? = null,
+    val temperature: Double? = null,
+    val maxTokens: Int? = null,
 )
 
 /**
@@ -25,4 +29,12 @@ data class ProfileDraft(
     val baseUrl: String,
     val key: String,
     val model: String,
+    /**
+     * Optional request params as raw form input (like [key], these are edited as text). Blank means
+     * "use the provider default"; the numeric two are validated by [ProfileValidator] and parsed to
+     * [ProviderProfile.temperature] / [ProviderProfile.maxTokens] on save.
+     */
+    val systemPrompt: String = "",
+    val temperature: String = "",
+    val maxTokens: String = "",
 )

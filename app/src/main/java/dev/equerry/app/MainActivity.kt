@@ -27,6 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
+import dev.equerry.app.ui.chat.ChatRoute
 import dev.equerry.app.ui.probe.ProbeLogRoute
 import dev.equerry.app.ui.providers.ProviderEditRoute
 import dev.equerry.app.ui.providers.ProviderListRoute
@@ -50,6 +51,7 @@ object Route {
     const val PROVIDERS = "providers"
     const val SLOTS = "slots"
     const val PROBE = "probe"
+    const val CHAT = "chat"
     const val EDIT = "edit"
 }
 
@@ -70,6 +72,7 @@ fun EquerryNavHost(
         SlotsRoute(onAddProvider = { navController.navigate(Route.EDIT) })
     },
     probeContent: @Composable () -> Unit = { ProbeLogRoute() },
+    chatContent: @Composable () -> Unit = { ChatRoute() },
 ) {
     NavHost(navController = navController, startDestination = Route.HOME) {
         composable(Route.HOME) {
@@ -77,11 +80,13 @@ fun EquerryNavHost(
                 onProviders = { navController.navigate(Route.PROVIDERS) },
                 onSlots = { navController.navigate(Route.SLOTS) },
                 onProbe = { navController.navigate(Route.PROBE) },
+                onChat = { navController.navigate(Route.CHAT) },
             )
         }
         composable(Route.PROVIDERS) { providersContent() }
         composable(Route.SLOTS) { slotsContent() }
         composable(Route.PROBE) { probeContent() }
+        composable(Route.CHAT) { chatContent() }
         composable(
             route = "${Route.EDIT}?profileId={profileId}",
             arguments = listOf(
@@ -103,7 +108,7 @@ fun EquerryNavHost(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeScreen(onProviders: () -> Unit, onSlots: () -> Unit, onProbe: () -> Unit) {
+private fun HomeScreen(onProviders: () -> Unit, onSlots: () -> Unit, onProbe: () -> Unit, onChat: () -> Unit) {
     Scaffold(topBar = { TopAppBar(title = { Text("Equerry") }) }) { pad ->
         Column(
             Modifier.padding(pad).padding(16.dp).fillMaxSize(),
@@ -115,6 +120,7 @@ private fun HomeScreen(onProviders: () -> Unit, onSlots: () -> Unit, onProbe: ()
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(4.dp))
+            HomeEntry("Chat", "Talk to your configured chat provider", onChat)
             HomeEntry("Providers", "Manage your AI backend profiles", onProviders)
             HomeEntry("Capability slots", "Route jobs to your providers", onSlots)
             HomeEntry("Probe log", "Assist-probe results from each invocation", onProbe)

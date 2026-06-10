@@ -1,123 +1,11 @@
 {
   "version": "0.1.0.2",
   "current_milestone": "v0.1",
-  "current_phase": "03-assist-probe",
+  "current_phase": "04-chat-drivers",
   "current_phase_status": "verified",
-  "last_activity": "2026-06-10T07:25:16.79364Z",
-  "last_action": "verified 03-assist-probe: pass (5/5 covered; c-1/c-2 manual gates closed on-device FP5/A15; Phase-0 10-app table captured)",
+  "last_activity": "2026-06-10T12:54:38.98776Z",
+  "last_action": "verified 04-chat-drivers: pass (5/5 covered; mutation skipped — Kotlin; c-1/c-3 render gap closed by t-11)",
   "history": [
-    {
-      "at": "2026-06-09T14:09:22.400051Z",
-      "action": "set current_phase=02-provider-model"
-    },
-    {
-      "at": "2026-06-09T14:33:25.604444Z",
-      "action": "set current_phase=02-provider-model"
-    },
-    {
-      "at": "2026-06-09T14:33:25.610225Z",
-      "action": "spec locked: 02-provider-model"
-    },
-    {
-      "at": "2026-06-09T15:00:57.28893Z",
-      "action": "set current_phase_status=planned"
-    },
-    {
-      "at": "2026-06-09T15:00:57.296342Z",
-      "action": "plan locked: 02-provider-model (10 tasks across 6 waves)"
-    },
-    {
-      "at": "2026-06-09T15:02:54.50645Z",
-      "action": "plan reviewed: 02-provider-model (0 blocking, 4 flags)"
-    },
-    {
-      "at": "2026-06-09T15:05:06.308411Z",
-      "action": "plan amended per review: 02-provider-model (model-preset + observeProfiles contracts sharpened)"
-    },
-    {
-      "at": "2026-06-09T15:12:47.141158Z",
-      "action": "executed t-1 (Provider domain model + per-type rules + validation)"
-    },
-    {
-      "at": "2026-06-09T15:18:35.924273Z",
-      "action": "executed t-2 (Dependencies + JVM test infrastructure)"
-    },
-    {
-      "at": "2026-06-09T15:32:39.57869Z",
-      "action": "executed t-3 (Encrypted SecretStore; real-crypto test in androidTest per Robolectric/Keystore fallback)"
-    },
-    {
-      "at": "2026-06-09T16:36:19.041786Z",
-      "action": "executed t-4 (Profile + slot DataStore persistence + DI)"
-    },
-    {
-      "at": "2026-06-09T16:43:50.528353Z",
-      "action": "executed t-5 (ProviderRepository: CRUD + key-split + cascade)"
-    },
-    {
-      "at": "2026-06-09T16:48:09.24936Z",
-      "action": "executed t-6 (Provider list + adaptive edit ViewModels)"
-    },
-    {
-      "at": "2026-06-09T16:56:40.204834Z",
-      "action": "executed t-7 (Capability Slots ViewModel)"
-    },
-    {
-      "at": "2026-06-09T17:51:07.505668Z",
-      "action": "executed t-8 (provider screens + design-handoff theme/fonts/components folded in)"
-    },
-    {
-      "at": "2026-06-09T18:19:38.682703Z",
-      "action": "executed t-9 (Capability Slots screen + picker); stabilized VM/screen test dispatcher race"
-    },
-    {
-      "at": "2026-06-09T18:28:17.351431Z",
-      "action": "executed t-10 (Navigation host + entry points)"
-    },
-    {
-      "at": "2026-06-09T18:28:30.792927Z",
-      "action": "set current_phase_status=complete"
-    },
-    {
-      "at": "2026-06-09T18:28:30.799501Z",
-      "action": "phase 02-provider-model executed (10/10 done \u0026 green); c-3 edit-load deferred to follow-up"
-    },
-    {
-      "at": "2026-06-09T18:38:28.612582Z",
-      "action": "bump internal 0.1.0.0 → 0.1.0.1"
-    },
-    {
-      "at": "2026-06-09T18:38:28.634313Z",
-      "action": "quick: wire profile editing (load-by-id + updateProfile)"
-    },
-    {
-      "at": "2026-06-09T18:48:13.040412Z",
-      "action": "bump internal 0.1.0.1 → 0.1.0.2"
-    },
-    {
-      "at": "2026-06-09T18:48:13.060028Z",
-      "action": "quick: install app launcher icons (light + dark)"
-    },
-    {
-      "at": "2026-06-09T18:53:06.87486Z",
-      "action": "set current_phase_status=verified"
-    },
-    {
-      "at": "2026-06-09T18:53:06.882344Z",
-      "action": "verified 02-provider-model: pass (6/6 covered; mutation skipped — no Kotlin adapter)"
-    },
-    {
-      "at": "2026-06-09T18:59:30.024363Z",
-      "action": "shipped 02-provider-model → https://github.com/equerry-dev/equerry/pull/1"
-    },
-    {
-      "at": "2026-06-09T19:30:40.832175Z",
-      "action": "completed 02-provider-model"
-    },
-    {
-      "at": "2026-06-09T19:36:12.14019Z",
-      "action": "created 03-assist-probe"
-    },
     {
       "at": "2026-06-09T19:45:24.32946Z",
       "action": "set current_phase=03-assist-probe"
@@ -205,6 +93,118 @@
     {
       "at": "2026-06-10T07:25:16.79364Z",
       "action": "verified 03-assist-probe: pass (5/5 covered; c-1/c-2 manual gates closed on-device FP5/A15; Phase-0 10-app table captured)"
+    },
+    {
+      "at": "2026-06-10T07:34:56.534787Z",
+      "action": "completed 03-assist-probe"
+    },
+    {
+      "at": "2026-06-10T07:37:58.801868Z",
+      "action": "created 04-chat-drivers"
+    },
+    {
+      "at": "2026-06-10T07:47:13.610041Z",
+      "action": "set current_phase=04-chat-drivers"
+    },
+    {
+      "at": "2026-06-10T07:47:13.617061Z",
+      "action": "spec locked: 04-chat-drivers"
+    },
+    {
+      "at": "2026-06-10T08:23:21.302767Z",
+      "action": "set current_phase_status=planned"
+    },
+    {
+      "at": "2026-06-10T08:23:21.310209Z",
+      "action": "plan locked (panel): 04-chat-drivers (10 tasks across 4 waves)"
+    },
+    {
+      "at": "2026-06-10T08:25:19.290634Z",
+      "action": "plan reviewed: 04-chat-drivers (0 blocking, 4 flags)"
+    },
+    {
+      "at": "2026-06-10T08:42:07.363242Z",
+      "action": "plan amended per review: 04-chat-drivers (10 tasks across 4 waves; t-6/t-7 parsers merged, t-10 split, t-5 +repo, t-3 logging-live contract)"
+    },
+    {
+      "at": "2026-06-10T08:48:28.585362Z",
+      "action": "executed t-1 (Define chat message + token + error model)"
+    },
+    {
+      "at": "2026-06-10T08:49:28.222472Z",
+      "action": "executed t-2 (Pure error mapper for failed requests)"
+    },
+    {
+      "at": "2026-06-10T08:52:52.084365Z",
+      "action": "executed t-3 (Key-redaction util + redacting OkHttp client)"
+    },
+    {
+      "at": "2026-06-10T08:53:49.405215Z",
+      "action": "executed t-4 (In-memory session history holder)"
+    },
+    {
+      "at": "2026-06-10T08:56:40.64863Z",
+      "action": "executed t-5 (Add request-params fields to profile + store + repo)"
+    },
+    {
+      "at": "2026-06-10T08:58:48.600031Z",
+      "action": "executed t-6 (Streaming token parsers SSE + Ollama NDJSON)"
+    },
+    {
+      "at": "2026-06-10T09:00:44.487475Z",
+      "action": "executed t-7 (Request body builders per provider type)"
+    },
+    {
+      "at": "2026-06-10T11:09:23.404818Z",
+      "action": "executed t-8 (Provider-form request-param inputs)"
+    },
+    {
+      "at": "2026-06-10T11:29:16.052179Z",
+      "action": "fixed flaky ProbeViewModelTest hang (test-only; full suite green)"
+    },
+    {
+      "at": "2026-06-10T11:34:09.010909Z",
+      "action": "executed t-9 (ChatDriver wiring + factory + MockWebServer e2e; +mockwebserver testImpl)"
+    },
+    {
+      "at": "2026-06-10T11:39:44.356968Z",
+      "action": "executed t-10 (Chat screen + ViewModel + nav route)"
+    },
+    {
+      "at": "2026-06-10T11:40:08.531094Z",
+      "action": "set current_phase_status=complete"
+    },
+    {
+      "at": "2026-06-10T11:40:08.538213Z",
+      "action": "phase 04-chat-drivers executed (10/10 done \u0026 green); +flaky ProbeViewModelTest hang fixed mid-run"
+    },
+    {
+      "at": "2026-06-10T12:14:56.816499Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-10T12:14:56.823737Z",
+      "action": "verified 04-chat-drivers: partial (3/5 covered, 2 weak; mutation skipped — Kotlin)"
+    },
+    {
+      "at": "2026-06-10T12:51:17.342107Z",
+      "action": "executed t-11 (ChatScreen Compose render test; closes verify FLAG)"
+    },
+    {
+      "at": "2026-06-10T12:51:29.27802Z",
+      "action": "set current_phase_status=complete"
+    },
+    {
+      "at": "2026-06-10T12:51:29.284267Z",
+      "action": "phase 04-chat-drivers re-executed (11/11 done); t-11 added ChatScreen render test — re-verify pending"
+    },
+    {
+      "at": "2026-06-10T12:54:38.981542Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-10T12:54:38.98776Z",
+      "action": "verified 04-chat-drivers: pass (5/5 covered; mutation skipped — Kotlin; c-1/c-3 render gap closed by t-11)"
     }
   ]
 }

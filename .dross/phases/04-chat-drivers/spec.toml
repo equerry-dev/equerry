@@ -1,0 +1,48 @@
+[phase]
+id        = "04-chat-drivers"
+title     = "CHAT capability drivers + chat screen"
+milestone = "v0.1"
+
+[[criteria]]
+id   = "c-1"
+text = "With a profile mapped to the CHAT slot, the user sends a typed message and the provider's actual reply text is rendered in the chat UI."
+
+[[criteria]]
+id   = "c-2"
+text = "Each provider type (Ollama, Anthropic, OpenAI-compatible, OpenRouter) returns a correctly-parsed reply when its profile is the active CHAT mapping."
+
+[[criteria]]
+id   = "c-3"
+text = "Sending with no profile mapped to CHAT shows clear in-UI guidance to configure/map a provider, with no crash and no silent no-op."
+
+[[criteria]]
+id   = "c-4"
+text = "A failed request (invalid key, unreachable host, non-2xx response) surfaces a human-readable error in the UI, and the API key never appears in any log line or error message."
+
+[[criteria]]
+id   = "c-5"
+text = "Within a session, a follow-up message sends the prior turns as context so the provider's reply accounts for the earlier exchange."
+
+[[decisions]]
+key    = "reply_streaming"
+choice = "Drivers expose the reply as a Flow of incremental tokens (SSE for Anthropic/OpenAI/OpenRouter, streaming JSON for Ollama); the chat UI appends tokens live as they arrive."
+why    = "Best chat UX and sets up incremental TTS for the later voice-roundtrip phase; okhttp-sse is already locked in the stack."
+locked = true
+
+[[decisions]]
+key    = "chat_surface"
+choice = "c-1's typed Q&A lives on a dedicated in-app chat screen with its own nav route; the assist-session probe dashboard is left as-is."
+why    = "Decouples this phase from assist-session lifecycle; the voice-roundtrip phase decides later how the session screen reuses the chat surface."
+locked = true
+
+[[decisions]]
+key    = "session_boundary"
+choice = "Conversation history is held in a session-scoped in-memory holder that survives in-app navigation; a 'New chat' action clears it; history is always lost on process death (no persistence)."
+why    = "Matches a normal chat mental model within a run while honouring the locked stack decision to defer Room; reset semantics are explicit (clear action) rather than implicit."
+locked = true
+
+[[decisions]]
+key    = "request_params"
+choice = "Add three optional fields to the Provider Profile — system prompt, temperature, max tokens — persisted and editable in the existing provider form; blank means fall back to the provider's own default. Drivers send them per request when set."
+why    = "Gives users per-backend control of instructions and sampling now; optional-with-fallback keeps existing keyless flows working. Note: this extends the Phase-02 ProviderProfile model and edit form."
+locked = true

@@ -1,0 +1,121 @@
+[phase]
+  id = "04-chat-drivers"
+
+[[task]]
+  id = "t-1"
+  wave = 1
+  title = "Define chat message + token + error model"
+  files = ["app/src/main/java/dev/equerry/app/providers/drivers/ChatMessage.kt", "app/src/main/java/dev/equerry/app/providers/drivers/ChatModels.kt"]
+  description = "Internal chat types the drivers normalize to: ChatMessage (role SYSTEM/USER/ASSISTANT + content),\na token type distinguishing Delta(text) from Done, and a sealed ChatError with\nNetwork/Auth/Http(code)/Malformed cases each holding a UI-safe human-readable message.\nChatError construction must never embed a request key.\n"
+  covers = ["c-1", "c-4", "c-5"]
+  test_contract = ["if a role or ChatError case is dropped, the exhaustiveness/round-trip assertions in ChatModelsTest fail to compile or assert", "if a ChatError message is built by concatenating the key, ChatModelsTest.errorMessageNeverContainsKey fails"]
+  status = "done"
+
+[[task]]
+  id = "t-2"
+  wave = 1
+  title = "Pure error mapper for failed requests"
+  files = ["app/src/main/java/dev/equerry/app/providers/drivers/ChatErrorMapper.kt"]
+  description = "A pure mapper turning transport/HTTP outcomes into ChatError: 401 -> Auth, other non-2xx ->\nHttp(code), IOException/UnknownHostException -> Network, parse failure -> Malformed.\n"
+  covers = ["c-4"]
+  depends_on = ["t-1"]
+  test_contract = ["if any branch is broken, the table cases in ChatErrorMapperTest (401->Auth, 500->Http, UnknownHost->Network, bad-json->Malformed) fail", "if a mapped message includes input text containing the key, ChatErrorMapperTest's no-key-substring assertion fails"]
+  status = "done"
+
+[[task]]
+  id = "t-3"
+  wave = 1
+  title = "Key-redaction util + redacting OkHttp client"
+  files = ["app/src/main/java/dev/equerry/app/providers/drivers/KeyRedaction.kt", "app/src/main/java/dev/equerry/app/providers/drivers/ChatHttpClient.kt"]
+  description = "KeyRedaction.redact(text, key) masks every occurrence of a non-blank key (no-op for blank).\nChatHttpClient factory returns one shared OkHttpClient whose logging interceptor IS installed,\nredacts Authorization/x-api-key headers, and never logs bodies; auth is injected via header only.\n"
+  covers = ["c-4"]
+  depends_on = ["t-1"]
+  test_contract = ["if redaction misses an occurrence or runs on a blank key, KeyRedactionTest.keyNeverSurvivesRedaction fails", "if a key reaches the log sink or the request URL, ChatHttpClientTest.key_never_in_logged_request fails", "if the logging interceptor is not actually installed (a silent client), ChatHttpClientTest.logging_is_live fails — it asserts a non-key request field IS observable in the log sink while the key is masked"]
+  status = "done"
+
+[[task]]
+  id = "t-4"
+  wave = 1
+  title = "In-memory session history holder"
+  files = ["app/src/main/java/dev/equerry/app/providers/drivers/ChatSession.kt"]
+  description = "@Singleton-scoped ChatSession: append/turns accumulate user+assistant turns in order;\nmessagesForRequest() returns prior turns ahead of the new user message (prepending a system\nprompt when supplied); clear() empties it. Survives in-app navigation (singleton), New-chat\nclears, no persistence (lost on process death) — per locked session_boundary.\n"
+  covers = ["c-5"]
+  depends_on = ["t-1"]
+  test_contract = ["if turn ordering or system-prompt prepend breaks, ChatSessionTest's multi-turn ordering assertion fails", "if clear() does not empty history, ChatSessionTest's New-chat assertion fails"]
+  status = "done"
+
+[[task]]
+  id = "t-5"
+  wave = 1
+  title = "Add request-params fields to profile + store + repo"
+  files = ["app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt", "app/src/main/java/dev/equerry/app/providers/ProfileValidator.kt", "app/src/main/java/dev/equerry/app/data/ProfileStore.kt", "app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt"]
+  description = "ProviderProfile + ProfileDraft gain optional systemPrompt:String?, temperature:Double?,\nmaxTokens:Int? (blank/null = provider default, per locked request_params). StoredProfile\nround-trips them; ProviderRepository.addProfile/updateProfile carry the new fields through;\nProfileValidator gains numeric validation for temperature/maxTokens.\n"
+  covers = ["c-1", "c-5"]
+  test_contract = ["if legacy JSON without the new keys fails to decode, ProfileStoreTest.legacyJsonStillDecodes fails", "if a non-numeric temperature/maxTokens is accepted, ProfileValidatorTest.rejects_garbage_numeric_params fails", "if addProfile->observeProfiles drops the three fields (or persists the key), ProviderRepositoryTest's round-trip assertion fails"]
+  status = "done"
+
+[[task]]
+  id = "t-6"
+  wave = 2
+  title = "Streaming token parsers (SSE + Ollama NDJSON)"
+  files = ["app/src/main/java/dev/equerry/app/providers/drivers/SseTokenParser.kt", "app/src/main/java/dev/equerry/app/providers/drivers/OllamaStreamParser.kt"]
+  description = "Pure parsers for the two wire formats. SseTokenParser decodes one OpenAI `data:` chunk and one\nAnthropic content_block_delta into Delta(text); `[DONE]`/message_stop yield Done. OllamaStreamParser\ndecodes newline-delimited JSON, emitting Delta(message.content) per line and Done on `\"done\":true`,\nbuffering an incomplete final line rather than crashing.\n"
+  covers = ["c-2", "c-4"]
+  depends_on = ["t-1", "t-2", "t-3"]
+  test_contract = ["if either SSE format's delta decode breaks, SseTokenParserTest's per-format concatenation-equals-reply assertion fails", "if a malformed/partial `data:` line throws (or `[DONE]` is parsed as JSON), SseTokenParserTest's malformed-line->Malformed assertion fails", "if Ollama NDJSON decoding breaks, OllamaStreamParserTest's multi-line-concatenates-to-reply assertion fails", "if a truncated final NDJSON line crashes instead of buffering/mapping to Malformed, OllamaStreamParserTest's half-buffered-line assertion fails"]
+  status = "done"
+
+[[task]]
+  id = "t-7"
+  wave = 2
+  title = "Request body builders per provider type"
+  files = ["app/src/main/java/dev/equerry/app/providers/drivers/ChatRequestBuilder.kt"]
+  description = "Builders produce JSON body + relative path + auth-header shape per type (Anthropic x-api-key +\nversion header; OpenAI/OpenRouter Bearer; Ollama keyless) from messages + optional params,\nwith stream=true. Prior turns from ChatSession are carried; params included only when set.\n"
+  covers = ["c-2", "c-4", "c-5"]
+  depends_on = ["t-1", "t-4", "t-5"]
+  test_contract = ["if stream=true is dropped or a prior turn is omitted, ChatRequestBuilderTest's streaming/multi-turn assertions fail", "if a system prompt/temperature/max_tokens is emitted when blank (or omitted when set), ChatRequestBuilderTest's optional-param assertion fails", "if any API key appears in the produced body or path/query, ChatRequestBuilderTest's key-in-headers-only assertion fails"]
+  status = "done"
+
+[[task]]
+  id = "t-8"
+  wave = 2
+  title = "Provider-form request-param inputs"
+  files = ["app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt", "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt"]
+  description = "Add optional system-prompt / temperature / max-tokens inputs to the existing provider edit form,\nwired to the t-5 ProfileDraft fields (blank = provider default). Validation errors from\nProfileValidator's numeric checks surface inline like the existing field errors.\n"
+  covers = ["c-1"]
+  depends_on = ["t-5"]
+  test_contract = ["if the three request-param inputs do not persist through a ProviderEdit save, ProviderEditViewModelTest.requestParamsSaved fails", "if a non-numeric temperature/maxTokens input does not surface an inline error, ProviderEditViewModelTest's numeric-validation assertion fails"]
+  status = "done"
+
+[[task]]
+  id = "t-9"
+  wave = 3
+  title = "ChatDriver wiring + factory + MockWebServer e2e"
+  files = ["app/src/main/java/dev/equerry/app/providers/drivers/ChatDriver.kt", "app/src/main/java/dev/equerry/app/providers/drivers/ChatDriverFactory.kt", "app/src/main/java/dev/equerry/app/di/RepositoryModule.kt"]
+  description = "ChatDriver.send(profile, key, messages): Flow<ChatToken> wires the t-3 OkHttp client (+SSE\nEventSource) to the t-6 parsers and t-7 builders. ChatDriverFactory selects by\nprofile.type.driverType (OpenRouter -> OpenAI-compatible). Adds testImplementation\nokhttp3:mockwebserver (okhttp 4.12.0) to libs.versions.toml + app/build.gradle.kts.\n"
+  covers = ["c-1", "c-2", "c-4", "c-5"]
+  depends_on = ["t-6", "t-7"]
+  test_contract = ["if a provider type's stream wiring breaks, ChatDriverTest (MockWebServer canned stream per type) fails its concatenated-text-equals-reply assertion", "if a 401 does not surface ChatError.Auth, ChatDriverTest's auth-failure assertion fails", "if the key is missing from the auth header or present in the request path, ChatDriverTest's recorded-request assertion fails", "if OpenRouter does not route through the OpenAI-compatible driver, ChatDriverFactoryTest.openRouterUsesOpenAiDriver fails"]
+  status = "done"
+
+[[task]]
+  id = "t-10"
+  wave = 4
+  title = "Chat screen + ViewModel + nav route"
+  files = ["app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt", "app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt", "app/src/main/java/dev/equerry/app/MainActivity.kt"]
+  description = "Dedicated chat screen (locked chat_surface): ChatViewModel(repository, driverFactory, session)\nexposes messages + unmapped-guidance flag + per-message error; live tokens append to the\ngrowing assistant bubble. Add Route.CHAT + a chatContent composable to EquerryNavHost and an\nonChat HomeEntry, following the existing providersContent/slotsContent/probeContent pattern.\n"
+  covers = ["c-1", "c-3", "c-4", "c-5"]
+  depends_on = ["t-4", "t-9"]
+  test_contract = ["if live tokens do not append to the growing assistant bubble, ChatViewModelTest's streaming-append assertion fails (c-1)", "if send() with no CHAT mapping calls the driver or crashes instead of setting the guidance flag, ChatViewModelTest's unmapped-guard assertion fails (c-3)", "if a second send drops the first turn, ChatViewModelTest's session-carry assertion fails (c-5); if newChat() does not clear, its reset assertion fails", "if a ChatError renders non-readable or leaks the key, ChatViewModelTest's keyless-error-bubble assertion fails (c-4)", "if Home cannot navigate to Route.CHAT, NavigationTest's chatContent assertion fails"]
+  status = "done"
+
+[[task]]
+  id = "t-11"
+  wave = 4
+  title = "ChatScreen Compose render test"
+  files = ["app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt"]
+  description = "Add a Robolectric Compose test for the stateless ChatScreen: transcript bubbles render their\ntext, the guidance banner shows only when unmapped, and a set error renders. Closes the verify\nFLAG that c-1/c-3 rendering was unverified at the UI layer. No production change.\n"
+  covers = ["c-1", "c-3"]
+  depends_on = ["t-10"]
+  test_contract = ["if MessageBubble stops rendering message content, ChatScreenTest's transcript-renders assertion fails (c-1)", "if the guidance banner does not render when unmapped (or renders when a provider is mapped), ChatScreenTest's guidance assertions fail (c-3)"]
+  status = "done"

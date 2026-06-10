@@ -13,7 +13,9 @@ class ProfileValidatorTest {
         baseUrl: String = "https://api.anthropic.com",
         key: String = "sk-123",
         model: String = "claude-sonnet-4-6",
-    ) = ProfileDraft(label, type, baseUrl, key, model)
+        temperature: String = "",
+        maxTokens: String = "",
+    ) = ProfileDraft(label, type, baseUrl, key, model, temperature = temperature, maxTokens = maxTokens)
 
     private fun fields(draft: ProfileDraft) =
         ProfileValidator.validate(draft).map { it.field }
@@ -59,6 +61,25 @@ class ProfileValidatorTest {
     @Test
     fun empty_model_is_flagged() {
         assertTrue(ProfileField.MODEL in fields(draft(model = "")))
+    }
+
+    @Test
+    fun rejects_garbage_numeric_params() {
+        val flagged = fields(draft(temperature = "hot", maxTokens = "lots"))
+        assertTrue(ProfileField.TEMPERATURE in flagged)
+        assertTrue(ProfileField.MAX_TOKENS in flagged)
+    }
+
+    @Test
+    fun blank_request_params_are_not_flagged() {
+        val flagged = fields(draft(temperature = "", maxTokens = ""))
+        assertFalse(ProfileField.TEMPERATURE in flagged)
+        assertFalse(ProfileField.MAX_TOKENS in flagged)
+    }
+
+    @Test
+    fun valid_numeric_request_params_are_accepted() {
+        assertEquals(emptyList<FieldError>(), ProfileValidator.validate(draft(temperature = "0.7", maxTokens = "512")))
     }
 
     @Test

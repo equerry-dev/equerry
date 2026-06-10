@@ -13,6 +13,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -62,25 +63,31 @@ class ProbeViewModelTest {
         Dispatchers.resetMain()
     }
 
+    // NOTE: a single, bounded subscription per test. The records flow is WhileSubscribed-shared, so
+    // re-subscribing across separate `first { }` calls under Unconfined could replay a stale value and
+    // wait forever; one continuous collection + withTimeout keeps these deterministic and fail-fast.
+
     @Test
     fun on_capture_sets_current_and_appends_to_log() = runBlocking {
-        sessionVm.onCapture(rec(1))
-        assertEquals(rec(1), sessionVm.currentCapture.value)
-        assertEquals(listOf(rec(1)), logVm.records.first { it.isNotEmpty() })
+        withTimeout(5_000) {
+            sessionVm.onCapture(rec(1))
+            assertEquals(rec(1), sessionVm.currentCapture.value)
 
-        sessionVm.onCapture(rec(2))
-        assertEquals(rec(2), sessionVm.currentCapture.value)
-        // Second invocation appends rather than overwriting the first.
-        assertEquals(listOf(rec(1), rec(2)), logVm.records.first { it.size == 2 })
+            sessionVm.onCapture(rec(2))
+            assertEquals(rec(2), sessionVm.currentCapture.value)
+            // Second invocation appends rather than overwriting the first (appends serialize in order).
+            assertEquals(listOf(rec(1), rec(2)), logVm.records.first { it.size == 2 })
+        }
     }
 
     @Test
     fun export_csv_matches_serializer_over_stored_records() = runBlocking {
-        sessionVm.onCapture(rec(1))
-        logVm.records.first { it.isNotEmpty() }
-        sessionVm.onCapture(rec(2))
-        val stored = logVm.records.first { it.size == 2 }
+        withTimeout(5_000) {
+            sessionVm.onCapture(rec(1))
+            sessionVm.onCapture(rec(2))
+            val stored = logVm.records.first { it.size == 2 }
 
-        assertEquals(ProbeCsv.toCsv(stored), logVm.exportCsv())
+            assertEquals(ProbeCsv.toCsv(stored), logVm.exportCsv())
+        }
     }
 }

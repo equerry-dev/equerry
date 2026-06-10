@@ -35,6 +35,10 @@ class ProviderRepository(
             type = draft.type,
             baseUrl = draft.baseUrl,
             model = draft.model,
+            // Blank form input means "use the provider default" -> null in the domain model.
+            systemPrompt = draft.systemPrompt.takeIf { it.isNotBlank() },
+            temperature = draft.temperature.toDoubleOrNull(),
+            maxTokens = draft.maxTokens.toIntOrNull(),
         )
         profileStore.save(profileStore.profiles().first() + profile)
         if (draft.key.isNotBlank()) {

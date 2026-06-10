@@ -1,0 +1,93 @@
+{
+  "phase": "04-chat-drivers",
+  "tasks": {
+    "t-1": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/drivers/ChatMessage.kt",
+        "app/src/main/java/dev/equerry/app/providers/drivers/ChatModels.kt"
+      ],
+      "commit": "b18299a",
+      "completed_at": "2026-06-10T08:48:28.564824Z"
+    },
+    "t-10": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt",
+        "app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt",
+        "app/src/main/java/dev/equerry/app/MainActivity.kt"
+      ],
+      "commit": "2fc3168",
+      "completed_at": "2026-06-10T11:39:44.339691Z"
+    },
+    "t-11": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt"
+      ],
+      "commit": "0b44fb9",
+      "completed_at": "2026-06-10T12:51:17.326739Z"
+    },
+    "t-2": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/drivers/ChatErrorMapper.kt"
+      ],
+      "commit": "6d9afa7",
+      "completed_at": "2026-06-10T08:49:28.208069Z"
+    },
+    "t-3": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/drivers/KeyRedaction.kt",
+        "app/src/main/java/dev/equerry/app/providers/drivers/ChatHttpClient.kt"
+      ],
+      "commit": "9d2d44a",
+      "completed_at": "2026-06-10T08:52:52.069728Z"
+    },
+    "t-4": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/drivers/ChatSession.kt"
+      ],
+      "commit": "a9a7638",
+      "completed_at": "2026-06-10T08:53:49.392201Z"
+    },
+    "t-5": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt",
+        "app/src/main/java/dev/equerry/app/providers/ProfileValidator.kt",
+        "app/src/main/java/dev/equerry/app/data/ProfileStore.kt",
+        "app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt"
+      ],
+      "commit": "ceab0bf",
+      "completed_at": "2026-06-10T08:56:40.635371Z"
+    },
+    "t-6": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/drivers/SseTokenParser.kt",
+        "app/src/main/java/dev/equerry/app/providers/drivers/OllamaStreamParser.kt"
+      ],
+      "commit": "dd2742f",
+      "completed_at": "2026-06-10T08:58:48.585216Z"
+    },
+    "t-7": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/drivers/ChatRequestBuilder.kt"
+      ],
+      "commit": "64f2c27",
+      "completed_at": "2026-06-10T09:00:44.474583Z"
+    },
+    "t-8": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt",
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt"
+      ],
+      "commit": "80f75bf",
+      "completed_at": "2026-06-10T11:09:23.391301Z"
+    },
+    "t-9": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/drivers/ChatDriver.kt",
+        "app/src/main/java/dev/equerry/app/providers/drivers/ChatDriverFactory.kt",
+        "app/src/main/java/dev/equerry/app/di/RepositoryModule.kt"
+      ],
+      "commit": "32b49ac",
+      "completed_at": "2026-06-10T11:34:08.995622Z"
+    }
+  }
+}
