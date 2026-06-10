@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.Preferences
 import dev.equerry.app.data.ProfileStore
 import dev.equerry.app.data.SecretStore
 import dev.equerry.app.data.SlotMappingStore
-import dev.equerry.app.data.SpeakTiming
 import dev.equerry.app.data.TurnControl
 import dev.equerry.app.data.VoiceSettingsStore
 import dev.equerry.app.providers.ProfileDraft
@@ -24,8 +23,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.resetMain
@@ -35,14 +36,16 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class VoiceFlowControllerTest {
+class VoiceFlowConcurrencyTest {
 
     @get:Rule
     val tmp = TemporaryFolder()
@@ -54,12 +57,26 @@ class VoiceFlowControllerTest {
         override fun removeKey(profileId: String) { keys.remove(profileId) }
     }
 
-    /** Emits a scripted STT event sequence and then completes (mirrors the real flow ending). */
-    private class FakeSpeechToText(private val events: List<SttEvent>) : SpeechToText {
-        override fun listen(): Flow<SttEvent> = events.asFlow()
+    /**
+     * Per-session scripted STT. Session i emits [sessions]\[i] then completes; a null/absent script
+     * stays open until cancelled (simulates active listening). Start/release counts are StateFlows
+     * so tests can await them deterministically.
+     */
+    private class ScriptedStt(private val sessions: List<List<SttEvent>?>) : SpeechToText {
+        val starts = MutableStateFlow(0)
+        val releases = MutableStateFlow(0)
+        override fun listen(): Flow<SttEvent> = callbackFlow {
+            val idx = starts.value
+            starts.value = idx + 1
+            val script = sessions.getOrNull(idx)
+            if (script != null) {
+                script.forEach { trySend(it) }
+                close()
+            }
+            awaitClose { releases.value = releases.value + 1 }
+        }
     }
 
-    /** Records every utterance handed to TTS. */
     private class FakeTextToSpeech : TextToSpeech {
         val spoken = mutableListOf<String>()
         override suspend fun init() = TtsInitResult.Ready
@@ -75,8 +92,6 @@ class VoiceFlowControllerTest {
     private lateinit var repository: ProviderRepository
     private lateinit var vm: ChatViewModel
     private lateinit var settings: VoiceSettingsStore
-
-    private val key = "sk-secret-ABCDEF1234567890"
 
     @Before
     fun setUp() {
@@ -106,7 +121,7 @@ class VoiceFlowControllerTest {
 
     private suspend fun configureChatProvider() {
         val created = repository.addProfile(
-            ProfileDraft("Mock", ProviderType.OPENAI_COMPATIBLE, server.url("/").toString(), key, "m"),
+            ProfileDraft("Mock", ProviderType.OPENAI_COMPATIBLE, server.url("/").toString(), "sk-key-123456", "m"),
         )
         repository.setChatSlot(created.id)
     }
@@ -120,59 +135,79 @@ class VoiceFlowControllerTest {
         )
 
     private fun controllerWith(stt: SpeechToText, tts: TextToSpeech) =
-        VoiceFlowController(
-            chat = vm,
-            stt = stt,
-            tts = tts,
-            settings = settings,
-            scope = controllerScope,
-            isMicGranted = { true },
-        )
+        VoiceFlowController(vm, stt, tts, settings, controllerScope, isMicGranted = { true })
 
     @Test
-    fun end_of_speech_auto_sends_and_speaks_the_whole_reply_once() = runBlocking {
-        configureChatProvider()
-        settings.setTurnControl(TurnControl.SINGLE_TURN) // one turn — continuous re-arm is t-8's concern
-        server.enqueue(sseReply("Hel", "lo"))
-        val tts = FakeTextToSpeech()
-        // Realistic STT order: end-of-speech, then the final transcript (which ends the flow).
-        val controller = controllerWith(
-            FakeSpeechToText(listOf(SttEvent.EndOfSpeech, SttEvent.Final("what time is it"))),
-            tts,
-        )
+    fun dismiss_mid_listening_releases_stt_once_and_returns_to_idle() = runBlocking {
+        val stt = ScriptedStt(listOf(null)) // session stays open (listening)
+        val controller = controllerWith(stt, FakeTextToSpeech())
 
         controller.start()
+        withTimeout(5_000) { stt.starts.first { it == 1 } }
+        assertEquals(VoiceFlowState.Listening, controller.state.value)
 
-        // The transcript shows the spoken question and the streamed reply (auto-send fired).
-        val done = withTimeout(5_000) {
-            vm.state.first { !it.streaming && it.transcript.size == 2 && it.lastReply != null }
-        }
-        assertEquals("what time is it", done.transcript[0].content)
-        assertEquals("Hello", done.transcript[1].content)
+        controller.stop()
 
-        // Whole reply spoken exactly once, after streaming completed.
-        withTimeout(5_000) { controller.state.first { it == VoiceFlowState.Idle && tts.spoken.isNotEmpty() } }
-        assertEquals(listOf("Hello"), tts.spoken)
+        withTimeout(5_000) { stt.releases.first { it == 1 } }
+        assertEquals(1, stt.starts.value) // no Final was ever processed; no re-listen
+        assertEquals(VoiceFlowState.Idle, controller.state.value)
     }
 
     @Test
-    fun sentence_mode_queues_each_completed_sentence_to_tts() = runBlocking {
+    fun dismiss_mid_stream_speaks_nothing() = runBlocking {
         configureChatProvider()
-        settings.setTurnControl(TurnControl.SINGLE_TURN) // one turn — continuous re-arm is t-8's concern
-        settings.setSpeakTiming(SpeakTiming.SENTENCE_BY_SENTENCE)
-        server.enqueue(sseReply("Hello there. ", "How are you?"))
-        val tts = FakeTextToSpeech()
-        val controller = controllerWith(
-            FakeSpeechToText(listOf(SttEvent.EndOfSpeech, SttEvent.Final("hi"))),
-            tts,
+        // Body never arrives within the test window, so the reply stays mid-stream.
+        server.enqueue(
+            MockResponse().setHeader("Content-Type", "text/event-stream")
+                .setBodyDelay(10, TimeUnit.SECONDS).setBody("data: [DONE]\n\n"),
         )
+        val tts = FakeTextToSpeech()
+        val controller = controllerWith(ScriptedStt(listOf(listOf(SttEvent.EndOfSpeech, SttEvent.Final("hi")))), tts)
+
+        controller.start()
+        // Wait until the reply is actually streaming, then dismiss.
+        withTimeout(5_000) { vm.state.first { it.streaming } }
+        controller.stop()
+
+        assertTrue("nothing should be spoken when dismissed mid-stream", tts.spoken.isEmpty())
+        assertEquals(VoiceFlowState.Idle, controller.state.value)
+    }
+
+    @Test
+    fun continuous_rearms_once_per_turn_and_ignores_a_double_start() = runBlocking {
+        configureChatProvider()
+        settings.setTurnControl(TurnControl.CONTINUOUS)
+        server.enqueue(sseReply("Hi"))
+        // Turn 1 completes; the re-armed second session stays open.
+        val stt = ScriptedStt(listOf(listOf(SttEvent.EndOfSpeech, SttEvent.Final("q1")), null))
+        val controller = controllerWith(stt, FakeTextToSpeech())
 
         controller.start()
 
-        withTimeout(5_000) { vm.state.first { !it.streaming && it.transcript.size == 2 && it.lastReply != null } }
-        withTimeout(5_000) { controller.state.first { it == VoiceFlowState.Idle && tts.spoken.size == 2 } }
+        // After turn 1 settles, the loop re-arms exactly once (start count reaches 2).
+        withTimeout(5_000) { stt.starts.first { it == 2 } }
+        assertEquals(VoiceFlowState.Listening, controller.state.value)
 
-        // Each completed sentence reached TTS, matching SpeakChunker's output (t-6).
-        assertEquals(listOf("Hello there.", "How are you?"), tts.spoken)
+        // A duplicate trigger while a turn is active must not arm a third session.
+        controller.start()
+        assertEquals(2, stt.starts.value)
+
+        controller.stop()
+    }
+
+    @Test
+    fun single_turn_does_not_rearm() = runBlocking {
+        configureChatProvider()
+        settings.setTurnControl(TurnControl.SINGLE_TURN)
+        server.enqueue(sseReply("Hi"))
+        val stt = ScriptedStt(listOf(listOf(SttEvent.EndOfSpeech, SttEvent.Final("q1"))))
+        val controller = controllerWith(stt, FakeTextToSpeech())
+
+        controller.start()
+
+        // The one reply completes, then the loop ends without re-arming.
+        withTimeout(5_000) { vm.state.first { !it.streaming && it.transcript.size == 2 && it.lastReply != null } }
+        withTimeout(5_000) { controller.state.first { it == VoiceFlowState.Idle } }
+        assertEquals(1, stt.starts.value) // listened exactly once
     }
 }

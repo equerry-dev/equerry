@@ -1,6 +1,7 @@
 package dev.equerry.app.voice
 
 import dev.equerry.app.data.SpeakTiming
+import dev.equerry.app.data.TurnControl
 import dev.equerry.app.data.VoiceSettingsStore
 import dev.equerry.app.providers.drivers.ChatRole
 import dev.equerry.app.ui.chat.ChatViewModel
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /** Coarse phase of one voice turn, surfaced for the session UI. */
@@ -41,7 +43,11 @@ class VoiceFlowController(
 
     private var job: Job? = null
 
-    /** Begin a listening turn. No-op while one is already running. */
+    /**
+     * Begin the listen→send→speak loop. No-op while a turn is already running (the active-job guard
+     * prevents a double-arm from rapid triggers). In [TurnControl.CONTINUOUS] the loop re-arms for a
+     * follow-up after each turn fully settles; in [TurnControl.SINGLE_TURN] it ends after one Q&A.
+     */
     fun start() {
         if (job?.isActive == true) return
         job = scope.launch {
@@ -51,32 +57,39 @@ class VoiceFlowController(
                 return@launch
             }
             tts.init()
-            _state.value = VoiceFlowState.Listening
+            do {
+                _state.value = VoiceFlowState.Listening
 
-            var finalText: String? = null
-            stt.listen().collect { event ->
-                when (event) {
-                    is SttEvent.Partial -> _state.value = VoiceFlowState.Transcribing
-                    is SttEvent.Final -> {
-                        finalText = event.text
-                        _state.value = VoiceFlowState.Transcribing
+                var finalText: String? = null
+                stt.listen().collect { event ->
+                    when (event) {
+                        is SttEvent.Partial -> _state.value = VoiceFlowState.Transcribing
+                        is SttEvent.Final -> {
+                            finalText = event.text
+                            _state.value = VoiceFlowState.Transcribing
+                        }
+                        SttEvent.EndOfSpeech -> _state.value = VoiceFlowState.Transcribing
+                        is SttEvent.Error -> Unit // routed in t-11
                     }
-                    SttEvent.EndOfSpeech -> _state.value = VoiceFlowState.Transcribing
-                    is SttEvent.Error -> Unit // routed in t-11
                 }
-            }
 
-            // The STT flow has completed — speech ended. Auto-send the recognized text.
-            val text = finalText
-            if (text.isNullOrBlank()) {
-                _state.value = VoiceFlowState.Idle
-            } else {
+                // The STT flow has completed — speech ended. Auto-send the recognized text.
+                val text = finalText
+                if (text.isNullOrBlank()) break
                 sendAndSpeak(text)
-            }
+                // Re-arm for a follow-up only once the prior turn has fully settled (above), so the
+                // mic is never armed twice for one turn.
+                val turn = settings.turnControl().first()
+            } while (turn == TurnControl.CONTINUOUS && isActive)
+            _state.value = VoiceFlowState.Idle
         }
     }
 
-    /** Stop the current turn and silence TTS. Hardened for cancellation/idempotency in t-8. */
+    /**
+     * Stop the loop, cancel any in-flight listening/streaming/speaking, and silence TTS. Idempotent:
+     * cancelling an already-stopped controller is safe. Cancelling the job unwinds the STT flow's
+     * awaitClose, which releases the recognizer.
+     */
     fun stop() {
         job?.cancel()
         job = null
