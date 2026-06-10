@@ -1,7 +1,7 @@
 [verify]
   phase = "04-chat-drivers"
-  generated_at = 2026-06-10T12:12:25.938574Z
-  verdict = "partial"
+  generated_at = 2026-06-10T12:53:47.62878Z
+  verdict = "pass"
 
 [summary]
   mutation_status = "skipped"
@@ -10,17 +10,18 @@
   mutants_survived = 0
   mutants_not_covered = 0
   criteria_total = 5
-  criteria_covered = 3
-  criteria_uncovered = 2
+  criteria_covered = 5
+  criteria_uncovered = 0
 
 [[criterion]]
   id = "c-1"
-  status = "weak"
+  status = "covered"
   tests = [
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatScreenTest.kt:transcript_bubbles_render_their_text",
     "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:live_tokens_append_to_the_growing_assistant_bubble",
     "app/src/test/java/dev/equerry/app/providers/drivers/ChatDriverTest.kt:openai_stream_concatenates_to_the_reply_and_keeps_key_in_header_not_path",
   ]
-  notes = "Reply reaches the rendered transcript state (VM test asserts the assistant bubble content) and the driver e2e proves a real stream becomes the reply. But no Compose test asserts ChatScreen actually renders the transcript as bubbles — a broken MessageBubble would not fail any test."
+  notes = "End to end: a real stream becomes the reply (driver e2e), lands in the transcript state (VM test), and renders as bubbles (ChatScreenTest). A rendering regression now fails ChatScreenTest."
 
 [[criterion]]
   id = "c-2"
@@ -37,11 +38,13 @@
 
 [[criterion]]
   id = "c-3"
-  status = "weak"
+  status = "covered"
   tests = [
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatScreenTest.kt:guidance_banner_shows_when_unmapped",
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatScreenTest.kt:guidance_banner_hidden_when_a_provider_is_mapped",
     "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:unmapped_send_sets_guidance_and_never_calls_the_driver",
   ]
-  notes = "The behavioural core is well covered: with no CHAT mapping, send() sets the guidance flag, never calls the driver (server.requestCount==0), and does not crash. But no Compose test asserts the guidance banner itself renders — the 'shows in-UI guidance' rendering is verified only at the state layer."
+  notes = "With no CHAT mapping, send() sets the guidance flag, never calls the driver, and does not crash (VM test); the guidance banner is asserted to render when unmapped and to be absent when mapped (ChatScreenTest)."
 
 [[criterion]]
   id = "c-4"
@@ -67,12 +70,12 @@
   notes = "The second send's request body (via MockWebServer) carries the first user+assistant turns; session ordering and builder turn-carry are unit-tested too."
 
 [[finding]]
-  severity = "FLAG"
-  text = "ChatScreen.kt has no Compose UI test, unlike ProviderEditScreen/ProbeScreen. c-1's transcript-bubble rendering and c-3's guidance-banner rendering are verified only at the ViewModel/state layer — a rendering regression would not fail any test. Add a Robolectric ChatScreen test (sent message + reply bubble appear; banner shows when unmapped)."
+  severity = "NOTE"
+  text = "mutation skipped: no Kotlin mutation adapter — verdict is based on criterion coverage alone (consistent with phases 02/03)."
 
 [[finding]]
   severity = "NOTE"
-  text = "mutation skipped: no Kotlin mutation adapter — verdict is based on criterion coverage alone (consistent with phases 02/03)."
+  text = "c-1/c-3 ChatScreen render coverage added in t-11 (ChatScreenTest) after the first verify flagged it weak — both now covered."
 
 [[finding]]
   severity = "NOTE"
