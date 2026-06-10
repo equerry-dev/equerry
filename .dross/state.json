@@ -1,17 +1,9 @@
 {
-  "version": "0.1.5.0",
+  "version": "0.1.5.1",
   "current_milestone": "v0.1",
-  "last_activity": "2026-06-10T16:43:04.093955Z",
-  "last_action": "completed 05-voice-roundtrip",
+  "last_activity": "2026-06-10T17:28:39.554245Z",
+  "last_action": "quick: permit cleartext HTTP for user-configured providers",
   "history": [
-    {
-      "at": "2026-06-10T07:47:13.617061Z",
-      "action": "spec locked: 04-chat-drivers"
-    },
-    {
-      "at": "2026-06-10T08:23:21.302767Z",
-      "action": "set current_phase_status=planned"
-    },
     {
       "at": "2026-06-10T08:23:21.310209Z",
       "action": "plan locked (panel): 04-chat-drivers (10 tasks across 4 waves)"
@@ -203,6 +195,14 @@
     {
       "at": "2026-06-10T16:43:04.093955Z",
       "action": "completed 05-voice-roundtrip"
+    },
+    {
+      "at": "2026-06-10T17:28:39.546772Z",
+      "action": "bump internal 0.1.5.0 → 0.1.5.1"
+    },
+    {
+      "at": "2026-06-10T17:28:39.554245Z",
+      "action": "quick: permit cleartext HTTP for user-configured providers"
     }
   ]
 }
