@@ -1,0 +1,60 @@
+[verify]
+  phase = "03-assist-probe"
+  generated_at = 2026-06-10T07:11:30.054979Z
+  verdict = "partial"
+
+[summary]
+  mutation_status = "skipped"
+  mutation_score = 0.0
+  mutants_killed = 0
+  mutants_survived = 0
+  mutants_not_covered = 0
+  criteria_total = 5
+  criteria_covered = 3
+  criteria_uncovered = 2
+
+[[criterion]]
+  id = "c-1"
+  status = "weak"
+  tests = ["app/src/main/AndroidManifest.xml + app/src/main/res/xml/voice_interaction_service.xml (build-parse via :app:lintDebug / assembleDebug)"]
+  notes = "Only automated guard is the manifest/xml build-parse (green): it confirms the VoiceInteractionService + session/recognition metadata are well-formed and the referenced classes exist. Whether Equerry actually appears in Settings > Digital assistant and becomes active is OS/framework-bound — a MANUAL on-device check that has NOT yet been performed."
+
+[[criterion]]
+  id = "c-2"
+  status = "weak"
+  tests = ["app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt:session_screen_shows_capture_fields", "app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt:session_screen_shows_blocked_screenshot"]
+  notes = "ProbeScreenTest covers that the session UI is a visible Compose screen rendering the live capture. The other half — the assist gesture actually launching it (not Gemini) — is OS-bound and requires a MANUAL on-device check that has NOT yet been performed."
+
+[[criterion]]
+  id = "c-3"
+  status = "covered"
+  tests = ["app/src/test/java/dev/equerry/app/assistant/AssistAnalyzerTest.kt:null_structure_yields_not_provided_and_zero_count", "app/src/test/java/dev/equerry/app/assistant/AssistAnalyzerTest.kt:counts_only_nodes_with_non_blank_text", "app/src/test/java/dev/equerry/app/assistant/AssistAnalyzerTest.kt:counts_all_descendants_in_a_deeply_nested_tree", "app/src/test/java/dev/equerry/app/assistant/ProbeCaptureTest.kt:capture_builds_record_and_pushes_to_viewmodel_and_store", "app/src/test/java/dev/equerry/app/assistant/ProbeCaptureTest.kt:adapter_over_a_stub_viewnode_tree_counts_text_nodes"]
+  notes = "structureProvided + text-node count logic and the capture wiring are fully unit-tested; only the framework Session callback itself is manual (covered via c-2's manual gate)."
+
+[[criterion]]
+  id = "c-4"
+  status = "covered"
+  tests = ["app/src/test/java/dev/equerry/app/assistant/AssistAnalyzerTest.kt:screenshot_with_null_dimensions_is_blocked", "app/src/test/java/dev/equerry/app/assistant/AssistAnalyzerTest.kt:screenshot_with_dimensions_arrived", "app/src/test/java/dev/equerry/app/assistant/ProbeCaptureTest.kt:capture_builds_record_and_pushes_to_viewmodel_and_store", "app/src/test/java/dev/equerry/app/assistant/ProbeCaptureTest.kt:capture_with_no_structure_or_screenshot_records_absence"]
+  notes = "arrived/blocked classification + dimensions (never the bitmap) are unit-tested on both the arrived and blocked paths."
+
+[[criterion]]
+  id = "c-5"
+  status = "covered"
+  tests = ["app/src/test/java/dev/equerry/app/data/ProbeStoreTest.kt:appended_records_round_trip_across_a_reload_in_order", "app/src/test/java/dev/equerry/app/data/ProbeStoreTest.kt:concurrent_appends_all_land", "app/src/test/java/dev/equerry/app/ui/probe/ProbeViewModelTest.kt:export_csv_matches_serializer_over_stored_records", "app/src/test/java/dev/equerry/app/assistant/ProbeCsvTest.kt:comma_and_quote_fields_are_escaped_and_round_trip", "app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt:log_screen_shows_row_per_record_and_export_affordance", "app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt:csv_share_intent_has_action_mime_and_payload", "app/src/test/java/dev/equerry/app/NavigationTest.kt:home_navigates_to_the_probe_log_route"]
+  notes = "Accumulation/persistence, the on-screen log, CSV export delegating to the real serializer, the share-sheet intent, and reachability via nav are all covered."
+
+[[finding]]
+  severity = "FLAG"
+  text = "c-1 manual gate OUTSTANDING: verify on a real device that Equerry appears in Settings > Default apps > Digital assistant and becomes the active assistant. Automated coverage is build-parse only."
+
+[[finding]]
+  severity = "FLAG"
+  text = "c-2 manual gate OUTSTANDING: verify on a real device that the assist gesture launches Equerry's probe session screen (not Gemini). Screen content is unit-tested; the gesture launch is not."
+
+[[finding]]
+  severity = "NOTE"
+  text = "Mutation skipped: no Kotlin/Android mutation adapter (Stryker is TS/JS only). 27 files skipped; verdict is based on criterion coverage alone, not a mutation score."
+
+[[finding]]
+  severity = "NOTE"
+  text = "This is a probe phase whose central value (the Phase-0 results table: did AssistStructure/screenshot arrive per ~10 real apps) is produced by the MANUAL on-device run. Closing c-1/c-2 on-device also produces that table (export CSV from the probe log)."

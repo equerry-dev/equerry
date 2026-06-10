@@ -2,18 +2,10 @@
   "version": "0.1.0.2",
   "current_milestone": "v0.1",
   "current_phase": "03-assist-probe",
-  "current_phase_status": "complete",
-  "last_activity": "2026-06-10T07:10:18.286632Z",
-  "last_action": "phase 03-assist-probe executed (8/8 done \u0026 green)",
+  "current_phase_status": "verified",
+  "last_activity": "2026-06-10T07:13:00.607482Z",
+  "last_action": "verified 03-assist-probe: partial (3/5 covered, 2 weak/manual; mutation skipped)",
   "history": [
-    {
-      "at": "2026-06-09T10:13:15.781318Z",
-      "action": "init complete"
-    },
-    {
-      "at": "2026-06-09T10:24:32.633873Z",
-      "action": "set current_milestone=v0.1"
-    },
     {
       "at": "2026-06-09T10:24:32.640319Z",
       "action": "scoped milestone v0.1: 4 criteria, 4 phases"
@@ -205,6 +197,14 @@
     {
       "at": "2026-06-10T07:10:18.286632Z",
       "action": "phase 03-assist-probe executed (8/8 done \u0026 green)"
+    },
+    {
+      "at": "2026-06-10T07:13:00.600872Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-10T07:13:00.607482Z",
+      "action": "verified 03-assist-probe: partial (3/5 covered, 2 weak/manual; mutation skipped)"
     }
   ]
 }
