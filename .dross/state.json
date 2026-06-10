@@ -1,15 +1,9 @@
 {
   "version": "0.1.0.2",
   "current_milestone": "v0.1",
-  "current_phase": "04-chat-drivers",
-  "current_phase_status": "verified",
-  "last_activity": "2026-06-10T12:54:38.98776Z",
-  "last_action": "verified 04-chat-drivers: pass (5/5 covered; mutation skipped — Kotlin; c-1/c-3 render gap closed by t-11)",
+  "last_activity": "2026-06-10T13:11:11.93982Z",
+  "last_action": "completed 04-chat-drivers",
   "history": [
-    {
-      "at": "2026-06-09T19:45:24.32946Z",
-      "action": "set current_phase=03-assist-probe"
-    },
     {
       "at": "2026-06-09T19:45:24.336557Z",
       "action": "spec locked: 03-assist-probe"
@@ -205,6 +199,10 @@
     {
       "at": "2026-06-10T12:54:38.98776Z",
       "action": "verified 04-chat-drivers: pass (5/5 covered; mutation skipped — Kotlin; c-1/c-3 render gap closed by t-11)"
+    },
+    {
+      "at": "2026-06-10T13:11:11.93982Z",
+      "action": "completed 04-chat-drivers"
     }
   ]
 }
