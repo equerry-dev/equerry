@@ -9,6 +9,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dev.equerry.app.data.ProbeStore
 import dev.equerry.app.data.ProfileStore
 import dev.equerry.app.data.SlotMappingStore
 import javax.inject.Singleton
@@ -32,4 +33,8 @@ object PersistenceModule {
     @Singleton
     fun provideSlotMappingStore(dataStore: DataStore<Preferences>): SlotMappingStore =
         SlotMappingStore(dataStore)
+
+    @Provides
+    @Singleton
+    fun provideProbeStore(dataStore: DataStore<Preferences>): ProbeStore = ProbeStore(dataStore)
 }

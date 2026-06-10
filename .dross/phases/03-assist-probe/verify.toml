@@ -1,0 +1,56 @@
+[verify]
+  phase = "03-assist-probe"
+  generated_at = 2026-06-10T07:11:30.054979Z
+  verdict = "pass"
+
+[summary]
+  mutation_status = "skipped"
+  mutation_score = 0.0
+  mutants_killed = 0
+  mutants_survived = 0
+  mutants_not_covered = 0
+  criteria_total = 5
+  criteria_covered = 5
+  criteria_uncovered = 0
+
+[[criterion]]
+  id = "c-1"
+  status = "covered"
+  tests = ["app/src/main/AndroidManifest.xml + app/src/main/res/xml/voice_interaction_service.xml (build-parse via :app:lintDebug / assembleDebug)", "MANUAL on-device (Fairphone FP5, Android 15): set as assistant; dumpsys voiceinteraction reports mComponent=dev.equerry.app/.assistant.EquerryVoiceInteractionService with session service loaded — the OS validated + bound Equerry as the active assistant"]
+  notes = "Build-parse confirms the service + metadata are well-formed; on-device the OS accepted and bound Equerry as the active voice interaction service (a malformed manifest/xml or missing recognition service would fail the bind). Manual gate CLOSED 2026-06-10."
+
+[[criterion]]
+  id = "c-2"
+  status = "covered"
+  tests = ["app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt:session_screen_shows_capture_fields", "app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt:session_screen_shows_blocked_screenshot", "MANUAL on-device (Fairphone FP5): assist gesture (KEYCODE_ASSIST) launched Equerry's 'Assist probe' Compose session window (logcat: Window{...VoiceInteractionSession} for dev.equerry.app, no crash), not Gemini"]
+  notes = "ProbeScreenTest covers the session screen content; on-device the assist gesture launched that screen showing live capture. Manual gate CLOSED 2026-06-10."
+
+[[criterion]]
+  id = "c-3"
+  status = "covered"
+  tests = ["app/src/test/java/dev/equerry/app/assistant/AssistAnalyzerTest.kt:null_structure_yields_not_provided_and_zero_count", "app/src/test/java/dev/equerry/app/assistant/AssistAnalyzerTest.kt:counts_only_nodes_with_non_blank_text", "app/src/test/java/dev/equerry/app/assistant/AssistAnalyzerTest.kt:counts_all_descendants_in_a_deeply_nested_tree", "app/src/test/java/dev/equerry/app/assistant/ProbeCaptureTest.kt:capture_builds_record_and_pushes_to_viewmodel_and_store", "app/src/test/java/dev/equerry/app/assistant/ProbeCaptureTest.kt:adapter_over_a_stub_viewnode_tree_counts_text_nodes"]
+  notes = "structureProvided + text-node count logic and the capture wiring are fully unit-tested; only the framework Session callback itself is manual (covered via c-2's manual gate)."
+
+[[criterion]]
+  id = "c-4"
+  status = "covered"
+  tests = ["app/src/test/java/dev/equerry/app/assistant/AssistAnalyzerTest.kt:screenshot_with_null_dimensions_is_blocked", "app/src/test/java/dev/equerry/app/assistant/AssistAnalyzerTest.kt:screenshot_with_dimensions_arrived", "app/src/test/java/dev/equerry/app/assistant/ProbeCaptureTest.kt:capture_builds_record_and_pushes_to_viewmodel_and_store", "app/src/test/java/dev/equerry/app/assistant/ProbeCaptureTest.kt:capture_with_no_structure_or_screenshot_records_absence"]
+  notes = "arrived/blocked classification + dimensions (never the bitmap) are unit-tested on both the arrived and blocked paths."
+
+[[criterion]]
+  id = "c-5"
+  status = "covered"
+  tests = ["app/src/test/java/dev/equerry/app/data/ProbeStoreTest.kt:appended_records_round_trip_across_a_reload_in_order", "app/src/test/java/dev/equerry/app/data/ProbeStoreTest.kt:concurrent_appends_all_land", "app/src/test/java/dev/equerry/app/ui/probe/ProbeViewModelTest.kt:export_csv_matches_serializer_over_stored_records", "app/src/test/java/dev/equerry/app/assistant/ProbeCsvTest.kt:comma_and_quote_fields_are_escaped_and_round_trip", "app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt:log_screen_shows_row_per_record_and_export_affordance", "app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt:csv_share_intent_has_action_mime_and_payload", "app/src/test/java/dev/equerry/app/NavigationTest.kt:home_navigates_to_the_probe_log_route"]
+  notes = "Accumulation/persistence, the on-screen log, CSV export delegating to the real serializer, the share-sheet intent, and reachability via nav are all covered."
+
+[[finding]]
+  severity = "NOTE"
+  text = "c-1 + c-2 manual gates CLOSED on-device 2026-06-10 (Fairphone FP5, Android 15): Equerry bound as active assistant (dumpsys voiceinteraction); assist gesture launched the probe session Compose screen, not Gemini."
+
+[[finding]]
+  severity = "NOTE"
+  text = "Mutation skipped: no Kotlin/Android mutation adapter (Stryker is TS/JS only). 27 files skipped; verdict is based on criterion coverage alone, not a mutation score."
+
+[[finding]]
+  severity = "NOTE"
+  text = "Phase-0 HARD-GATE results table produced from a live 10-app on-device probe. AssistStructure arrived for all 10 apps (node counts 0-38; Discord=0 nodes despite structure=yes — custom-rendered UI). Screenshot blocked for co.uk.Nationwide.Mobile (banking, FLAG_SECURE) and one Settings capture; arrived (1224x2700) elsewhere. Absent-structure path also exercised (structureProvided=false). Raw records in the app DataStore; table reproducible via the probe log Export CSV."

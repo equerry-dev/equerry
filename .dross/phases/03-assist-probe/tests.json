@@ -1,0 +1,115 @@
+{
+  "phase": "03-assist-probe",
+  "generated_at": "2026-06-10T07:11:30.054979Z",
+  "languages": null,
+  "skipped": [
+    {
+      "file": "app/src/main/AndroidManifest.xml",
+      "reason": "no mutation adapter for .xml"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/MainActivity.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/AssistAnalyzer.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/EquerryRecognitionService.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionService.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSessionService.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/ProbeCapture.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/ProbeCsv.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/ProbeRecord.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/data/ProbeStore.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/di/PersistenceModule.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/probe/ProbeLogScreen.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/probe/ProbeLogViewModel.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/probe/ProbeSessionScreen.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/probe/ProbeSessionViewModel.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/probe/ProbeShare.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/res/values/strings.xml",
+      "reason": "no mutation adapter for .xml"
+    },
+    {
+      "file": "app/src/main/res/xml/recognition_service.xml",
+      "reason": "no mutation adapter for .xml"
+    },
+    {
+      "file": "app/src/main/res/xml/voice_interaction_service.xml",
+      "reason": "no mutation adapter for .xml"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/NavigationTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/assistant/AssistAnalyzerTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/assistant/ProbeCaptureTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/assistant/ProbeCsvTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/data/ProbeStoreTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/probe/ProbeViewModelTest.kt",
+      "reason": "no mutation adapter for .kt"
+    }
+  ]
+}

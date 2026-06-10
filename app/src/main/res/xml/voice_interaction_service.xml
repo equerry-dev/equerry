@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<voice-interaction-service
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:recognitionService="dev.equerry.app.assistant.EquerryRecognitionService"
+    android:sessionService="dev.equerry.app.assistant.EquerryVoiceInteractionSessionService"
+    android:supportsAssist="true"
+    android:supportsLocalInteraction="true" />

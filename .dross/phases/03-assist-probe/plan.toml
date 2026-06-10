@@ -1,0 +1,89 @@
+[phase]
+  id = "03-assist-probe"
+
+[[task]]
+  id = "t-1"
+  wave = 1
+  title = "Define ProbeRecord + AssistAnalyzer"
+  files = ["app/src/main/java/dev/equerry/app/assistant/ProbeRecord.kt", "app/src/main/java/dev/equerry/app/assistant/AssistAnalyzer.kt", "app/src/test/java/dev/equerry/app/assistant/AssistAnalyzerTest.kt"]
+  description = "@Serializable ProbeRecord (packageName, timestamp, structureProvided, nodeCount,\nscreenshotArrived, screenshotBlocked, screenshotWidth: Int?, screenshotHeight: Int?)\nwith NO bitmap/byte[] field — screenshot_retention enforced by type. AssistAnalyzer:\ncountTextNodes over a ViewNodeLike tree abstraction + screenshotMeta(width?, height?).\n"
+  covers = ["c-3", "c-4"]
+  test_contract = ["null root -> structureProvided=false, count=0; a tree with 3 text-bearing + 2 blank/null-text nodes -> count=3; a 4-level nested tree counts all descendants (recursion bug -> count off, AssistAnalyzerTest fails)", "screenshotMeta with null dims -> arrived=false, blocked=true, dims null; 1080x2400 -> arrived=true, blocked=false, w=1080, h=2400 (signature takes no Bitmap, so pixels can't leak past it)"]
+  status = "done"
+
+[[task]]
+  id = "t-2"
+  wave = 2
+  title = "Add ProbeStore (DataStore append-only list)"
+  files = ["app/src/main/java/dev/equerry/app/data/ProbeStore.kt", "app/src/main/java/dev/equerry/app/di/PersistenceModule.kt", "app/src/test/java/dev/equerry/app/data/ProbeStoreTest.kt"]
+  description = "ProbeStore over the existing settings DataStore, JSON list under one key, mirroring\nProfileStore. append(record) read-modify-writes inside ONE dataStore.edit; records():\nFlow; provided @Singleton from PersistenceModule.\n"
+  covers = ["c-5"]
+  depends_on = ["t-1"]
+  test_contract = ["append three records then read via a fresh store over the same preferences_pb file (process-death sim) returns all three in insertion order; empty store -> emptyList", "50 concurrent append() calls all land (size==50) — a read-then-write outside the edit block drops writes and ProbeStoreTest fails"]
+  status = "done"
+
+[[task]]
+  id = "t-4"
+  wave = 2
+  title = "Add CSV serializer for probe records"
+  files = ["app/src/main/java/dev/equerry/app/assistant/ProbeCsv.kt", "app/src/test/java/dev/equerry/app/assistant/ProbeCsvTest.kt"]
+  description = "toCsv(records): RFC-4180 — fixed header (package,timestamp,structure,nodes,screenshot,\nwidth,height) then one row per record. Blocked-screenshot record -> empty width/height\ncells, screenshot=false.\n"
+  covers = ["c-5"]
+  depends_on = ["t-1"]
+  test_contract = ["a packageName containing a comma is double-quoted; a field containing a double-quote has it doubled (\"a\"\"b\") so the round-trip parse in the test holds; column-order or header breakage fails ProbeCsvTest", "empty list -> header row only, no crash, no trailing blank line"]
+  status = "done"
+
+[[task]]
+  id = "t-3"
+  wave = 3
+  title = "Add ProbeSessionViewModel + ProbeLogViewModel"
+  files = ["app/src/main/java/dev/equerry/app/ui/probe/ProbeSessionViewModel.kt", "app/src/main/java/dev/equerry/app/ui/probe/ProbeLogViewModel.kt", "app/src/test/java/dev/equerry/app/ui/probe/ProbeViewModelTest.kt"]
+  description = "onCapture(record) exposes it as the current-capture StateFlow AND it appears in\nProbeLogViewModel.records backed by the same ProbeStore. exportCsv() delegates to the\nreal ProbeCsv (t-4) over stored records.\n"
+  covers = ["c-3", "c-4", "c-5"]
+  depends_on = ["t-1", "t-2", "t-4"]
+  test_contract = ["onCapture(record) sets current-capture StateFlow and the record appears in ProbeLogViewModel.records over a tmp DataStore; a second invocation appends (does not overwrite) the first", "exportCsv() output equals ProbeCsv.toCsv over stored records, so a serializer regression is caught here rather than stubbed away"]
+  status = "done"
+
+[[task]]
+  id = "t-5"
+  wave = 4
+  title = "Build probe screens + CSV share intent"
+  files = ["app/src/main/java/dev/equerry/app/ui/probe/ProbeSessionScreen.kt", "app/src/main/java/dev/equerry/app/ui/probe/ProbeLogScreen.kt", "app/src/main/java/dev/equerry/app/ui/probe/ProbeShare.kt", "app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt"]
+  description = "ProbeSessionScreen renders the live single-invocation capture; ProbeLogScreen renders\nthe accumulated records list with an Export affordance. ProbeShare.csvShareIntent(csv)\nbuilds the share-sheet intent (export_format locked = CSV via share-sheet); the Export\naffordance invokes it. Robolectric screen tests mirror ProviderListScreenTest.\n"
+  covers = ["c-2", "c-5"]
+  depends_on = ["t-1", "t-3"]
+  test_contract = ["ProbeSessionScreen given a sample record shows the foreground package, \"AssistStructure: yes (N nodes)\", \"Screenshot: arrived (WxH)\"; a blocked-screenshot record shows \"Screenshot: blocked\"", "ProbeLogScreen given two records renders two rows + an Export affordance; tapping it invokes csvShareIntent", "csvShareIntent(csv) returns an ACTION_SEND intent with type \"text/csv\" and EXTRA_TEXT == csv (ProbeScreenTest) — a wrong action/MIME/payload fails the test"]
+  status = "done"
+
+[[task]]
+  id = "t-7"
+  wave = 5
+  title = "Wire probe log route into nav graph"
+  files = ["app/src/main/java/dev/equerry/app/MainActivity.kt", "app/src/test/java/dev/equerry/app/NavigationTest.kt"]
+  description = "Add Route.PROBE + composable destination; Home gains a \"Probe log\" entry whose click\nnavigates to Route.PROBE.\n"
+  covers = ["c-5"]
+  depends_on = ["t-5"]
+  test_contract = ["NavigationTest (TestNavHostController) asserts currentDestination?.route == Route.PROBE after clicking the Home \"Probe log\" entry; missing route registration or home entry fails the test"]
+  status = "done"
+
+[[task]]
+  id = "t-8"
+  wave = 5
+  title = "Wire session capture into analyzer + viewmodel"
+  files = ["app/src/main/java/dev/equerry/app/assistant/ProbeCapture.kt", "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSessionService.kt", "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt", "app/src/test/java/dev/equerry/app/assistant/ProbeCaptureTest.kt"]
+  description = "Extract ProbeCapture (testable): given a structure + screenshot meta + package, builds a\nProbeRecord via AssistAnalyzer (t-1) and pushes it to ProbeSessionViewModel (t-3). The\nSession's onHandleAssist/onHandleScreenshot adapt AssistStructure.ViewNode -> ViewNodeLike\nand call ProbeCapture, then show ProbeSessionScreen (t-5).\n"
+  covers = ["c-2", "c-3", "c-4"]
+  depends_on = ["t-1", "t-3", "t-5"]
+  test_contract = ["ProbeCapture.capture(stub structure, stub screenshot meta, pkg) builds a ProbeRecord whose nodeCount == analyzer count and screenshot fields == meta, and pushes it so it appears in ProbeSessionViewModel current-capture + the store (ProbeCaptureTest) — broken capture wiring fails the test", "the ViewNode -> ViewNodeLike adapter over a stub AssistStructure-shaped tree yields the expected countTextNodes result (ProbeCaptureTest)", "MANUAL (verify-time, c-2): perform the assist gesture; Equerry's ProbeSessionScreen appears (not Gemini) showing the live capture — framework/OS-bound, not unit-testable"]
+  status = "done"
+
+[[task]]
+  id = "t-6"
+  wave = 6
+  title = "Register VoiceInteractionService + manifest/xml"
+  files = ["app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionService.kt", "app/src/main/res/xml/voice_interaction_service.xml", "app/src/main/res/xml/recognition_service.xml", "app/src/main/AndroidManifest.xml", "app/src/main/res/values/strings.xml"]
+  description = "VoiceInteractionService declared with BIND_VOICE_INTERACTION + session/recognition\nmetadata so Equerry appears in the Digital-assistant picker. recognition_service.xml\nadvertised for OEM picker compat. xml/manifest reference the session service from t-8.\n"
+  covers = ["c-1"]
+  depends_on = ["t-8"]
+  test_contract = ["assembleDebug/lint confirms the service + xml meta-data parse — broken meta-data or a missing referenced class fails the manifest merge / MissingClass lint", "MANUAL (verify-time, c-1): install debug build; Settings > Default apps > Digital assistant lists \"Equerry\"; selecting it makes it the active assistant — framework/OS-bound, not unit-testable"]
+  status = "done"

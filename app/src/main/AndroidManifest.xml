@@ -18,10 +18,40 @@
         android:theme="@style/Theme.Equerry">
 
         <!--
-          TODO(Phase 0/1): register the VoiceInteractionService + VoiceInteractionSession
-          so Equerry can be set as the system default digital assistant (spec §10).
-          The launcher Activity below is the settings/onboarding entry point.
+          Assistant role (spec §10): the VoiceInteractionService + its session/recognition
+          services let Equerry be set as the system default digital assistant. The launcher
+          Activity below is the settings/onboarding entry point.
         -->
+        <service
+            android:name=".assistant.EquerryVoiceInteractionService"
+            android:label="@string/assist_service_label"
+            android:permission="android.permission.BIND_VOICE_INTERACTION"
+            android:exported="true">
+            <meta-data
+                android:name="android.voice_interaction"
+                android:resource="@xml/voice_interaction_service" />
+            <intent-filter>
+                <action android:name="android.service.voice.VoiceInteractionService" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".assistant.EquerryVoiceInteractionSessionService"
+            android:permission="android.permission.BIND_VOICE_INTERACTION"
+            android:exported="true" />
+
+        <service
+            android:name=".assistant.EquerryRecognitionService"
+            android:permission="android.permission.BIND_RECOGNITION_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.speech.RecognitionService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.speech"
+                android:resource="@xml/recognition_service" />
+        </service>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

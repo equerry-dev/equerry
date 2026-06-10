@@ -27,6 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
+import dev.equerry.app.ui.probe.ProbeLogRoute
 import dev.equerry.app.ui.providers.ProviderEditRoute
 import dev.equerry.app.ui.providers.ProviderListRoute
 import dev.equerry.app.ui.slots.SlotsRoute
@@ -48,6 +49,7 @@ object Route {
     const val HOME = "home"
     const val PROVIDERS = "providers"
     const val SLOTS = "slots"
+    const val PROBE = "probe"
     const val EDIT = "edit"
 }
 
@@ -67,16 +69,19 @@ fun EquerryNavHost(
     slotsContent: @Composable () -> Unit = {
         SlotsRoute(onAddProvider = { navController.navigate(Route.EDIT) })
     },
+    probeContent: @Composable () -> Unit = { ProbeLogRoute() },
 ) {
     NavHost(navController = navController, startDestination = Route.HOME) {
         composable(Route.HOME) {
             HomeScreen(
                 onProviders = { navController.navigate(Route.PROVIDERS) },
                 onSlots = { navController.navigate(Route.SLOTS) },
+                onProbe = { navController.navigate(Route.PROBE) },
             )
         }
         composable(Route.PROVIDERS) { providersContent() }
         composable(Route.SLOTS) { slotsContent() }
+        composable(Route.PROBE) { probeContent() }
         composable(
             route = "${Route.EDIT}?profileId={profileId}",
             arguments = listOf(
@@ -98,7 +103,7 @@ fun EquerryNavHost(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeScreen(onProviders: () -> Unit, onSlots: () -> Unit) {
+private fun HomeScreen(onProviders: () -> Unit, onSlots: () -> Unit, onProbe: () -> Unit) {
     Scaffold(topBar = { TopAppBar(title = { Text("Equerry") }) }) { pad ->
         Column(
             Modifier.padding(pad).padding(16.dp).fillMaxSize(),
@@ -112,6 +117,7 @@ private fun HomeScreen(onProviders: () -> Unit, onSlots: () -> Unit) {
             Spacer(Modifier.height(4.dp))
             HomeEntry("Providers", "Manage your AI backend profiles", onProviders)
             HomeEntry("Capability slots", "Route jobs to your providers", onSlots)
+            HomeEntry("Probe log", "Assist-probe results from each invocation", onProbe)
         }
     }
 }
