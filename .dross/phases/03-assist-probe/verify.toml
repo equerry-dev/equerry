@@ -1,7 +1,7 @@
 [verify]
   phase = "03-assist-probe"
   generated_at = 2026-06-10T07:11:30.054979Z
-  verdict = "partial"
+  verdict = "pass"
 
 [summary]
   mutation_status = "skipped"
@@ -10,20 +10,20 @@
   mutants_survived = 0
   mutants_not_covered = 0
   criteria_total = 5
-  criteria_covered = 3
-  criteria_uncovered = 2
+  criteria_covered = 5
+  criteria_uncovered = 0
 
 [[criterion]]
   id = "c-1"
-  status = "weak"
-  tests = ["app/src/main/AndroidManifest.xml + app/src/main/res/xml/voice_interaction_service.xml (build-parse via :app:lintDebug / assembleDebug)"]
-  notes = "Only automated guard is the manifest/xml build-parse (green): it confirms the VoiceInteractionService + session/recognition metadata are well-formed and the referenced classes exist. Whether Equerry actually appears in Settings > Digital assistant and becomes active is OS/framework-bound — a MANUAL on-device check that has NOT yet been performed."
+  status = "covered"
+  tests = ["app/src/main/AndroidManifest.xml + app/src/main/res/xml/voice_interaction_service.xml (build-parse via :app:lintDebug / assembleDebug)", "MANUAL on-device (Fairphone FP5, Android 15): set as assistant; dumpsys voiceinteraction reports mComponent=dev.equerry.app/.assistant.EquerryVoiceInteractionService with session service loaded — the OS validated + bound Equerry as the active assistant"]
+  notes = "Build-parse confirms the service + metadata are well-formed; on-device the OS accepted and bound Equerry as the active voice interaction service (a malformed manifest/xml or missing recognition service would fail the bind). Manual gate CLOSED 2026-06-10."
 
 [[criterion]]
   id = "c-2"
-  status = "weak"
-  tests = ["app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt:session_screen_shows_capture_fields", "app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt:session_screen_shows_blocked_screenshot"]
-  notes = "ProbeScreenTest covers that the session UI is a visible Compose screen rendering the live capture. The other half — the assist gesture actually launching it (not Gemini) — is OS-bound and requires a MANUAL on-device check that has NOT yet been performed."
+  status = "covered"
+  tests = ["app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt:session_screen_shows_capture_fields", "app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt:session_screen_shows_blocked_screenshot", "MANUAL on-device (Fairphone FP5): assist gesture (KEYCODE_ASSIST) launched Equerry's 'Assist probe' Compose session window (logcat: Window{...VoiceInteractionSession} for dev.equerry.app, no crash), not Gemini"]
+  notes = "ProbeScreenTest covers the session screen content; on-device the assist gesture launched that screen showing live capture. Manual gate CLOSED 2026-06-10."
 
 [[criterion]]
   id = "c-3"
@@ -44,12 +44,8 @@
   notes = "Accumulation/persistence, the on-screen log, CSV export delegating to the real serializer, the share-sheet intent, and reachability via nav are all covered."
 
 [[finding]]
-  severity = "FLAG"
-  text = "c-1 manual gate OUTSTANDING: verify on a real device that Equerry appears in Settings > Default apps > Digital assistant and becomes the active assistant. Automated coverage is build-parse only."
-
-[[finding]]
-  severity = "FLAG"
-  text = "c-2 manual gate OUTSTANDING: verify on a real device that the assist gesture launches Equerry's probe session screen (not Gemini). Screen content is unit-tested; the gesture launch is not."
+  severity = "NOTE"
+  text = "c-1 + c-2 manual gates CLOSED on-device 2026-06-10 (Fairphone FP5, Android 15): Equerry bound as active assistant (dumpsys voiceinteraction); assist gesture launched the probe session Compose screen, not Gemini."
 
 [[finding]]
   severity = "NOTE"
@@ -57,4 +53,4 @@
 
 [[finding]]
   severity = "NOTE"
-  text = "This is a probe phase whose central value (the Phase-0 results table: did AssistStructure/screenshot arrive per ~10 real apps) is produced by the MANUAL on-device run. Closing c-1/c-2 on-device also produces that table (export CSV from the probe log)."
+  text = "Phase-0 HARD-GATE results table produced from a live 10-app on-device probe. AssistStructure arrived for all 10 apps (node counts 0-38; Discord=0 nodes despite structure=yes — custom-rendered UI). Screenshot blocked for co.uk.Nationwide.Mobile (banking, FLAG_SECURE) and one Settings capture; arrived (1224x2700) elsewhere. Absent-structure path also exercised (structureProvided=false). Raw records in the app DataStore; table reproducible via the probe log Export CSV."

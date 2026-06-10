@@ -3,17 +3,9 @@
   "current_milestone": "v0.1",
   "current_phase": "03-assist-probe",
   "current_phase_status": "verified",
-  "last_activity": "2026-06-10T07:13:00.607482Z",
-  "last_action": "verified 03-assist-probe: partial (3/5 covered, 2 weak/manual; mutation skipped)",
+  "last_activity": "2026-06-10T07:25:16.79364Z",
+  "last_action": "verified 03-assist-probe: pass (5/5 covered; c-1/c-2 manual gates closed on-device FP5/A15; Phase-0 10-app table captured)",
   "history": [
-    {
-      "at": "2026-06-09T10:24:32.640319Z",
-      "action": "scoped milestone v0.1: 4 criteria, 4 phases"
-    },
-    {
-      "at": "2026-06-09T14:08:22.429884Z",
-      "action": "created 01-provider-model"
-    },
     {
       "at": "2026-06-09T14:09:22.400051Z",
       "action": "set current_phase=02-provider-model"
@@ -205,6 +197,14 @@
     {
       "at": "2026-06-10T07:13:00.607482Z",
       "action": "verified 03-assist-probe: partial (3/5 covered, 2 weak/manual; mutation skipped)"
+    },
+    {
+      "at": "2026-06-10T07:25:16.787388Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-10T07:25:16.79364Z",
+      "action": "verified 03-assist-probe: pass (5/5 covered; c-1/c-2 manual gates closed on-device FP5/A15; Phase-0 10-app table captured)"
     }
   ]
 }
