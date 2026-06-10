@@ -1,13 +1,9 @@
 {
   "version": "0.1.0.2",
   "current_milestone": "v0.1",
-  "last_activity": "2026-06-10T13:11:11.93982Z",
-  "last_action": "completed 04-chat-drivers",
+  "last_activity": "2026-06-10T13:11:20.080714Z",
+  "last_action": "shipped 04-chat-drivers → https://github.com/equerry-dev/equerry/pull/3 (merged af22e22, preserve-commit merge)",
   "history": [
-    {
-      "at": "2026-06-09T19:45:24.336557Z",
-      "action": "spec locked: 03-assist-probe"
-    },
     {
       "at": "2026-06-10T05:19:50.860174Z",
       "action": "set current_phase_status=planned"
@@ -203,6 +199,10 @@
     {
       "at": "2026-06-10T13:11:11.93982Z",
       "action": "completed 04-chat-drivers"
+    },
+    {
+      "at": "2026-06-10T13:11:20.080714Z",
+      "action": "shipped 04-chat-drivers → https://github.com/equerry-dev/equerry/pull/3 (merged af22e22, preserve-commit merge)"
     }
   ]
 }
