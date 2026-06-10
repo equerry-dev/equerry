@@ -1,0 +1,90 @@
+[phase]
+id        = "06-tools-actions"
+title     = "Tool-calling actions (timers, alarms, calendar, messaging)"
+milestone = "v0.1"
+
+[[criteria]]
+id   = "c-1"
+text = "A chat message (typed or voice-transcribed) asking for a supported action makes the CHAT provider return a structured tool call, and Equerry acts on it rather than only replying in prose."
+
+[[criteria]]
+id   = "c-2"
+text = "A timer/alarm request stages a 'Start now?' prompt (one-tap Start/Cancel card, plus a spoken 'Start now?' + yes/no listen in a voice session); it fires only on tap-or-spoken-yes, and Cancel/no discards."
+
+[[criteria]]
+id   = "c-3"
+text = "Calendar/email/SMS requests open the corresponding system app pre-filled with the model's proposed content (event title+time; recipient/subject/body); Equerry never sends or saves — the user commits in that app (r-02)."
+
+[[criteria]]
+id   = "c-4"
+text = "Each of the five tools (set timer, set alarm, create calendar event, draft email, draft SMS) works end-to-end from a typed or spoken request, with the model-proposed details correctly populated."
+
+[[criteria]]
+id   = "c-5"
+text = "When the mapped CHAT provider/model can't do tool calls (or returns a malformed tool call), Equerry shows clear in-UI guidance — no crash, no silently-dropped request."
+
+[[criteria]]
+id   = "c-6"
+text = "A single request asking for several actions produces multiple actions, each handled per its type (fired/staged or handed-off), not just the first."
+
+[[decisions]]
+key    = "handoff_execution"
+choice = "Calendar/email/SMS execute by opening the system app pre-filled (ACTION_INSERT for calendar; ACTION_SENDTO/mailto/sms for messaging) directly on the tool call — no Equerry preview card. Equerry never sends or saves; the user reviews/edits and commits in the target app."
+why    = "r-02: the model stages, the human commits. Launching a pre-filled compose is not itself side-effecting, so the target app's own send/save IS the human gate — no in-app side-effect machinery needed. Matches the user's intent that the final send happens in the real app."
+locked = true
+
+[[decisions]]
+key    = "timer_alarm_confirm"
+choice = "Timer/alarm always stage a 'Start now?' prompt: a one-tap Start/Cancel card, and in a voice session also spoken aloud with a narrow yes/no listen. Fires only on tap-or-spoken-yes. No separate confirm_first param (always-ask supersedes it). Listen safeguards: narrow grammar, wait for the TTS prompt to finish before listening, timeout leaves it staged as a tappable card."
+why    = "An in-app confirm catches a misheard value before firing and keeps an explicit tap, so it matches the milestone's 'executes only after an in-app confirmation tap' with no divergence. Always-ask is simpler than a per-request flag."
+locked = true
+
+[[decisions]]
+key    = "benign_voice_confirm"
+choice = "Spoken confirmation is accepted only for benign, reversible, on-device actions (timer/alarm). Irreversible/outward actions (email/SMS) are never voice-committed — they hand off to the system app where the user taps send."
+why    = "Timer/alarm fall outside r-02's 'send/post/irreversible' scope, so a spoken 'yes' there doesn't touch the hard rule. Restricting voice-confirm to benign actions keeps r-02 unchanged while enabling hands-free confirm where it's safe."
+locked = true
+
+[[decisions]]
+key    = "tool_scope"
+choice = "Five tools this phase: set_timer, set_alarm, create_calendar_event, draft_email, draft_sms."
+why    = "Matches the milestone success criterion exactly (timer/alarm, calendar event, draft email/SMS); no broader toolset this phase."
+locked = true
+
+[[decisions]]
+key    = "multi_action"
+choice = "A single action direct-launches/fires as above. A request yielding several actions posts a pending-actions list in the transcript — each a tap-to-run entry (timer/alarm shows Start, hand-offs show Open) — runnable in any order and individually skippable."
+why    = "Only one app can open at a time, so a batch can't all fire at once; a list lets the user control order and skip any, satisfying c-6 without forcing a sequence."
+locked = true
+
+[[decisions]]
+key    = "unsupported_provider_ux"
+choice = "When the mapped CHAT provider is known tool-incapable, a passive banner sits on the chat screen ('Actions need a tool-capable provider' + Change-in-Settings link). On a failed/malformed action attempt, Equerry adds a one-line note with a Settings link. Tool capability is judged best-effort at the driver level."
+why    = "Tells the user before they ask and degrades gracefully on failure (c-5). Per-model tool support isn't always knowable, so capability is driver-level and best-effort rather than guaranteed."
+locked = true
+
+[[decisions]]
+key    = "action_followup"
+choice = "After firing/opening, Equerry posts its own deterministic factual note of what it did ('Timer started — 5:00', 'Opened Messages to Mum (you send it)') — never 'sent'. The model is not called again with a tool result."
+why    = "For hand-offs Equerry can't observe whether the user actually sent, so the model must never claim a send. A deterministic note is honest, cheap, and avoids a second round-trip."
+locked = true
+
+[[deferred]]
+text = "Voice-confirm as a commit gate for irreversible/outward actions (email/SMS)."
+why  = "Would require amending r-02 (tap-only). Out of scope; benign voice-confirm covers timer/alarm only."
+
+[[deferred]]
+text = "In-app editing of a staged action's content before hand-off."
+why  = "Direct-launch was chosen; edits happen in the target app's own editor. Would duplicate that UI."
+
+[[deferred]]
+text = "Model conversational follow-up about actions (feeding a tool-result back so the model acknowledges)."
+why  = "Deterministic note chosen instead — avoids a second model call and the risk of fabricating an unknown outcome."
+
+[[deferred]]
+text = "Additional tool types beyond the five (web search, reminders, notes, contacts/maps, music, etc.)."
+why  = "v0.1 ships exactly the five in the milestone criterion; the tool-registration plumbing makes adding more cheap later."
+
+[[deferred]]
+text = "Action history/log, undo, scheduling actions for later, and model-driven multi-step action chains."
+why  = "All premature for v0.1; revisit once the single-turn staging flow is proven."

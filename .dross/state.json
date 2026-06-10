@@ -1,21 +1,11 @@
 {
   "version": "0.1.5.3",
   "current_milestone": "v0.1",
-  "last_activity": "2026-06-10T17:42:20.193996Z",
-  "last_action": "quick: add mic button to chat for the voice round-trip",
+  "current_phase": "06-tools-actions",
+  "current_phase_status": "created",
+  "last_activity": "2026-06-10T18:30:55.338217Z",
+  "last_action": "spec locked: 06-tools-actions",
   "history": [
-    {
-      "at": "2026-06-10T08:49:28.222472Z",
-      "action": "executed t-2 (Pure error mapper for failed requests)"
-    },
-    {
-      "at": "2026-06-10T08:52:52.084365Z",
-      "action": "executed t-3 (Key-redaction util + redacting OkHttp client)"
-    },
-    {
-      "at": "2026-06-10T08:53:49.405215Z",
-      "action": "executed t-4 (In-memory session history holder)"
-    },
     {
       "at": "2026-06-10T08:56:40.64863Z",
       "action": "executed t-5 (Add request-params fields to profile + store + repo)"
@@ -203,6 +193,18 @@
     {
       "at": "2026-06-10T17:42:20.193996Z",
       "action": "quick: add mic button to chat for the voice round-trip"
+    },
+    {
+      "at": "2026-06-10T17:53:45.76256Z",
+      "action": "created 06-tools-actions"
+    },
+    {
+      "at": "2026-06-10T18:30:55.33003Z",
+      "action": "set current_phase=06-tools-actions"
+    },
+    {
+      "at": "2026-06-10T18:30:55.338217Z",
+      "action": "spec locked: 06-tools-actions"
     }
   ]
 }
