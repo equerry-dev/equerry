@@ -41,12 +41,18 @@ class ProfileStore(private val dataStore: DataStore<Preferences>) {
         val type: String,
         val baseUrl: String,
         val model: String,
+        // Optional request params — nullable with defaults so profiles written before this field
+        // existed still decode (combined with ignoreUnknownKeys below).
+        val systemPrompt: String? = null,
+        val temperature: Double? = null,
+        val maxTokens: Int? = null,
     )
 
-    private fun ProviderProfile.toStored() = StoredProfile(id, label, type.name, baseUrl, model)
+    private fun ProviderProfile.toStored() =
+        StoredProfile(id, label, type.name, baseUrl, model, systemPrompt, temperature, maxTokens)
 
     private fun StoredProfile.toDomain() =
-        ProviderProfile(id, label, ProviderType.valueOf(type), baseUrl, model)
+        ProviderProfile(id, label, ProviderType.valueOf(type), baseUrl, model, systemPrompt, temperature, maxTokens)
 
     private companion object {
         val KEY = stringPreferencesKey("profiles_json")

@@ -1,7 +1,7 @@
 package dev.equerry.app.providers
 
 /** A field on the create/edit form that validation can flag. */
-enum class ProfileField { LABEL, BASE_URL, KEY, MODEL }
+enum class ProfileField { LABEL, BASE_URL, KEY, MODEL, TEMPERATURE, MAX_TOKENS }
 
 /** A single validation failure tied to the [field] that the UI should mark. */
 data class FieldError(val field: ProfileField, val message: String)
@@ -28,6 +28,13 @@ object ProfileValidator {
         }
         if (draft.model.isBlank()) {
             errors += FieldError(ProfileField.MODEL, "Choose or enter a model.")
+        }
+        // Request params are optional (blank = provider default), but if given they must be numeric.
+        if (draft.temperature.isNotBlank() && draft.temperature.toDoubleOrNull() == null) {
+            errors += FieldError(ProfileField.TEMPERATURE, "Temperature must be a number.")
+        }
+        if (draft.maxTokens.isNotBlank() && draft.maxTokens.toIntOrNull() == null) {
+            errors += FieldError(ProfileField.MAX_TOKENS, "Max tokens must be a whole number.")
         }
 
         return errors

@@ -66,6 +66,26 @@ class ProviderRepositoryTest {
     }
 
     @Test
+    fun addProfile_carries_request_params_and_still_keeps_key_out_of_payload() = withRepo { repo, secret, dataStore ->
+        val draftWithParams = ProfileDraft(
+            label = "Tuned", type = ProviderType.ANTHROPIC, baseUrl = "https://api.anthropic.com",
+            key = "sk-secret-xyz", model = "claude-sonnet-4-6",
+            systemPrompt = "be brief", temperature = "0.7", maxTokens = "512",
+        )
+
+        val created = repo.addProfile(draftWithParams)
+        val loaded = repo.observeProfiles().first().first { it.id == created.id }
+
+        assertEquals("be brief", loaded.systemPrompt)
+        assertEquals(0.7, loaded.temperature!!, 0.0001)
+        assertEquals(512, loaded.maxTokens)
+        // The key is still split off to the secret store, never the JSON payload.
+        assertEquals("sk-secret-xyz", secret.getKey(created.id))
+        val rawJson = dataStore.data.first()[stringPreferencesKey("profiles_json")]
+        assertFalse("API key must not appear in the profile payload", rawJson!!.contains("sk-secret-xyz"))
+    }
+
+    @Test
     fun deleteProfile_removes_secret_and_clears_chat_mapping() = withRepo { repo, secret, _ ->
         val created = repo.addProfile(draft())
         repo.setChatSlot(created.id)
