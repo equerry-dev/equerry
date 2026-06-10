@@ -1,4 +1,4 @@
-phases = ["00-assist-probe", "01-provider-model", "02-chat-drivers", "03-voice-roundtrip"]
+phases = ["02-provider-model", "03-assist-probe", "04-chat-drivers", "05-voice-roundtrip"]
 
 [milestone]
   version = "v0.1"
