@@ -1,0 +1,159 @@
+[verify]
+  phase = "04-chat-drivers"
+  generated_at = 2026-06-10T12:12:25.938574Z
+  verdict = "partial"
+
+[summary]
+  mutation_status = "skipped"
+  mutation_score = 0.0
+  mutants_killed = 0
+  mutants_survived = 0
+  mutants_not_covered = 0
+  criteria_total = 5
+  criteria_covered = 3
+  criteria_uncovered = 2
+
+[[criterion]]
+  id = "c-1"
+  status = "weak"
+  tests = [
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:live_tokens_append_to_the_growing_assistant_bubble",
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatDriverTest.kt:openai_stream_concatenates_to_the_reply_and_keeps_key_in_header_not_path",
+  ]
+  notes = "Reply reaches the rendered transcript state (VM test asserts the assistant bubble content) and the driver e2e proves a real stream becomes the reply. But no Compose test asserts ChatScreen actually renders the transcript as bubbles — a broken MessageBubble would not fail any test."
+
+[[criterion]]
+  id = "c-2"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatDriverTest.kt:openai_stream_concatenates_to_the_reply_and_keeps_key_in_header_not_path",
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatDriverTest.kt:anthropic_stream_concatenates_to_the_reply_with_key_in_x_api_key",
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatDriverTest.kt:ollama_ndjson_stream_concatenates_to_the_reply_and_sends_no_auth_header",
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatDriverFactoryTest.kt:openRouterUsesOpenAiDriver",
+    "app/src/test/java/dev/equerry/app/providers/drivers/SseTokenParserTest.kt",
+    "app/src/test/java/dev/equerry/app/providers/drivers/OllamaStreamParserTest.kt",
+  ]
+  notes = "Ollama/Anthropic/OpenAI-compatible each have a MockWebServer e2e stream test. OpenRouter is covered transitively: the factory test proves it routes through the OpenAI driver (ProviderType.driverType), which has the e2e + parser/builder coverage."
+
+[[criterion]]
+  id = "c-3"
+  status = "weak"
+  tests = [
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:unmapped_send_sets_guidance_and_never_calls_the_driver",
+  ]
+  notes = "The behavioural core is well covered: with no CHAT mapping, send() sets the guidance flag, never calls the driver (server.requestCount==0), and does not crash. But no Compose test asserts the guidance banner itself renders — the 'shows in-UI guidance' rendering is verified only at the state layer."
+
+[[criterion]]
+  id = "c-4"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:a_failed_request_renders_a_keyless_error",
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatErrorMapperTest.kt:mapped_message_never_contains_a_key_even_when_the_input_does",
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatModelsTest.kt:errorMessageNeverContainsKey",
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatHttpClientTest.kt:key_never_in_logged_request",
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatHttpClientTest.kt:logging_is_live",
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatDriverTest.kt:a_401_surfaces_chat_error_auth",
+  ]
+  notes = "Failure path is defended in depth: 401->Auth surfaces a readable error in the VM state, and key-never-leaks is asserted at the model, mapper, redaction/logging, builder and recorded-request layers."
+
+[[criterion]]
+  id = "c-5"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:second_send_carries_the_first_turn_as_context",
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatSessionTest.kt:request_carries_prior_turns_in_order_with_system_prompt_first",
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatRequestBuilderTest.kt:openai_sets_streaming_and_carries_every_prior_turn",
+  ]
+  notes = "The second send's request body (via MockWebServer) carries the first user+assistant turns; session ordering and builder turn-carry are unit-tested too."
+
+[[finding]]
+  severity = "FLAG"
+  text = "ChatScreen.kt has no Compose UI test, unlike ProviderEditScreen/ProbeScreen. c-1's transcript-bubble rendering and c-3's guidance-banner rendering are verified only at the ViewModel/state layer — a rendering regression would not fail any test. Add a Robolectric ChatScreen test (sent message + reply bubble appear; banner shows when unmapped)."
+
+[[finding]]
+  severity = "NOTE"
+  text = "mutation skipped: no Kotlin mutation adapter — verdict is based on criterion coverage alone (consistent with phases 02/03)."
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/MainActivity.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/data/ProfileStore.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/di/RepositoryModule.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/ProfileValidator.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/ChatDriver.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/ChatDriverFactory.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/ChatErrorMapper.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/ChatHttpClient.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/ChatMessage.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/ChatModels.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/ChatRequestBuilder.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/ChatSession.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/KeyRedaction.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/OllamaStreamParser.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/SseTokenParser.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt: no mutation adapter for .kt"

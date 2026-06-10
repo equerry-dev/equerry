@@ -1,0 +1,91 @@
+{
+  "phase": "04-chat-drivers",
+  "generated_at": "2026-06-10T12:12:25.938574Z",
+  "languages": null,
+  "skipped": [
+    {
+      "file": "app/src/main/java/dev/equerry/app/MainActivity.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/data/ProfileStore.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/di/RepositoryModule.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/ProfileValidator.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/ChatDriver.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/ChatDriverFactory.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/ChatErrorMapper.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/ChatHttpClient.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/ChatMessage.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/ChatModels.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/ChatRequestBuilder.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/ChatSession.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/KeyRedaction.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/OllamaStreamParser.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/SseTokenParser.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt",
+      "reason": "no mutation adapter for .kt"
+    }
+  ]
+}
