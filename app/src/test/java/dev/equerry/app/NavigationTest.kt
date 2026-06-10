@@ -36,6 +36,7 @@ class NavigationTest {
                     navController = nav,
                     providersContent = { Text("providers-stub") },
                     slotsContent = { Text("slots-stub") },
+                    probeContent = { Text("probe-stub") },
                 )
             }
         }
@@ -62,6 +63,15 @@ class NavigationTest {
         compose.onNodeWithText("Capability slots").performClick()
         compose.runOnIdle {
             assertEquals(Route.SLOTS, nav.currentDestination?.route)
+        }
+    }
+
+    @Test
+    fun home_navigates_to_the_probe_log_route() {
+        setGraph()
+        compose.onNodeWithText("Probe log").performClick()
+        compose.runOnIdle {
+            assertEquals(Route.PROBE, nav.currentDestination?.route)
         }
     }
 }
