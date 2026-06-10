@@ -108,3 +108,14 @@
   depends_on = ["t-4", "t-9"]
   test_contract = ["if live tokens do not append to the growing assistant bubble, ChatViewModelTest's streaming-append assertion fails (c-1)", "if send() with no CHAT mapping calls the driver or crashes instead of setting the guidance flag, ChatViewModelTest's unmapped-guard assertion fails (c-3)", "if a second send drops the first turn, ChatViewModelTest's session-carry assertion fails (c-5); if newChat() does not clear, its reset assertion fails", "if a ChatError renders non-readable or leaks the key, ChatViewModelTest's keyless-error-bubble assertion fails (c-4)", "if Home cannot navigate to Route.CHAT, NavigationTest's chatContent assertion fails"]
   status = "done"
+
+[[task]]
+  id = "t-11"
+  wave = 4
+  title = "ChatScreen Compose render test"
+  files = ["app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt"]
+  description = "Add a Robolectric Compose test for the stateless ChatScreen: transcript bubbles render their\ntext, the guidance banner shows only when unmapped, and a set error renders. Closes the verify\nFLAG that c-1/c-3 rendering was unverified at the UI layer. No production change.\n"
+  covers = ["c-1", "c-3"]
+  depends_on = ["t-10"]
+  test_contract = ["if MessageBubble stops rendering message content, ChatScreenTest's transcript-renders assertion fails (c-1)", "if the guidance banner does not render when unmapped (or renders when a provider is mapped), ChatScreenTest's guidance assertions fail (c-3)"]
+  status = "done"

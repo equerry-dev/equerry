@@ -2,22 +2,10 @@
   "version": "0.1.0.2",
   "current_milestone": "v0.1",
   "current_phase": "04-chat-drivers",
-  "current_phase_status": "verified",
-  "last_activity": "2026-06-10T12:14:56.823737Z",
-  "last_action": "verified 04-chat-drivers: partial (3/5 covered, 2 weak; mutation skipped — Kotlin)",
+  "current_phase_status": "complete",
+  "last_activity": "2026-06-10T12:51:29.284267Z",
+  "last_action": "phase 04-chat-drivers re-executed (11/11 done); t-11 added ChatScreen render test — re-verify pending",
   "history": [
-    {
-      "at": "2026-06-09T18:53:06.87486Z",
-      "action": "set current_phase_status=verified"
-    },
-    {
-      "at": "2026-06-09T18:53:06.882344Z",
-      "action": "verified 02-provider-model: pass (6/6 covered; mutation skipped — no Kotlin adapter)"
-    },
-    {
-      "at": "2026-06-09T18:59:30.024363Z",
-      "action": "shipped 02-provider-model → https://github.com/equerry-dev/equerry/pull/1"
-    },
     {
       "at": "2026-06-09T19:30:40.832175Z",
       "action": "completed 02-provider-model"
@@ -205,6 +193,18 @@
     {
       "at": "2026-06-10T12:14:56.823737Z",
       "action": "verified 04-chat-drivers: partial (3/5 covered, 2 weak; mutation skipped — Kotlin)"
+    },
+    {
+      "at": "2026-06-10T12:51:17.342107Z",
+      "action": "executed t-11 (ChatScreen Compose render test; closes verify FLAG)"
+    },
+    {
+      "at": "2026-06-10T12:51:29.27802Z",
+      "action": "set current_phase_status=complete"
+    },
+    {
+      "at": "2026-06-10T12:51:29.284267Z",
+      "action": "phase 04-chat-drivers re-executed (11/11 done); t-11 added ChatScreen render test — re-verify pending"
     }
   ]
 }
