@@ -5,6 +5,7 @@ import dev.equerry.app.data.TurnControl
 import dev.equerry.app.data.VoiceSettingsStore
 import dev.equerry.app.providers.drivers.ChatRole
 import dev.equerry.app.ui.chat.ChatViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,12 +37,18 @@ class VoiceFlowController(
     private val settings: VoiceSettingsStore,
     private val scope: CoroutineScope,
     private val isMicGranted: () -> Boolean,
+    private val isChatConfigured: suspend () -> Boolean = { true },
 ) {
 
     private val _state = MutableStateFlow(VoiceFlowState.Idle)
     val state: StateFlow<VoiceFlowState> = _state.asStateFlow()
 
+    /** The current failure guidance, or null when none. The single surface for every failure mode (c-5). */
+    private val _guidance = MutableStateFlow<VoiceGuidance?>(null)
+    val guidance: StateFlow<VoiceGuidance?> = _guidance.asStateFlow()
+
     private var job: Job? = null
+    private var ttsReady = false
 
     /**
      * Begin the listen→send→speak loop. No-op while a turn is already running (the active-job guard
@@ -51,37 +58,54 @@ class VoiceFlowController(
     fun start() {
         if (job?.isActive == true) return
         job = scope.launch {
-            if (!isMicGranted()) {
-                // Guidance for the denied state is routed by t-11; here we simply never arm STT.
-                _state.value = VoiceFlowState.Idle
-                return@launch
-            }
-            tts.init()
-            do {
-                _state.value = VoiceFlowState.Listening
-
-                var finalText: String? = null
-                stt.listen().collect { event ->
-                    when (event) {
-                        is SttEvent.Partial -> _state.value = VoiceFlowState.Transcribing
-                        is SttEvent.Final -> {
-                            finalText = event.text
-                            _state.value = VoiceFlowState.Transcribing
-                        }
-                        SttEvent.EndOfSpeech -> _state.value = VoiceFlowState.Transcribing
-                        is SttEvent.Error -> Unit // routed in t-11
-                    }
+            try {
+                // Pre-flight: never arm STT if the mic is denied or no provider is mapped.
+                if (!isMicGranted()) {
+                    _guidance.value = VoiceGuidanceFactory.micDenied()
+                    _state.value = VoiceFlowState.Idle
+                    return@launch
                 }
+                if (!isChatConfigured()) {
+                    _guidance.value = VoiceGuidanceFactory.noChatProvider()
+                    _state.value = VoiceFlowState.Idle
+                    return@launch
+                }
+                ttsReady = tts.init() == TtsInitResult.Ready
+                do {
+                    _guidance.value = null
+                    _state.value = VoiceFlowState.Listening
 
-                // The STT flow has completed — speech ended. Auto-send the recognized text.
-                val text = finalText
-                if (text.isNullOrBlank()) break
-                sendAndSpeak(text)
-                // Re-arm for a follow-up only once the prior turn has fully settled (above), so the
-                // mic is never armed twice for one turn.
-                val turn = settings.turnControl().first()
-            } while (turn == TurnControl.CONTINUOUS && isActive)
-            _state.value = VoiceFlowState.Idle
+                    var finalText: String? = null
+                    var sttError: SttError? = null
+                    stt.listen().collect { event ->
+                        when (event) {
+                            is SttEvent.Partial -> _state.value = VoiceFlowState.Transcribing
+                            is SttEvent.Final -> {
+                                finalText = event.text
+                                _state.value = VoiceFlowState.Transcribing
+                            }
+                            SttEvent.EndOfSpeech -> _state.value = VoiceFlowState.Transcribing
+                            is SttEvent.Error -> sttError = event.error
+                        }
+                    }
+
+                    // The STT flow has completed — speech ended (or errored).
+                    sttError?.let { _guidance.value = VoiceGuidanceFactory.sttError(it) }
+                    val text = finalText
+                    if (text.isNullOrBlank()) break
+                    sendAndSpeak(text)
+                    // Re-arm for a follow-up only once the prior turn has fully settled (above), so
+                    // the mic is never armed twice for one turn.
+                    val turn = settings.turnControl().first()
+                } while (turn == TurnControl.CONTINUOUS && isActive)
+                _state.value = VoiceFlowState.Idle
+            } catch (c: CancellationException) {
+                throw c // dismissal — let stop()'s cancellation propagate
+            } catch (e: Exception) {
+                // Never throw to the framework session; surface a generic guidance instead (c-5).
+                _guidance.value = VoiceGuidance("Something went wrong with the voice session.")
+                _state.value = VoiceFlowState.Idle
+            }
         }
     }
 
@@ -108,8 +132,9 @@ class VoiceFlowController(
         chat.state
             .onEach { ui ->
                 if (ui.streaming) sawStreaming = true
-                // Feed newly-streamed text to the chunker for sentence-by-sentence speaking.
-                if (timing == SpeakTiming.SENTENCE_BY_SENTENCE) {
+                // Feed newly-streamed text to the chunker for sentence-by-sentence speaking (only
+                // when TTS is usable — a failed engine must not block the round-trip).
+                if (ttsReady && timing == SpeakTiming.SENTENCE_BY_SENTENCE) {
                     val assistant = ui.transcript.lastOrNull { it.role == ChatRole.ASSISTANT }?.content.orEmpty()
                     if (assistant.length > spokenSoFar.length) {
                         val delta = assistant.substring(spokenSoFar.length)
@@ -121,18 +146,29 @@ class VoiceFlowController(
             .first { sawStreaming && !it.streaming && (it.lastReply != null || it.error != null || it.unmapped) }
 
         val finalUi = chat.state.value
-        if (finalUi.error != null || finalUi.unmapped) {
-            // The reply failed or no provider is mapped — guidance is t-11's job; do not speak.
-            _state.value = VoiceFlowState.Idle
-            return
+        when {
+            finalUi.unmapped -> {
+                _guidance.value = VoiceGuidanceFactory.noChatProvider()
+                _state.value = VoiceFlowState.Idle
+                return
+            }
+            // Stream failed mid-reply: show the key-free error, keep the partial reply, never speak it.
+            finalUi.error != null -> {
+                _guidance.value = VoiceGuidanceFactory.replyError(finalUi.error)
+                _state.value = VoiceFlowState.Idle
+                return
+            }
         }
 
         _state.value = VoiceFlowState.Speaking
-        if (timing == SpeakTiming.SENTENCE_BY_SENTENCE) {
+        if (!ttsReady) {
+            // The reply is already rendered in the transcript; we just can't speak it (c-5).
+            _guidance.value = VoiceGuidanceFactory.ttsUnavailable()
+        } else if (timing == SpeakTiming.SENTENCE_BY_SENTENCE) {
             chunker.finish().forEach { tts.speak(it) }
         } else {
             finalUi.lastReply?.let { tts.speak(it) }
         }
-        _state.value = VoiceFlowState.Idle // continuous re-arm is added in t-8
+        _state.value = VoiceFlowState.Idle
     }
 }
