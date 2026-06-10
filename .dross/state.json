@@ -1,21 +1,11 @@
 {
   "version": "0.1.0.2",
   "current_milestone": "v0.1",
-  "last_activity": "2026-06-10T07:34:56.534787Z",
-  "last_action": "completed 03-assist-probe",
+  "current_phase": "04-chat-drivers",
+  "current_phase_status": "created",
+  "last_activity": "2026-06-10T07:47:13.617061Z",
+  "last_action": "spec locked: 04-chat-drivers",
   "history": [
-    {
-      "at": "2026-06-09T14:33:25.604444Z",
-      "action": "set current_phase=02-provider-model"
-    },
-    {
-      "at": "2026-06-09T14:33:25.610225Z",
-      "action": "spec locked: 02-provider-model"
-    },
-    {
-      "at": "2026-06-09T15:00:57.28893Z",
-      "action": "set current_phase_status=planned"
-    },
     {
       "at": "2026-06-09T15:00:57.296342Z",
       "action": "plan locked: 02-provider-model (10 tasks across 6 waves)"
@@ -203,6 +193,18 @@
     {
       "at": "2026-06-10T07:34:56.534787Z",
       "action": "completed 03-assist-probe"
+    },
+    {
+      "at": "2026-06-10T07:37:58.801868Z",
+      "action": "created 04-chat-drivers"
+    },
+    {
+      "at": "2026-06-10T07:47:13.610041Z",
+      "action": "set current_phase=04-chat-drivers"
+    },
+    {
+      "at": "2026-06-10T07:47:13.617061Z",
+      "action": "spec locked: 04-chat-drivers"
     }
   ]
 }
