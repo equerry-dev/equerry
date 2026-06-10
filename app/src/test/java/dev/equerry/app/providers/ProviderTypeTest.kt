@@ -44,6 +44,15 @@ class ProviderTypeTest {
     }
 
     @Test
+    fun tool_capability_is_true_for_all_types_except_ollama() {
+        // Flip any row and this fails. Ollama is best-effort incapable (unsupported_provider_ux).
+        assertTrue(ProviderType.ANTHROPIC.supportsTools)
+        assertTrue(ProviderType.OPENAI_COMPATIBLE.supportsTools)
+        assertTrue(ProviderType.OPENROUTER.supportsTools)
+        assertFalse(ProviderType.OLLAMA.supportsTools)
+    }
+
+    @Test
     fun only_chat_slot_is_active() {
         assertTrue(CapabilitySlot.CHAT.active)
         val others = CapabilitySlot.entries.filter { it != CapabilitySlot.CHAT }
