@@ -37,6 +37,7 @@ class NavigationTest {
                     providersContent = { Text("providers-stub") },
                     slotsContent = { Text("slots-stub") },
                     probeContent = { Text("probe-stub") },
+                    chatContent = { Text("chat-stub") },
                 )
             }
         }
@@ -72,6 +73,15 @@ class NavigationTest {
         compose.onNodeWithText("Probe log").performClick()
         compose.runOnIdle {
             assertEquals(Route.PROBE, nav.currentDestination?.route)
+        }
+    }
+
+    @Test
+    fun home_navigates_to_the_chat_route() {
+        setGraph()
+        compose.onNodeWithText("Chat").performClick()
+        compose.runOnIdle {
+            assertEquals(Route.CHAT, nav.currentDestination?.route)
         }
     }
 }
