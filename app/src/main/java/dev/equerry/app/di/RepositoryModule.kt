@@ -8,6 +8,8 @@ import dev.equerry.app.data.ProfileStore
 import dev.equerry.app.data.SecretStore
 import dev.equerry.app.data.SlotMappingStore
 import dev.equerry.app.providers.ProviderRepository
+import dev.equerry.app.providers.drivers.ChatHttpClient
+import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
 @Module
@@ -21,4 +23,9 @@ object RepositoryModule {
         secretStore: SecretStore,
         slotMappingStore: SlotMappingStore,
     ): ProviderRepository = ProviderRepository(profileStore, secretStore, slotMappingStore)
+
+    /** The single shared, key-redacting OkHttp client every chat driver streams through (t-3). */
+    @Provides
+    @Singleton
+    fun provideChatHttpClient(): OkHttpClient = ChatHttpClient.create()
 }
