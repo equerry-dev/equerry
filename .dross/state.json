@@ -1,17 +1,9 @@
 {
-  "version": "0.1.5.1",
+  "version": "0.1.5.2",
   "current_milestone": "v0.1",
-  "last_activity": "2026-06-10T17:28:39.554245Z",
-  "last_action": "quick: permit cleartext HTTP for user-configured providers",
+  "last_activity": "2026-06-10T17:35:08.865562Z",
+  "last_action": "quick: wait for TTS to finish before re-arming the mic",
   "history": [
-    {
-      "at": "2026-06-10T08:23:21.310209Z",
-      "action": "plan locked (panel): 04-chat-drivers (10 tasks across 4 waves)"
-    },
-    {
-      "at": "2026-06-10T08:25:19.290634Z",
-      "action": "plan reviewed: 04-chat-drivers (0 blocking, 4 flags)"
-    },
     {
       "at": "2026-06-10T08:42:07.363242Z",
       "action": "plan amended per review: 04-chat-drivers (10 tasks across 4 waves; t-6/t-7 parsers merged, t-10 split, t-5 +repo, t-3 logging-live contract)"
@@ -203,6 +195,14 @@
     {
       "at": "2026-06-10T17:28:39.554245Z",
       "action": "quick: permit cleartext HTTP for user-configured providers"
+    },
+    {
+      "at": "2026-06-10T17:35:08.858251Z",
+      "action": "bump internal 0.1.5.1 → 0.1.5.2"
+    },
+    {
+      "at": "2026-06-10T17:35:08.865562Z",
+      "action": "quick: wait for TTS to finish before re-arming the mic"
     }
   ]
 }
