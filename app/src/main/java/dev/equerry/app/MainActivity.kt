@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +35,7 @@ import dev.equerry.app.ui.providers.ProviderEditRoute
 import dev.equerry.app.ui.providers.ProviderListRoute
 import dev.equerry.app.ui.slots.SlotsRoute
 import dev.equerry.app.ui.theme.EquerryTheme
+import dev.equerry.app.ui.voicesettings.VoiceSettingsRoute
 
 /** Settings / onboarding host. Owns the navigation graph over the provider + slot screens. */
 @AndroidEntryPoint
@@ -52,6 +55,7 @@ object Route {
     const val SLOTS = "slots"
     const val PROBE = "probe"
     const val CHAT = "chat"
+    const val VOICE = "voice"
     const val EDIT = "edit"
 }
 
@@ -73,6 +77,7 @@ fun EquerryNavHost(
     },
     probeContent: @Composable () -> Unit = { ProbeLogRoute() },
     chatContent: @Composable () -> Unit = { ChatRoute() },
+    voiceContent: @Composable () -> Unit = { VoiceSettingsRoute() },
 ) {
     NavHost(navController = navController, startDestination = Route.HOME) {
         composable(Route.HOME) {
@@ -81,12 +86,14 @@ fun EquerryNavHost(
                 onSlots = { navController.navigate(Route.SLOTS) },
                 onProbe = { navController.navigate(Route.PROBE) },
                 onChat = { navController.navigate(Route.CHAT) },
+                onVoice = { navController.navigate(Route.VOICE) },
             )
         }
         composable(Route.PROVIDERS) { providersContent() }
         composable(Route.SLOTS) { slotsContent() }
         composable(Route.PROBE) { probeContent() }
         composable(Route.CHAT) { chatContent() }
+        composable(Route.VOICE) { voiceContent() }
         composable(
             route = "${Route.EDIT}?profileId={profileId}",
             arguments = listOf(
@@ -108,10 +115,16 @@ fun EquerryNavHost(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeScreen(onProviders: () -> Unit, onSlots: () -> Unit, onProbe: () -> Unit, onChat: () -> Unit) {
+private fun HomeScreen(
+    onProviders: () -> Unit,
+    onSlots: () -> Unit,
+    onProbe: () -> Unit,
+    onChat: () -> Unit,
+    onVoice: () -> Unit,
+) {
     Scaffold(topBar = { TopAppBar(title = { Text("Equerry") }) }) { pad ->
         Column(
-            Modifier.padding(pad).padding(16.dp).fillMaxSize(),
+            Modifier.padding(pad).padding(16.dp).fillMaxSize().verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
@@ -124,6 +137,7 @@ private fun HomeScreen(onProviders: () -> Unit, onSlots: () -> Unit, onProbe: ()
             HomeEntry("Providers", "Manage your AI backend profiles", onProviders)
             HomeEntry("Capability slots", "Route jobs to your providers", onSlots)
             HomeEntry("Probe log", "Assist-probe results from each invocation", onProbe)
+            HomeEntry("Voice", "Spoken Q&A and listening behaviour", onVoice)
         }
     }
 }

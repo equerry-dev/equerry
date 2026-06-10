@@ -165,6 +165,32 @@ class ChatViewModelTest {
     }
 
     @Test
+    fun programmatic_send_text_matches_the_typed_path_and_exposes_the_final_reply() = runBlocking {
+        configureChatProvider()
+        server.enqueue(sseReply("Hel", "lo"))
+
+        // Voice path: send text directly, with no onInputChange typed into the box.
+        vm.send("hi")
+
+        val done = awaitState { !it.streaming && it.transcript.size == 2 && it.error == null }
+        assertEquals(ChatRole.USER, done.transcript[0].role)
+        assertEquals("hi", done.transcript[0].content)
+        assertEquals(ChatRole.ASSISTANT, done.transcript[1].role)
+        assertEquals("Hello", done.transcript[1].content)
+        // The completed reply is exposed for whole-reply TTS (t-7).
+        assertEquals("Hello", done.lastReply)
+    }
+
+    @Test
+    fun programmatic_send_text_with_no_mapping_guides_and_never_calls_the_driver() = runBlocking {
+        // No CHAT slot configured.
+        vm.send("hi")
+
+        awaitState { it.unmapped }
+        assertEquals(0, server.requestCount)
+    }
+
+    @Test
     fun a_failed_request_renders_a_keyless_error() = runBlocking {
         configureChatProvider()
         server.enqueue(MockResponse().setResponseCode(401).setHeader("Content-Type", "text/event-stream"))

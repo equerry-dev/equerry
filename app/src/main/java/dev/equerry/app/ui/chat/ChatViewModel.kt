@@ -28,6 +28,12 @@ data class ChatUiState(
     val unmapped: Boolean = false,
     /** A human-readable, key-free error for the last send, or null. */
     val error: String? = null,
+    /**
+     * The most recently completed assistant reply, or null while none has completed (or while one
+     * is streaming). Combined with [streaming] flipping to false and [error] being null, this is
+     * the "reply done" signal the voice flow reads to speak the whole reply (t-7).
+     */
+    val lastReply: String? = null,
 )
 
 /**
@@ -47,9 +53,17 @@ class ChatViewModel @Inject constructor(
 
     fun onInputChange(value: String) = _state.update { it.copy(input = value) }
 
-    fun send() {
-        val text = _state.value.input.trim()
-        if (text.isEmpty() || _state.value.streaming) return
+    /** Send the current input box (the typed path). Delegates to [send]. */
+    fun send() = send(_state.value.input)
+
+    /**
+     * Send [text] to the CHAT-mapped provider and stream the reply. The single round-trip path for
+     * both the typed input and the voice flow (t-7) — no provider-call logic is duplicated. With no
+     * provider mapped it surfaces guidance and never touches a driver (c-5).
+     */
+    fun send(text: String) {
+        val trimmed = text.trim()
+        if (trimmed.isEmpty() || _state.value.streaming) return
         viewModelScope.launch {
             val profile = repository.observeChatMapping().first()
             if (profile == null) {
@@ -58,17 +72,18 @@ class ChatViewModel @Inject constructor(
                 return@launch
             }
             val key = repository.keyFor(profile.id).orEmpty()
-            val requestMessages = session.messagesForRequest(text, profile.systemPrompt)
-            session.append(ChatMessage(ChatRole.USER, text))
+            val requestMessages = session.messagesForRequest(trimmed, profile.systemPrompt)
+            session.append(ChatMessage(ChatRole.USER, trimmed))
             _state.update {
                 it.copy(
                     transcript = it.transcript +
-                        ChatMessage(ChatRole.USER, text) +
+                        ChatMessage(ChatRole.USER, trimmed) +
                         ChatMessage(ChatRole.ASSISTANT, ""),
                     input = "",
                     streaming = true,
                     unmapped = false,
                     error = null,
+                    lastReply = null,
                 )
             }
 
@@ -90,7 +105,7 @@ class ChatViewModel @Inject constructor(
 
             if (!failed) {
                 session.append(ChatMessage(ChatRole.ASSISTANT, reply.toString()))
-                _state.update { it.copy(streaming = false) }
+                _state.update { it.copy(streaming = false, lastReply = reply.toString()) }
             }
         }
     }

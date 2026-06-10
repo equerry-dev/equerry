@@ -7,6 +7,12 @@
       system compose UIs via public intents (see spec §5, §8).
     -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!--
+      Microphone for the voice round-trip (phase 05): the assist session captures the spoken
+      question via system STT. Grantable from the in-session runtime prompt or from Equerry's
+      settings; every denied state shows the same guidance (locked mic_permission decision).
+    -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:name=".EquerryApplication"

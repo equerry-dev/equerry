@@ -1,93 +1,11 @@
 {
-  "version": "0.1.0.2",
+  "version": "0.1.5.0",
   "current_milestone": "v0.1",
-  "last_activity": "2026-06-10T13:11:20.080714Z",
-  "last_action": "shipped 04-chat-drivers → https://github.com/equerry-dev/equerry/pull/3 (merged af22e22, preserve-commit merge)",
+  "current_phase": "05-voice-roundtrip",
+  "current_phase_status": "verified",
+  "last_activity": "2026-06-10T16:17:26.747549Z",
+  "last_action": "verified 05-voice-roundtrip: pass (5/5 covered, mutation skipped)",
   "history": [
-    {
-      "at": "2026-06-10T05:19:50.860174Z",
-      "action": "set current_phase_status=planned"
-    },
-    {
-      "at": "2026-06-10T05:19:50.867275Z",
-      "action": "plan locked: 03-assist-probe (5 tasks across 3 waves)"
-    },
-    {
-      "at": "2026-06-10T05:21:32.552543Z",
-      "action": "plan reviewed: 03-assist-probe (0 blocking, 4 flags)"
-    },
-    {
-      "at": "2026-06-10T05:30:55.738969Z",
-      "action": "set current_phase_status=planned"
-    },
-    {
-      "at": "2026-06-10T05:30:55.745371Z",
-      "action": "plan locked (panel): 03-assist-probe (7 tasks across 3 waves)"
-    },
-    {
-      "at": "2026-06-10T05:37:44.527749Z",
-      "action": "plan amended per review: 03-assist-probe (8 tasks across 6 waves; wave-order fixed, share-sheet owned, t-6 split, capture contract added)"
-    },
-    {
-      "at": "2026-06-10T05:41:17.509012Z",
-      "action": "executed t-1 (Define ProbeRecord + AssistAnalyzer)"
-    },
-    {
-      "at": "2026-06-10T05:42:41.462303Z",
-      "action": "executed t-2 (Add ProbeStore)"
-    },
-    {
-      "at": "2026-06-10T05:43:54.013495Z",
-      "action": "executed t-4 (Add CSV serializer)"
-    },
-    {
-      "at": "2026-06-10T05:45:19.02237Z",
-      "action": "executed t-3 (Probe ViewModels)"
-    },
-    {
-      "at": "2026-06-10T05:47:20.553795Z",
-      "action": "executed t-5 (Probe screens + CSV share intent)"
-    },
-    {
-      "at": "2026-06-10T05:48:32.957139Z",
-      "action": "executed t-7 (Probe log nav route)"
-    },
-    {
-      "at": "2026-06-10T05:52:31.740482Z",
-      "action": "executed t-8 (Session capture wiring)"
-    },
-    {
-      "at": "2026-06-10T07:09:59.306172Z",
-      "action": "executed t-6 (Register VoiceInteractionService + manifest; +RecognitionService per approved deviation)"
-    },
-    {
-      "at": "2026-06-10T07:10:18.280439Z",
-      "action": "set current_phase_status=complete"
-    },
-    {
-      "at": "2026-06-10T07:10:18.286632Z",
-      "action": "phase 03-assist-probe executed (8/8 done \u0026 green)"
-    },
-    {
-      "at": "2026-06-10T07:13:00.600872Z",
-      "action": "set current_phase_status=verified"
-    },
-    {
-      "at": "2026-06-10T07:13:00.607482Z",
-      "action": "verified 03-assist-probe: partial (3/5 covered, 2 weak/manual; mutation skipped)"
-    },
-    {
-      "at": "2026-06-10T07:25:16.787388Z",
-      "action": "set current_phase_status=verified"
-    },
-    {
-      "at": "2026-06-10T07:25:16.79364Z",
-      "action": "verified 03-assist-probe: pass (5/5 covered; c-1/c-2 manual gates closed on-device FP5/A15; Phase-0 10-app table captured)"
-    },
-    {
-      "at": "2026-06-10T07:34:56.534787Z",
-      "action": "completed 03-assist-probe"
-    },
     {
       "at": "2026-06-10T07:37:58.801868Z",
       "action": "created 04-chat-drivers"
@@ -203,6 +121,90 @@
     {
       "at": "2026-06-10T13:11:20.080714Z",
       "action": "shipped 04-chat-drivers → https://github.com/equerry-dev/equerry/pull/3 (merged af22e22, preserve-commit merge)"
+    },
+    {
+      "at": "2026-06-10T13:33:51.400991Z",
+      "action": "created 05-voice-roundtrip"
+    },
+    {
+      "at": "2026-06-10T13:46:18.494786Z",
+      "action": "set current_phase=05-voice-roundtrip"
+    },
+    {
+      "at": "2026-06-10T13:46:18.500028Z",
+      "action": "spec locked: 05-voice-roundtrip"
+    },
+    {
+      "at": "2026-06-10T14:23:01.521032Z",
+      "action": "set current_phase_status=planned"
+    },
+    {
+      "at": "2026-06-10T14:23:01.527311Z",
+      "action": "plan locked (panel): 05-voice-roundtrip (11 tasks across 4 waves)"
+    },
+    {
+      "at": "2026-06-10T14:35:55.194839Z",
+      "action": "plan reviewed: 05-voice-roundtrip (0 blocking after amendment, 5 flags in REVIEW.md)"
+    },
+    {
+      "at": "2026-06-10T14:43:48.113806Z",
+      "action": "set version=0.1.5.0"
+    },
+    {
+      "at": "2026-06-10T14:57:03.772341Z",
+      "action": "executed t-1 (Declare RECORD_AUDIO + mic-permission seam)"
+    },
+    {
+      "at": "2026-06-10T15:00:55.58072Z",
+      "action": "executed t-2 (STT capture behind a recognizer seam)"
+    },
+    {
+      "at": "2026-06-10T15:03:31.693558Z",
+      "action": "executed t-3 (TTS playback behind a speaker seam)"
+    },
+    {
+      "at": "2026-06-10T15:05:34.588219Z",
+      "action": "executed t-4 (Voice settings store)"
+    },
+    {
+      "at": "2026-06-10T15:07:50.020185Z",
+      "action": "executed t-5 (Programmatic send(text) on ChatViewModel)"
+    },
+    {
+      "at": "2026-06-10T15:09:24.508488Z",
+      "action": "executed t-6 (SpeakChunker)"
+    },
+    {
+      "at": "2026-06-10T15:15:45.896805Z",
+      "action": "executed t-9 (Voice settings screen + settings-path mic grant)"
+    },
+    {
+      "at": "2026-06-10T15:21:29.331931Z",
+      "action": "executed t-7 (Voice-flow controller)"
+    },
+    {
+      "at": "2026-06-10T15:28:25.887672Z",
+      "action": "executed t-8 (Concurrency: dismiss + continuous re-arm)"
+    },
+    {
+      "at": "2026-06-10T15:33:30.236442Z",
+      "action": "executed t-11 (Failure routing: single guidance surface)"
+    },
+    {
+      "at": "2026-06-10T16:07:09.473318Z",
+      "action": "set current_phase_status=complete"
+    },
+    {
+      "at": "2026-06-10T16:07:09.480906Z",
+      "action": "phase 05-voice-roundtrip executed (11/11 done)"
+    },
+    {
+      "at": "2026-06-10T16:17:26.742103Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-10T16:17:26.747549Z",
+      "action": "verified 05-voice-roundtrip: pass (5/5 covered, mutation skipped)"
     }
   ]
 }

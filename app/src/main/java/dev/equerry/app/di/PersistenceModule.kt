@@ -12,6 +12,7 @@ import dagger.hilt.components.SingletonComponent
 import dev.equerry.app.data.ProbeStore
 import dev.equerry.app.data.ProfileStore
 import dev.equerry.app.data.SlotMappingStore
+import dev.equerry.app.data.VoiceSettingsStore
 import javax.inject.Singleton
 
 private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "equerry_settings")
@@ -37,4 +38,9 @@ object PersistenceModule {
     @Provides
     @Singleton
     fun provideProbeStore(dataStore: DataStore<Preferences>): ProbeStore = ProbeStore(dataStore)
+
+    @Provides
+    @Singleton
+    fun provideVoiceSettingsStore(dataStore: DataStore<Preferences>): VoiceSettingsStore =
+        VoiceSettingsStore(dataStore)
 }

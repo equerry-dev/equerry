@@ -1,0 +1,101 @@
+{
+  "phase": "05-voice-roundtrip",
+  "tasks": {
+    "t-1": {
+      "files": [
+        "app/src/main/AndroidManifest.xml",
+        "app/src/main/java/dev/equerry/app/voice/MicPermission.kt",
+        "app/src/test/java/dev/equerry/app/voice/MicPermissionTest.kt"
+      ],
+      "commit": "26febdd",
+      "completed_at": "2026-06-10T14:57:03.752908Z"
+    },
+    "t-10": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt",
+        "app/src/test/java/dev/equerry/app/voice/VoiceSessionWiringTest.kt"
+      ],
+      "commit": "67fda61",
+      "completed_at": "2026-06-10T16:06:51.320108Z"
+    },
+    "t-11": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+        "app/src/main/java/dev/equerry/app/voice/VoiceGuidance.kt",
+        "app/src/test/java/dev/equerry/app/voice/VoiceFlowFailureTest.kt"
+      ],
+      "commit": "1e68320",
+      "completed_at": "2026-06-10T15:33:30.223677Z"
+    },
+    "t-2": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/SpeechToText.kt",
+        "app/src/main/java/dev/equerry/app/voice/SystemSpeechToText.kt",
+        "app/src/test/java/dev/equerry/app/voice/SystemSpeechToTextTest.kt"
+      ],
+      "commit": "5bcb36e",
+      "completed_at": "2026-06-10T15:00:55.563993Z"
+    },
+    "t-3": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/TextToSpeech.kt",
+        "app/src/main/java/dev/equerry/app/voice/SystemTextToSpeech.kt",
+        "app/src/test/java/dev/equerry/app/voice/SystemTextToSpeechTest.kt"
+      ],
+      "commit": "9b9f714",
+      "completed_at": "2026-06-10T15:03:31.678916Z"
+    },
+    "t-4": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/data/VoiceSettingsStore.kt",
+        "app/src/main/java/dev/equerry/app/di/PersistenceModule.kt",
+        "app/src/test/java/dev/equerry/app/data/VoiceSettingsStoreTest.kt"
+      ],
+      "commit": "247358c",
+      "completed_at": "2026-06-10T15:05:34.571835Z"
+    },
+    "t-5": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt",
+        "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt"
+      ],
+      "commit": "95233c5",
+      "completed_at": "2026-06-10T15:07:50.003754Z"
+    },
+    "t-6": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/SpeakChunker.kt",
+        "app/src/test/java/dev/equerry/app/voice/SpeakChunkerTest.kt"
+      ],
+      "commit": "b9ed15e",
+      "completed_at": "2026-06-10T15:09:24.493203Z"
+    },
+    "t-7": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+        "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt"
+      ],
+      "commit": "f7b8ec4",
+      "completed_at": "2026-06-10T15:21:29.318705Z"
+    },
+    "t-8": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+        "app/src/test/java/dev/equerry/app/voice/VoiceFlowConcurrencyTest.kt",
+        "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt"
+      ],
+      "commit": "35c47b0",
+      "completed_at": "2026-06-10T15:28:25.87211Z"
+    },
+    "t-9": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/voicesettings/VoiceSettingsScreen.kt",
+        "app/src/main/java/dev/equerry/app/ui/voicesettings/VoiceSettingsViewModel.kt",
+        "app/src/main/java/dev/equerry/app/MainActivity.kt",
+        "app/src/test/java/dev/equerry/app/ui/voicesettings/VoiceSettingsViewModelTest.kt"
+      ],
+      "commit": "e604fff",
+      "completed_at": "2026-06-10T15:15:45.88242Z"
+    }
+  }
+}

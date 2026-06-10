@@ -1,0 +1,48 @@
+[phase]
+id        = "05-voice-roundtrip"
+title     = "Voice round-trip (spoken Q&A in the assist session)"
+milestone = "v0.1"
+
+[[criteria]]
+id   = "c-1"
+text = "Performing the assist gesture launches Equerry's session, which enters a listening state and starts system STT capture."
+
+[[criteria]]
+id   = "c-2"
+text = "The spoken utterance is transcribed by system STT and the recognized text is shown as the user's question in the session."
+
+[[criteria]]
+id   = "c-3"
+text = "The transcribed question is sent to the CHAT-mapped provider and its reply renders in the session as it streams in."
+
+[[criteria]]
+id   = "c-4"
+text = "The completed reply is spoken aloud via system TTS."
+
+[[criteria]]
+id   = "c-5"
+text = "When no provider is mapped to CHAT (or STT/TTS is unavailable), the session shows clear guidance/error instead of failing silently or crashing."
+
+[[decisions]]
+key    = "session_ui_reuse"
+choice = "The assist session renders the phase-04 ChatScreen (transcript bubbles), driven by the voice flow; the probe dashboard moves off the assist path (still reachable via the Probe log route)."
+why    = "One chat surface for typed and spoken chat — least new UI, and phase 04 explicitly deferred 'how the session screen reuses the chat surface' to this phase."
+locked = true
+
+[[decisions]]
+key    = "turn_control"
+choice = "Turn-taking is a persisted (DataStore) user setting. In all modes listening auto-stops on STT end-of-speech and auto-sends. The setting selects post-reply behaviour: 'continuous' (default) auto-listens again for a follow-up until the user dismisses the session; 'single turn' ends after one Q&A. Tap-to-stop is not included this phase."
+why    = "Continuous is the most conversational default, but auto-reopening the mic isn't right for everyone — a toggle lets users choose. Auto-stop-on-silence keeps it hands-free either way."
+locked = true
+
+[[decisions]]
+key    = "speak_timing"
+choice = "TTS speak timing is a persisted (DataStore) user setting. Default 'whole reply at end' speaks the finished reply as one utterance; the opt-in 'sentence-by-sentence' queues each sentence to TTS as it streams (uses reply_streaming)."
+why    = "Whole-reply is the most reliable default for v0.1; sentence-by-sentence is snappier for those who want it. Making it a setting avoids betting the phase on the more edge-case-prone path."
+locked = true
+
+[[decisions]]
+key    = "mic_permission"
+choice = "RECORD_AUDIO can be granted from either the in-session runtime prompt (first invocation that needs the mic) or from Equerry's settings; in every denied/ungranted state the session shows the same clear guidance (with a path to settings) and never crashes."
+why    = "Flexible for the user and keeps a single, consistent denial/guidance state regardless of entry point."
+locked = true
