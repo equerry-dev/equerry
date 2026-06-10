@@ -2,54 +2,10 @@
   "version": "0.1.5.3",
   "current_milestone": "v0.1",
   "current_phase": "06-tools-actions",
-  "current_phase_status": "planned",
-  "last_activity": "2026-06-10T18:45:01.195958Z",
-  "last_action": "plan amended post-review: 06-tools-actions (t-1 +ChatDriver.kt seam; t-9 -\u003e wave 2; now 2 waves)",
+  "current_phase_status": "complete",
+  "last_activity": "2026-06-10T19:17:25.520716Z",
+  "last_action": "phase 06-tools-actions executed (9/9 done \u0026 green)",
   "history": [
-    {
-      "at": "2026-06-10T11:29:16.052179Z",
-      "action": "fixed flaky ProbeViewModelTest hang (test-only; full suite green)"
-    },
-    {
-      "at": "2026-06-10T11:34:09.010909Z",
-      "action": "executed t-9 (ChatDriver wiring + factory + MockWebServer e2e; +mockwebserver testImpl)"
-    },
-    {
-      "at": "2026-06-10T11:39:44.356968Z",
-      "action": "executed t-10 (Chat screen + ViewModel + nav route)"
-    },
-    {
-      "at": "2026-06-10T11:40:08.531094Z",
-      "action": "set current_phase_status=complete"
-    },
-    {
-      "at": "2026-06-10T11:40:08.538213Z",
-      "action": "phase 04-chat-drivers executed (10/10 done \u0026 green); +flaky ProbeViewModelTest hang fixed mid-run"
-    },
-    {
-      "at": "2026-06-10T12:14:56.816499Z",
-      "action": "set current_phase_status=verified"
-    },
-    {
-      "at": "2026-06-10T12:14:56.823737Z",
-      "action": "verified 04-chat-drivers: partial (3/5 covered, 2 weak; mutation skipped — Kotlin)"
-    },
-    {
-      "at": "2026-06-10T12:51:17.342107Z",
-      "action": "executed t-11 (ChatScreen Compose render test; closes verify FLAG)"
-    },
-    {
-      "at": "2026-06-10T12:51:29.27802Z",
-      "action": "set current_phase_status=complete"
-    },
-    {
-      "at": "2026-06-10T12:51:29.284267Z",
-      "action": "phase 04-chat-drivers re-executed (11/11 done); t-11 added ChatScreen render test — re-verify pending"
-    },
-    {
-      "at": "2026-06-10T12:54:38.981542Z",
-      "action": "set current_phase_status=verified"
-    },
     {
       "at": "2026-06-10T12:54:38.98776Z",
       "action": "verified 04-chat-drivers: pass (5/5 covered; mutation skipped — Kotlin; c-1/c-3 render gap closed by t-11)"
@@ -205,6 +161,50 @@
     {
       "at": "2026-06-10T18:45:01.195958Z",
       "action": "plan amended post-review: 06-tools-actions (t-1 +ChatDriver.kt seam; t-9 -\u003e wave 2; now 2 waves)"
+    },
+    {
+      "at": "2026-06-10T18:52:26.382193Z",
+      "action": "executed t-1 (Add ToolCall token + tool-call parsers)"
+    },
+    {
+      "at": "2026-06-10T18:54:44.152167Z",
+      "action": "executed t-2 (Register five tool specs in request body)"
+    },
+    {
+      "at": "2026-06-10T18:55:28.608632Z",
+      "action": "executed t-3 (Add per-type tool-capability flag)"
+    },
+    {
+      "at": "2026-06-10T18:57:51.354078Z",
+      "action": "executed t-4 (Pure intent-builders for the five actions)"
+    },
+    {
+      "at": "2026-06-10T18:59:33.744115Z",
+      "action": "executed t-5 (Pure ToolCall to ActionPlan mapper)"
+    },
+    {
+      "at": "2026-06-10T19:00:23.459772Z",
+      "action": "executed t-6 (Pure yes/no grammar recogniser)"
+    },
+    {
+      "at": "2026-06-10T19:07:40.803483Z",
+      "action": "executed t-7 (Dispatch tool calls + staging + guidance in ChatViewModel)"
+    },
+    {
+      "at": "2026-06-10T19:10:38.363206Z",
+      "action": "executed t-8 (Action cards, pending list, banner in ChatScreen)"
+    },
+    {
+      "at": "2026-06-10T19:16:54.150435Z",
+      "action": "executed t-9 (Spoken Start-now + yes/no confirm in voice flow)"
+    },
+    {
+      "at": "2026-06-10T19:17:25.514213Z",
+      "action": "set current_phase_status=complete"
+    },
+    {
+      "at": "2026-06-10T19:17:25.520716Z",
+      "action": "phase 06-tools-actions executed (9/9 done \u0026 green)"
     }
   ]
 }
