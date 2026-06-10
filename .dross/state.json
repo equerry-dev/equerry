@@ -2,18 +2,10 @@
   "version": "0.1.5.0",
   "current_milestone": "v0.1",
   "current_phase": "05-voice-roundtrip",
-  "current_phase_status": "complete",
-  "last_activity": "2026-06-10T16:07:09.480906Z",
-  "last_action": "phase 05-voice-roundtrip executed (11/11 done)",
+  "current_phase_status": "verified",
+  "last_activity": "2026-06-10T16:17:26.747549Z",
+  "last_action": "verified 05-voice-roundtrip: pass (5/5 covered, mutation skipped)",
   "history": [
-    {
-      "at": "2026-06-10T07:25:16.79364Z",
-      "action": "verified 03-assist-probe: pass (5/5 covered; c-1/c-2 manual gates closed on-device FP5/A15; Phase-0 10-app table captured)"
-    },
-    {
-      "at": "2026-06-10T07:34:56.534787Z",
-      "action": "completed 03-assist-probe"
-    },
     {
       "at": "2026-06-10T07:37:58.801868Z",
       "action": "created 04-chat-drivers"
@@ -205,6 +197,14 @@
     {
       "at": "2026-06-10T16:07:09.480906Z",
       "action": "phase 05-voice-roundtrip executed (11/11 done)"
+    },
+    {
+      "at": "2026-06-10T16:17:26.742103Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-10T16:17:26.747549Z",
+      "action": "verified 05-voice-roundtrip: pass (5/5 covered, mutation skipped)"
     }
   ]
 }

@@ -1,0 +1,81 @@
+[verify]
+  phase = "05-voice-roundtrip"
+  generated_at = 2026-06-10T16:16:01.734245Z
+  verdict = "pass"
+
+[summary]
+  mutation_status = "skipped"
+  mutation_score = 0.0
+  mutants_killed = 0
+  mutants_survived = 0
+  mutants_not_covered = 0
+  criteria_total = 5
+  criteria_covered = 5
+  criteria_uncovered = 0
+
+[[criterion]]
+  id = "c-1"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/voice/VoiceSessionWiringTest.kt:on_show_checks_permission_then_arms_when_granted",
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowConcurrencyTest.kt:dismiss_mid_listening_releases_stt_once_and_returns_to_idle",
+    "app/src/test/java/dev/equerry/app/voice/MicPermissionTest.kt:manifest_declares_record_audio",
+  ]
+  notes = "Listening state + STT-arm-on-show (gated on mic permission) and the RECORD_AUDIO precondition are unit-tested. The OS gesture→session launch is framework-bound and verified manually per the t-10 contract."
+
+[[criterion]]
+  id = "c-2"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/voice/SystemSpeechToTextTest.kt:results_emit_final_with_the_first_hypothesis",
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt:end_of_speech_auto_sends_and_speaks_the_whole_reply_once",
+  ]
+  notes = "STT onResults→Final mapping is tested; the controller test asserts the recognized text becomes transcript[0] (the user's question). Real on-device SpeechRecognizer is a thin manual-verified adapter."
+
+[[criterion]]
+  id = "c-3"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt:end_of_speech_auto_sends_and_speaks_the_whole_reply_once",
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:programmatic_send_text_matches_the_typed_path_and_exposes_the_final_reply",
+  ]
+  notes = "Controller auto-sends the transcript to the CHAT-mapped provider (MockWebServer) and the streamed reply renders as transcript[1]."
+
+[[criterion]]
+  id = "c-4"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt:end_of_speech_auto_sends_and_speaks_the_whole_reply_once",
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt:sentence_mode_queues_each_completed_sentence_to_tts",
+    "app/src/test/java/dev/equerry/app/voice/SpeakChunkerTest.kt:whole_reply_mode_holds_until_done_then_emits_one_utterance",
+    "app/src/test/java/dev/equerry/app/voice/SystemTextToSpeechTest.kt:speak_after_ready_init_reaches_the_engine",
+  ]
+  notes = "Completed reply is handed to TTS exactly once (whole-reply) or per-sentence; chunking and TTS gating are unit-tested. Real android TextToSpeech is a thin manual-verified adapter."
+
+[[criterion]]
+  id = "c-5"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowFailureTest.kt:no_chat_provider_guides_and_never_arms_stt",
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowFailureTest.kt:mic_denied_guides_with_settings_path_and_never_arms_stt",
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowFailureTest.kt:stt_no_match_guides_without_crashing_or_sending",
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowFailureTest.kt:reply_error_shows_keyfree_guidance_and_does_not_speak",
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowFailureTest.kt:tts_failure_renders_the_reply_but_skips_speaking",
+  ]
+  notes = "Every failure mode (no provider, mic denied, STT no-match, reply error, TTS failed) routes to one VoiceGuidance surface; each case asserts guidance shown, key-free, and no exception escapes."
+
+[[finding]]
+  severity = "NOTE"
+  text = "Mutation efficacy not measured: no Kotlin mutation adapter (Stryker is TS/JS only). Verdict is based on criterion-to-test coverage alone."
+
+[[finding]]
+  severity = "NOTE"
+  text = "Manual-verify surfaces by design (framework-bound, cannot be unit-tested): the VoiceInteractionSession gesture→launch + ChatScreen render, and the real SpeechRecognizer/TextToSpeech adapters. Their decision logic lives in unit-tested seams (sttErrorFor, TTS init gating, VoiceFlowController, VoiceSessionCoordinator, SpeakChunker)."
+
+[[finding]]
+  severity = "NOTE"
+  text = "r-03 spot-check: VoiceFlowFailureTest:reply_error_shows_keyfree_guidance_and_does_not_speak asserts the guidance message never contains the API key; reply errors reuse the phase-04 redacted ChatError messages."
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped (no .kt/.xml mutation adapter): all 16 source + 11 test files touched this phase. See tests.json for the full list."
