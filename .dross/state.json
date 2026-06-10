@@ -1,17 +1,9 @@
 {
-  "version": "0.1.5.2",
+  "version": "0.1.5.3",
   "current_milestone": "v0.1",
-  "last_activity": "2026-06-10T17:35:08.865562Z",
-  "last_action": "quick: wait for TTS to finish before re-arming the mic",
+  "last_activity": "2026-06-10T17:42:20.193996Z",
+  "last_action": "quick: add mic button to chat for the voice round-trip",
   "history": [
-    {
-      "at": "2026-06-10T08:42:07.363242Z",
-      "action": "plan amended per review: 04-chat-drivers (10 tasks across 4 waves; t-6/t-7 parsers merged, t-10 split, t-5 +repo, t-3 logging-live contract)"
-    },
-    {
-      "at": "2026-06-10T08:48:28.585362Z",
-      "action": "executed t-1 (Define chat message + token + error model)"
-    },
     {
       "at": "2026-06-10T08:49:28.222472Z",
       "action": "executed t-2 (Pure error mapper for failed requests)"
@@ -203,6 +195,14 @@
     {
       "at": "2026-06-10T17:35:08.865562Z",
       "action": "quick: wait for TTS to finish before re-arming the mic"
+    },
+    {
+      "at": "2026-06-10T17:42:20.18661Z",
+      "action": "bump internal 0.1.5.2 → 0.1.5.3"
+    },
+    {
+      "at": "2026-06-10T17:42:20.193996Z",
+      "action": "quick: add mic button to chat for the voice round-trip"
     }
   ]
 }
