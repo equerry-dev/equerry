@@ -1,0 +1,266 @@
+[phase]
+id = "05-voice-roundtrip"
+
+# 11 tasks across 4 waves. Panel-merged (risk skeleton + mvp send(text) + verification
+# SpeakChunker). Failure isolation kept (t-8 concurrency, t-11 failure routing as own
+# tasks); STT/TTS error mapping is unit-tested (t-2/t-3 JVM contracts), not manual-only.
+
+[[task]]
+id            = "t-1"
+wave          = 1
+title         = "Declare RECORD_AUDIO + mic-permission seam"
+files         = [
+  "app/src/main/AndroidManifest.xml",
+  "app/src/main/java/dev/equerry/app/voice/MicPermission.kt",
+  "app/src/test/java/dev/equerry/app/voice/MicPermissionTest.kt",
+]
+description   = """
+Add <uses-permission RECORD_AUDIO>. Define a MicPermission seam whose evaluate(granted)
+yields ONE Denied state (guidance text + open-settings action) byte-identical regardless of
+entry point (in-session vs settings) — the locked mic_permission "same guidance everywhere".
+Impl wraps ContextCompat.checkSelfPermission; no Android calls in the interface.
+"""
+covers        = ["c-1", "c-5"]
+test_contract = [
+  "Manifest resource-parse asserts RECORD_AUDIO is declared; dropping it fails the test (c-1 listening can't start).",
+  "evaluate(false) from the in-session input and the settings input produce an EQUAL Denied guidance; two divergent denial messages fail the cross-entry-point equality assertion.",
+  "evaluate(true) returns Ready.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-2"
+wave          = 1
+title         = "STT capture behind a recognizer seam"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/SpeechToText.kt",
+  "app/src/main/java/dev/equerry/app/voice/SystemSpeechToText.kt",
+  "app/src/test/java/dev/equerry/app/voice/SystemSpeechToTextTest.kt",
+]
+description   = """
+SpeechToText interface emitting Flow<SttEvent> (Partial, Final(text), EndOfSpeech, Error).
+SystemSpeechToText wraps SpeechRecognizer + RecognitionListener, mapping onError codes to a
+sealed SttError (NoMatch, Timeout, Busy, PermissionDenied, Unavailable). NOT routed through
+EquerryRecognitionService. Recognizer injected as a factory lambda so tests substitute a fake.
+"""
+covers        = ["c-2", "c-5"]
+test_contract = [
+  "Fake recognizer onError(ERROR_NO_MATCH) emits SttError.NoMatch and completes (no crash/hang).",
+  "ERROR_SPEECH_TIMEOUT -> Timeout, ERROR_INSUFFICIENT_PERMISSIONS -> PermissionDenied, ERROR_RECOGNIZER_BUSY -> Busy; any mismap fails its case.",
+  "onResults emits Final with the first hypothesis.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-3"
+wave          = 1
+title         = "TTS playback behind a speaker seam"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/TextToSpeech.kt",
+  "app/src/main/java/dev/equerry/app/voice/SystemTextToSpeech.kt",
+  "app/src/test/java/dev/equerry/app/voice/SystemTextToSpeechTest.kt",
+]
+description   = """
+TextToSpeech interface (init(): Ready|Failed|MissingEngine; speak(utterance);
+speakSentences(stream); stop(); shutdown()). SystemTextToSpeech wraps
+android.speech.tts.TextToSpeech, mapping onInit status != SUCCESS and a null engine to
+Failed/MissingEngine. Engine injected via factory so a fake drives init outcomes.
+"""
+covers        = ["c-4", "c-5"]
+test_contract = [
+  "Fake engine onInit(ERROR) -> init() returns Failed and a subsequent speak() is a safe no-op (never throws).",
+  "No engine -> init() returns MissingEngine.",
+  "speak() before a Ready init is dropped, not crashed.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-4"
+wave          = 1
+title         = "Voice settings store (turn + speak timing)"
+files         = [
+  "app/src/main/java/dev/equerry/app/data/VoiceSettingsStore.kt",
+  "app/src/main/java/dev/equerry/app/di/PersistenceModule.kt",
+  "app/src/test/java/dev/equerry/app/data/VoiceSettingsStoreTest.kt",
+]
+description   = """
+One DataStore-backed store on the existing "equerry_settings" DataStore (same shape as
+SlotMappingStore) persisting turnControl (CONTINUOUS default | SINGLE_TURN) and speakTiming
+(WHOLE_REPLY default | SENTENCE_BY_SENTENCE), each with a setter. Add a @Provides @Singleton
+in PersistenceModule. One store for both settings.
+"""
+covers        = ["c-1", "c-4"]
+test_contract = [
+  "Fresh store emits CONTINUOUS + WHOLE_REPLY (locked defaults); flipping a default fails.",
+  "After setTurnControl(SINGLE_TURN), a reload over the same file emits SINGLE_TURN (survives reload).",
+  "A garbled persisted value falls back to the default, not a throw.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-5"
+wave          = 1
+title         = "Programmatic send(text) on ChatViewModel"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt",
+  "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt",
+]
+description   = """
+Extract the existing send() body into send(text: String) (the input-driven overload delegates
+to it); expose the completed assistant text (lastReply + a done signal) so the controller can
+read the finished reply for whole-reply TTS. NO new round-trip logic — the phase-04
+stream/unmapped/error/key-redaction path is reused verbatim.
+"""
+covers        = ["c-3", "c-5"]
+test_contract = [
+  "send(\"hi\") with a mapped provider yields the same 2-bubble transcript as the typed path AND exposes the finished assistant text.",
+  "send(\"hi\") with no CHAT mapping sets unmapped and makes zero driver requests (c-5).",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-6"
+wave          = 2
+depends_on    = ["t-4"]
+title         = "SpeakChunker: reply stream to TTS utterances"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/SpeakChunker.kt",
+  "app/src/test/java/dev/equerry/app/voice/SpeakChunkerTest.kt",
+]
+description   = """
+Pure function turning the reply token stream into TTS utterances per the speak_timing setting:
+SENTENCE_BY_SENTENCE emits one utterance per completed sentence as boundaries stream in (flush
+trailing fragment on done); WHOLE_REPLY holds and emits exactly one utterance at done.
+"""
+covers        = ["c-4"]
+test_contract = [
+  "SpeakChunker(SENTENCE) fed deltas \"Hi. \" / \"How are\" / \" you? Bye.\" emits [\"Hi.\", \"How are you?\", \"Bye.\"].",
+  "SpeakChunker(WHOLE_REPLY) emits exactly one utterance equal to the full concatenation only at done; a boundary or hold-until-done regression fails the per-mode list assertion.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-7"
+wave          = 2
+depends_on    = ["t-1", "t-2", "t-3", "t-4", "t-5", "t-6"]
+title         = "Voice-flow controller: listen-send-speak loop"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+  "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt",
+]
+description   = """
+Pure-Kotlin controller (no Android UI) wiring MicPermission -> SpeechToText ->
+ChatViewModel.send(text) -> SpeakChunker -> TextToSpeech, exposing VoiceFlowState (Idle,
+Listening, Transcribing, Sending, Speaking). On STT EndOfSpeech it auto-stops and auto-sends
+(turn_control: no tap-to-stop). Reads VoiceSettingsStore for turn + speak timing. Reuses
+ChatViewModel/ChatSession — does NOT reinvent send.
+"""
+covers        = ["c-1", "c-2", "c-3", "c-4"]
+test_contract = [
+  "Fake STT Final(\"what time is it\") -> EndOfSpeech with a stubbed chat stream: transcript shows the user turn and the streamed reply renders.",
+  "Under WHOLE_REPLY exactly one speak() of the full reply fires after streaming completes.",
+  "Under SENTENCE_BY_SENTENCE each completed sentence is queued to TTS as deltas arrive (matching t-6 output).",
+  "If auto-send doesn't fire on EndOfSpeech the \"no send issued\" assertion fails.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-9"
+wave          = 2
+depends_on    = ["t-1", "t-4"]
+title         = "Voice settings screen + settings-path mic grant"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/voicesettings/VoiceSettingsScreen.kt",
+  "app/src/main/java/dev/equerry/app/ui/voicesettings/VoiceSettingsViewModel.kt",
+  "app/src/main/java/dev/equerry/app/MainActivity.kt",
+  "app/src/test/java/dev/equerry/app/ui/voicesettings/VoiceSettingsViewModelTest.kt",
+]
+description   = """
+HiltViewModel exposing both settings as StateFlow + setters over VoiceSettingsStore; a Compose
+screen with two choice controls plus the mic-permission grant/guidance entry point (settings
+path of mic_permission, reusing MicPermission so guidance equals the in-session string). Add a
+VOICE route + Home entry in MainActivity.
+"""
+covers        = ["c-1", "c-4", "c-5"]
+test_contract = [
+  "Toggling turnControl to SINGLE_TURN persists and re-emits; the VM seeds from the store's current values (ignoring the persisted value fails the seed assertion).",
+  "Toggling speakTiming calls setSpeakTiming(SENTENCE).",
+  "Mic-denied surfaces the SAME guidance string the in-session path uses (reuses t-1).",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-8"
+wave          = 3
+depends_on    = ["t-7"]
+title         = "Concurrency: dismiss + continuous re-arm races"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+  "app/src/test/java/dev/equerry/app/voice/VoiceFlowConcurrencyTest.kt",
+]
+description   = """
+Make the loop cancellation-safe. On session dismissal cancel listening/streaming/speaking and
+release STT+TTS. In CONTINUOUS, re-arm the mic only after the prior turn fully settles (reply
+done + speak done/aborted), guarding against double-arm. SINGLE_TURN ends after one Q&A.
+Idempotent stop(). Edits VoiceFlowController.kt after t-7 creates it (sequential, same file).
+"""
+covers        = ["c-1", "c-5"]
+test_contract = [
+  "dismiss() mid-Listening -> STT released once, no Final processed after, state -> Idle.",
+  "dismiss() mid-stream -> collection cancelled, no speak() fires.",
+  "CONTINUOUS: two rapid EndOfSpeech triggers -> startListening ran once, not twice.",
+  "SINGLE_TURN: no re-arm after the first turn; a leaked re-arm fails its assertion.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-11"
+wave          = 3
+depends_on    = ["t-7"]
+title         = "Failure routing: single guidance surface"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+  "app/src/main/java/dev/equerry/app/voice/VoiceGuidance.kt",
+  "app/src/test/java/dev/equerry/app/voice/VoiceFlowFailureTest.kt",
+]
+description   = """
+Map every partial-failure into ONE VoiceGuidance surface (reusing ChatUiState.unmapped/error
+where present, adding voice-specific guidance for mic-denied, STT-unavailable, TTS-missing).
+Owns: no CHAT provider, stream error mid-reply, STT NoMatch/Timeout/Busy/Unavailable, TTS
+Failed/MissingEngine, mic Denied. Never throws to the framework session. Edits
+VoiceFlowController.kt after t-7 (sequential, same file as t-8).
+"""
+covers        = ["c-5"]
+test_contract = [
+  "No CHAT mapping -> unmapped guidance, STT never armed.",
+  "Chat stream throws ChatException mid-reply -> key-free error shown, partial reply retained, NOT spoken.",
+  "STT NoMatch -> \"didn't catch that\" guidance, no crash.",
+  "TTS Failed -> reply still rendered, spoken-aloud silently skipped with a one-line notice.",
+  "mic Denied -> shared guidance + settings path, STT never armed; each case asserts no exception escapes.",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-10"
+wave          = 4
+depends_on    = ["t-7", "t-8", "t-11"]
+title         = "Wire controller into assist session (ChatScreen)"
+files         = [
+  "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt",
+  "app/src/test/java/dev/equerry/app/voice/VoiceSessionWiringTest.kt",
+]
+description   = """
+Switch the session content from ProbeSessionScreen to ChatRoute/ChatScreen (session_ui_reuse,
+locked), pull VoiceFlowController/ChatViewModel via a new @EntryPoint (same pattern as
+ProbeStoreEntryPoint), request RECORD_AUDIO + start the controller on onShow/onCreate so
+listening begins on invocation (c-1), release on onDestroy (delegating to t-8's idempotent
+stop). AssistStructure probe capture still feeds ProbeStore but off the rendered surface; Probe
+dashboard stays reachable via the Probe log route only. All branching stays in the controller.
+"""
+covers        = ["c-1", "c-3", "c-5"]
+test_contract = [
+  "Framework session verified MANUALLY (documented in contract comment: assist gesture -> listening -> spoken Q -> reply renders -> reply spoken).",
+  "VoiceSessionWiringTest drives onShow/onDestroy against fakes: onShow checks permission THEN arms STT; onDestroy calls idempotent stop()/release exactly once.",
+  "Wiring that arms STT before the permission gate fails the \"permission checked before arm\" assertion.",
+]
+status        = "pending"

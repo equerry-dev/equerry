@@ -2,18 +2,10 @@
   "version": "0.1.0.2",
   "current_milestone": "v0.1",
   "current_phase": "05-voice-roundtrip",
-  "current_phase_status": "created",
-  "last_activity": "2026-06-10T13:46:18.500028Z",
-  "last_action": "spec locked: 05-voice-roundtrip",
+  "current_phase_status": "planned",
+  "last_activity": "2026-06-10T14:23:01.527311Z",
+  "last_action": "plan locked (panel): 05-voice-roundtrip (11 tasks across 4 waves)",
   "history": [
-    {
-      "at": "2026-06-10T05:30:55.738969Z",
-      "action": "set current_phase_status=planned"
-    },
-    {
-      "at": "2026-06-10T05:30:55.745371Z",
-      "action": "plan locked (panel): 03-assist-probe (7 tasks across 3 waves)"
-    },
     {
       "at": "2026-06-10T05:37:44.527749Z",
       "action": "plan amended per review: 03-assist-probe (8 tasks across 6 waves; wave-order fixed, share-sheet owned, t-6 split, capture contract added)"
@@ -205,6 +197,14 @@
     {
       "at": "2026-06-10T13:46:18.500028Z",
       "action": "spec locked: 05-voice-roundtrip"
+    },
+    {
+      "at": "2026-06-10T14:23:01.521032Z",
+      "action": "set current_phase_status=planned"
+    },
+    {
+      "at": "2026-06-10T14:23:01.527311Z",
+      "action": "plan locked (panel): 05-voice-roundtrip (11 tasks across 4 waves)"
     }
   ]
 }
