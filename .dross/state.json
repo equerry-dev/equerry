@@ -3,13 +3,9 @@
   "current_milestone": "v0.1",
   "current_phase": "04-chat-drivers",
   "current_phase_status": "planned",
-  "last_activity": "2026-06-10T08:23:21.310209Z",
-  "last_action": "plan locked (panel): 04-chat-drivers (10 tasks across 4 waves)",
+  "last_activity": "2026-06-10T08:25:19.290634Z",
+  "last_action": "plan reviewed: 04-chat-drivers (0 blocking, 4 flags)",
   "history": [
-    {
-      "at": "2026-06-09T15:05:06.308411Z",
-      "action": "plan amended per review: 02-provider-model (model-preset + observeProfiles contracts sharpened)"
-    },
     {
       "at": "2026-06-09T15:12:47.141158Z",
       "action": "executed t-1 (Provider domain model + per-type rules + validation)"
@@ -205,6 +201,10 @@
     {
       "at": "2026-06-10T08:23:21.310209Z",
       "action": "plan locked (panel): 04-chat-drivers (10 tasks across 4 waves)"
+    },
+    {
+      "at": "2026-06-10T08:25:19.290634Z",
+      "action": "plan reviewed: 04-chat-drivers (0 blocking, 4 flags)"
     }
   ]
 }
