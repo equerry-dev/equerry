@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Bring-your-own-backend: users point Equerry at self-hosted providers that are commonly plaintext
+  http on a LAN address, a Tailscale host, or localhost (e.g. Ollama on :11434, llama.cpp on :8083).
+  The destination is always user-chosen, never a first-party Equerry server, and on Android
+  targetSdk >= 28 cleartext is blocked by default — which silently breaks every http provider.
+
+  HTTPS remains fully supported; this just stops the platform from refusing user-configured
+  cleartext endpoints. Scope this to specific <domain> entries if a future build wants to tighten it.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
