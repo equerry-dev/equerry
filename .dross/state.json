@@ -2,62 +2,10 @@
   "version": "0.1.0.2",
   "current_milestone": "v0.1",
   "current_phase": "04-chat-drivers",
-  "current_phase_status": "planned",
-  "last_activity": "2026-06-10T08:42:07.363242Z",
-  "last_action": "plan amended per review: 04-chat-drivers (10 tasks across 4 waves; t-6/t-7 parsers merged, t-10 split, t-5 +repo, t-3 logging-live contract)",
+  "current_phase_status": "complete",
+  "last_activity": "2026-06-10T11:40:08.538213Z",
+  "last_action": "phase 04-chat-drivers executed (10/10 done \u0026 green); +flaky ProbeViewModelTest hang fixed mid-run",
   "history": [
-    {
-      "at": "2026-06-09T15:18:35.924273Z",
-      "action": "executed t-2 (Dependencies + JVM test infrastructure)"
-    },
-    {
-      "at": "2026-06-09T15:32:39.57869Z",
-      "action": "executed t-3 (Encrypted SecretStore; real-crypto test in androidTest per Robolectric/Keystore fallback)"
-    },
-    {
-      "at": "2026-06-09T16:36:19.041786Z",
-      "action": "executed t-4 (Profile + slot DataStore persistence + DI)"
-    },
-    {
-      "at": "2026-06-09T16:43:50.528353Z",
-      "action": "executed t-5 (ProviderRepository: CRUD + key-split + cascade)"
-    },
-    {
-      "at": "2026-06-09T16:48:09.24936Z",
-      "action": "executed t-6 (Provider list + adaptive edit ViewModels)"
-    },
-    {
-      "at": "2026-06-09T16:56:40.204834Z",
-      "action": "executed t-7 (Capability Slots ViewModel)"
-    },
-    {
-      "at": "2026-06-09T17:51:07.505668Z",
-      "action": "executed t-8 (provider screens + design-handoff theme/fonts/components folded in)"
-    },
-    {
-      "at": "2026-06-09T18:19:38.682703Z",
-      "action": "executed t-9 (Capability Slots screen + picker); stabilized VM/screen test dispatcher race"
-    },
-    {
-      "at": "2026-06-09T18:28:17.351431Z",
-      "action": "executed t-10 (Navigation host + entry points)"
-    },
-    {
-      "at": "2026-06-09T18:28:30.792927Z",
-      "action": "set current_phase_status=complete"
-    },
-    {
-      "at": "2026-06-09T18:28:30.799501Z",
-      "action": "phase 02-provider-model executed (10/10 done \u0026 green); c-3 edit-load deferred to follow-up"
-    },
-    {
-      "at": "2026-06-09T18:38:28.612582Z",
-      "action": "bump internal 0.1.0.0 → 0.1.0.1"
-    },
-    {
-      "at": "2026-06-09T18:38:28.634313Z",
-      "action": "quick: wire profile editing (load-by-id + updateProfile)"
-    },
     {
       "at": "2026-06-09T18:48:13.040412Z",
       "action": "bump internal 0.1.0.1 → 0.1.0.2"
@@ -205,6 +153,58 @@
     {
       "at": "2026-06-10T08:42:07.363242Z",
       "action": "plan amended per review: 04-chat-drivers (10 tasks across 4 waves; t-6/t-7 parsers merged, t-10 split, t-5 +repo, t-3 logging-live contract)"
+    },
+    {
+      "at": "2026-06-10T08:48:28.585362Z",
+      "action": "executed t-1 (Define chat message + token + error model)"
+    },
+    {
+      "at": "2026-06-10T08:49:28.222472Z",
+      "action": "executed t-2 (Pure error mapper for failed requests)"
+    },
+    {
+      "at": "2026-06-10T08:52:52.084365Z",
+      "action": "executed t-3 (Key-redaction util + redacting OkHttp client)"
+    },
+    {
+      "at": "2026-06-10T08:53:49.405215Z",
+      "action": "executed t-4 (In-memory session history holder)"
+    },
+    {
+      "at": "2026-06-10T08:56:40.64863Z",
+      "action": "executed t-5 (Add request-params fields to profile + store + repo)"
+    },
+    {
+      "at": "2026-06-10T08:58:48.600031Z",
+      "action": "executed t-6 (Streaming token parsers SSE + Ollama NDJSON)"
+    },
+    {
+      "at": "2026-06-10T09:00:44.487475Z",
+      "action": "executed t-7 (Request body builders per provider type)"
+    },
+    {
+      "at": "2026-06-10T11:09:23.404818Z",
+      "action": "executed t-8 (Provider-form request-param inputs)"
+    },
+    {
+      "at": "2026-06-10T11:29:16.052179Z",
+      "action": "fixed flaky ProbeViewModelTest hang (test-only; full suite green)"
+    },
+    {
+      "at": "2026-06-10T11:34:09.010909Z",
+      "action": "executed t-9 (ChatDriver wiring + factory + MockWebServer e2e; +mockwebserver testImpl)"
+    },
+    {
+      "at": "2026-06-10T11:39:44.356968Z",
+      "action": "executed t-10 (Chat screen + ViewModel + nav route)"
+    },
+    {
+      "at": "2026-06-10T11:40:08.531094Z",
+      "action": "set current_phase_status=complete"
+    },
+    {
+      "at": "2026-06-10T11:40:08.538213Z",
+      "action": "phase 04-chat-drivers executed (10/10 done \u0026 green); +flaky ProbeViewModelTest hang fixed mid-run"
     }
   ]
 }
