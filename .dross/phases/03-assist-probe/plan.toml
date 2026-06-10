@@ -1,0 +1,116 @@
+[phase]
+id = "03-assist-probe"
+
+[[task]]
+id            = "t-1"
+wave          = 1
+title         = "Probe record model + DataStore persistence"
+files         = [
+  "app/src/main/java/dev/equerry/app/assistant/ProbeRecord.kt",
+  "app/src/main/java/dev/equerry/app/data/ProbeRecordStore.kt",
+  "app/src/main/java/dev/equerry/app/di/PersistenceModule.kt",
+]
+description   = """
+ProbeRecord domain model + ProbeRecordStore persisting a JSON list in the locked
+settings DataStore (mirrors ProfileStore). One record appended per invocation.
+Never stores a bitmap — screenshot is fact + dimensions only. Provide via Hilt.
+"""
+covers        = ["c-5"]
+test_contract = [
+  "appending a record then reloading the store returns all prior records in insertion order (ProbeRecordStoreTest)",
+  "a record with screenshotBlocked=true round-trips with no bitmap field present",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-2"
+wave          = 1
+title         = "Probe data helpers (pure, JVM-tested)"
+files         = [
+  "app/src/main/java/dev/equerry/app/assistant/AssistStructureSummary.kt",
+  "app/src/main/java/dev/equerry/app/assistant/ScreenshotMeta.kt",
+  "app/src/main/java/dev/equerry/app/assistant/ProbeCsv.kt",
+]
+description   = """
+Pure helpers: text-node counter over a small AssistNode abstraction (+ a thin
+AssistStructure.ViewNode adapter); screenshot metadata (dimensions or blocked);
+CSV renderer for a list of ProbeRecord. All unit-testable on the JVM with fakes.
+"""
+covers        = ["c-3", "c-4", "c-5"]
+test_contract = [
+  "a node tree with K text-bearing nodes returns textNodeCount == K; a tree with none returns 0 (AssistStructureSummaryTest)",
+  "screenshot meta for a 1080x2400 bitmap renders \"1080x2400\"; a null/blocked screenshot renders the blocked marker",
+  "CSV output has a header row plus one row per record; the screenshot column reads \"blocked\" when blocked (ProbeCsvTest)",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-3"
+wave          = 2
+depends_on    = ["t-1", "t-2"]
+title         = "Assistant role plumbing + capture"
+files         = [
+  "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionService.kt",
+  "app/src/main/java/dev/equerry/app/assistant/EquerrySessionService.kt",
+  "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt",
+  "app/src/main/java/dev/equerry/app/assistant/ProbeRecorder.kt",
+  "app/src/main/res/xml/interaction_service.xml",
+  "app/src/main/res/xml/recognition_service.xml",
+  "app/src/main/AndroidManifest.xml",
+]
+description   = """
+Register VoiceInteractionService + SessionService + Session and the res/xml
+metadata so Equerry can be set as the system default assistant. The session's
+onHandleAssist/onHandleScreenshot are thin glue over the t-2 helpers + t-1 store
+via a JVM-testable ProbeRecorder.
+"""
+covers        = ["c-1", "c-3", "c-4"]
+test_contract = [
+  "ProbeRecorder.record(summary, screenshotMeta, app) persists exactly one ProbeRecord whose nodeCount == summary count and screenshot fields == meta (ProbeRecorderTest)",
+  "MANUAL (verify-time): Equerry appears in the Digital-assistant picker and becomes the active assistant once selected — framework/OS-bound, not unit-testable",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-4"
+wave          = 3
+depends_on    = ["t-3", "t-2"]
+title         = "Live probe dashboard (session content view)"
+files         = [
+  "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt",
+  "app/src/main/java/dev/equerry/app/ui/probe/ProbeDashboard.kt",
+]
+description   = """
+Host a ComposeView in the session window (ViewTree lifecycle/savedstate owners)
+rendering the current invocation's capture: foreground app, AssistStructure
+arrived + node count, screenshot arrived/blocked + size.
+"""
+covers        = ["c-2"]
+test_contract = [
+  "given ProbeUiState(app=X, nodeCount=N, screenshot=\"blocked\"), the dashboard renders \"X\", \"N text nodes\" and \"blocked\" (Compose UI test)",
+  "MANUAL (verify-time): the assist gesture shows this session screen, not Gemini — framework/OS-bound, not unit-testable",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-5"
+wave          = 3
+depends_on    = ["t-1", "t-2"]
+title         = "Probe log screen + CSV export + nav entry"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/probe/ProbeLogScreen.kt",
+  "app/src/main/java/dev/equerry/app/ui/probe/ProbeLogViewModel.kt",
+  "app/src/main/java/dev/equerry/app/MainActivity.kt",
+]
+description   = """
+A probe-log screen reachable from Home listing stored records newest-first, with
+an Export action that shares the CSV (t-2 renderer) via the system share-sheet.
+Empty store shows guidance.
+"""
+covers        = ["c-5"]
+test_contract = [
+  "ProbeLogViewModel exposes stored records newest-first (ProbeLogViewModelTest)",
+  "the export builder produces an ACTION_SEND intent with type \"text/csv\" whose body == ProbeCsv output (ShareIntent test)",
+  "an empty store renders the empty-state guidance (Compose test)",
+]
+status        = "pending"
