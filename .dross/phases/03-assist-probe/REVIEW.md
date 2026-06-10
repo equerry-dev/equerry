@@ -1,76 +1,88 @@
 # Plan Review — 03-assist-probe
 
 Reviewed: 2026-06-10
-Plan: 5 tasks across 3 waves
+Plan: 7 tasks across 3 waves
 
 ## BLOCKING
 (none)
 
-All five criteria are covered (c-1→t-3, c-2→t-4, c-3→t-2/t-3, c-4→t-2/t-3,
-c-5→t-1/t-2/t-5). No task contradicts a locked decision. No rule violations:
-runtime.mode is "native" so gradle commands are correct, and the assistant
-role is built on the sanctioned Assist API / VoiceInteractionService, not an
-AccessibilityService (r-01 respected).
-
 ## FLAG
-- [granularity] t-3 touches 7 files and spans 3 layers (service registration +
-  manifest/res-xml plumbing + JVM-testable ProbeRecorder capture logic). The
-  framework-binding plumbing (the three services, two res/xml files, manifest)
-  and the testable ProbeRecorder are separable concerns with different verify
-  paths — the former is MANUAL-only, the latter has a real unit contract.
-  Suggestion: consider splitting t-3 into "role registration + manifest/xml"
-  (manual-verified, no unit test) and "ProbeRecorder capture glue" (the
-  ProbeRecorderTest contract). The split also lets t-4 depend only on the
-  registration half.
+- [wave-order] t-2 and t-4 are both declared `wave = 1` yet each has
+  `depends_on = ["t-1"]`, and t-1 is also `wave = 1`. A task cannot run in the same
+  wave as a dependency it consumes — both need t-1's `ProbeRecord` type. As written
+  the `wave` field contradicts the dependency graph (the whole of wave 1 cannot run
+  in parallel).
+  Suggestion: Move t-2 and t-4 to wave 2 and cascade the rest (current wave-2
+  t-3/t-5/t-7 → wave 3, t-6 → wave 4), or drop wave numbers and let `depends_on`
+  drive ordering. Pick one ordering model and keep it internally consistent.
 
-- [wave-order] t-4 declares depends_on = ["t-3", "t-2"], but t-4's actual work
-  is the Compose dashboard in the session window. Its stated need on t-3 is the
-  EquerryVoiceInteractionSession host. However t-4 ALSO edits
-  EquerryVoiceInteractionSession.kt — the same file t-3 creates — so the two
-  tasks write the same file in different waves. That is a real ordering need
-  (t-4 must follow t-3), but it signals the session class is being built across
-  two tasks. Suggestion: confirm t-3 leaves a clear seam (e.g. an empty
-  onCreateContentView / setContentView hook) for t-4 to fill, or fold the
-  dashboard hosting into t-3 and keep ProbeDashboard.kt as the only t-4 file.
+- [locked-decisions] export_format is locked as "Export the results table as CSV
+  **via the Android share-sheet**." t-4 produces the CSV string and t-3 exposes
+  `exportCsv()`, but no task owns the share-sheet (`Intent.ACTION_SEND` /
+  `ShareCompat`) wiring. t-5 only renders an "Export CSV" affordance and its
+  contract asserts the affordance is *displayed*, not that it fires a share intent.
+  The share-sheet half of the locked decision is unimplemented.
+  Suggestion: Assign the share-sheet launch (intent construction + invocation from
+  the Export affordance) explicitly to t-5 or t-3, with a contract asserting the
+  intent is built with the CSV payload and correct MIME type.
 
-- [wave-order] t-5 depends_on = ["t-1", "t-2"] only — it needs the store and the
-  CSV renderer, neither of which is in wave 2. t-5 has no dependency on t-3 or
-  t-4, so it could run in wave 2 alongside t-3 for more parallelism instead of
-  sitting in wave 3. Suggestion: move t-5 to wave 2 (its deps t-1/t-2 are both
-  wave 1), shrinking the critical path.
+- [granularity] t-6 touches 6 files, spans 3 layers (service/session classes + 3
+  manifest/XML resources + strings + viewmodel/screen wire-up) and covers 4
+  criteria (c-1..c-4). It bundles "make the app a selectable assistant" (manifest +
+  VIS registration, c-1) with "session feeds the analyzer and launches the screen"
+  (c-2/c-3/c-4) — two separable concerns with different verify paths.
+  Suggestion: Consider splitting into (a) VoiceInteractionService/Session
+  registration + manifest/XML (c-1, mostly manifest-merge + manual) and (b) session
+  onHandleAssist/onHandleScreenshot wiring into analyzer/viewmodel/screen
+  (c-2/c-3/c-4, has unit-testable surface).
 
-- [test-contract] t-3's first contract ("ProbeRecorder.record(...) persists
-  exactly one ProbeRecord whose nodeCount == summary count and screenshot
-  fields == meta") is good, but the MANUAL line is the only coverage for c-1
-  (appears in picker / becomes active assistant). c-1 therefore has zero
-  automated verification. That is inherent to the OS-bound role and acceptable,
-  but flag it so verify-time treats c-1 as a manual gate, not a passed unit
-  test. Suggestion: ensure the verify step explicitly records the manual c-1
-  check rather than inferring it from t-3 passing.
+- [test-contract] t-6's only automated contract for its core capture path is
+  "extend AssistAnalyzerTest with the ViewNode -> ViewNodeLike adapter case." The
+  session callbacks (`onHandleAssist`/`onHandleScreenshot`) feeding the viewmodel
+  are not unit-asserted; c-2/c-3/c-4 for the live session path rest on the two
+  MANUAL contracts. The adapter test verifies tree conversion but not that the
+  session wires that output into ProbeSessionViewModel.
+  Suggestion: Add a contract that the session's capture handler (or an extracted
+  testable capture function) builds a ProbeRecord from a stub structure/screenshot
+  and pushes it to the viewmodel — so the wiring, not just the adapter, has a gate.
 
 ## NOTE
-- [strengths] Screenshot-retention discipline is carried correctly through the
-  whole chain: t-1 ("Never stores a bitmap — screenshot is fact + dimensions
-  only") and t-2 (blocked marker / dimensions only) both honor the locked
-  screenshot_retention decision and the privacy core_value. Good fidelity to a
-  hard constraint.
+- [strengths] screenshot_retention is enforced structurally, not by convention:
+  t-1's `ProbeRecord` has no bitmap/byte[] field and `screenshotMeta` takes no
+  Bitmap, with the contract stating "pixels can't leak past it." Enforcing a
+  privacy decision at the type level is the right move for a privacy-is-the-product
+  app.
 
-- [strengths] The pure-helpers/glue separation (t-2 extracts node counting, CSV
-  rendering, and screenshot meta as JVM-testable units behind an AssistNode
-  abstraction) is the right shape for an Android phase — it pulls real logic out
-  of the framework-bound services so c-3/c-4/c-5 get genuine unit contracts
-  instead of leaning on instrumentation.
+- [strengths] Test contracts are specific and name the failure mode rather than
+  asserting "tests pass": t-2's "read-then-write outside the edit block drops
+  writes," t-4's RFC-4180 quote-doubling round-trip, t-1's recursion / 4-level
+  nesting case.
 
-- [strengths] Plan correctly mirrors the existing ProfileStore pattern (verified
-  in app/.../data/ProfileStore.kt) and reuses the already-provided
-  PersistenceModule DataStore — no new dependency, matching the locked
-  probe_persistence rationale. All referenced existing files (ProfileStore,
-  PersistenceModule, MainActivity, AndroidManifest) exist in the repo; the
-  manifest even carries a TODO marker exactly where t-3 will register the
-  services.
+- [strengths] t-3's exportCsv contract deliberately delegates to the real
+  `ProbeCsv` ("so a serializer regression is caught here rather than stubbed away"),
+  avoiding the common trap of mocking the collaborator and testing nothing.
+
+- [coverage] All five criteria covered: c-1→t-6; c-2→t-5,t-6; c-3→t-1,t-3,t-6;
+  c-4→t-1,t-3,t-6; c-5→t-2,t-3,t-4,t-5,t-7. No gaps.
+
+- [forbidden-actions] No rule violations. r-01 (no AccessibilityService) is
+  respected — the plan uses VoiceInteractionService/Assist API only. r-02/r-03 are
+  not engaged (no side-effecting actions, no keys). runtime.mode is "native" with
+  gradle commands; no pnpm/docker concern. Global rules.toml does not exist.
+
+- [verified] All referenced existing files exist: MainActivity.kt (has `Route` +
+  `EquerryNavHost` that t-7 extends), NavigationTest.kt (t-7's contract matches its
+  TestNavHostController pattern), PersistenceModule.kt (t-2 extends it, mirroring
+  the ProfileStore/SlotMappingStore provider pattern), ProfileStore.kt (the pattern
+  t-2 mirrors), strings.xml, and AndroidManifest.xml (carries a TODO placeholder
+  exactly where t-6 registers the VIS). ProviderListScreenTest (t-5's mirror)
+  exists. New files are each created by their own task before downstream use.
+
+- [granularity] t-1 bundles ProbeRecord + AssistAnalyzer in one task — fine, not an
+  inflated split; the record is a trivial data class and the analyzer is small.
 
 ## Summary
-Solid, well-decomposed plan with full criteria coverage and no blockers; the
-main improvements are splitting the overloaded t-3, pulling t-5 forward to
-wave 2, and treating the EquerryVoiceInteractionSession.kt shared edit between
-t-3 and t-4 as a deliberate seam.
+Solid, specific plan with strong type-level privacy enforcement and concrete
+contracts; the fixable gaps are the wave/dependency inconsistency, an unowned
+share-sheet step that a locked decision requires, and t-6 being an over-stuffed
+multi-layer task with thin automated coverage of its session-wiring path.
