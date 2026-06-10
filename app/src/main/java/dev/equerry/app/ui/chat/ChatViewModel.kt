@@ -10,6 +10,10 @@ import dev.equerry.app.providers.drivers.ChatMessage
 import dev.equerry.app.providers.drivers.ChatRole
 import dev.equerry.app.providers.drivers.ChatSession
 import dev.equerry.app.providers.drivers.ChatToken
+import dev.equerry.app.tools.actions.ActionNotes
+import dev.equerry.app.tools.actions.ActionPlanner
+import dev.equerry.app.tools.actions.ActionRunner
+import dev.equerry.app.tools.actions.PlannedAction
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,6 +38,17 @@ data class ChatUiState(
      * the "reply done" signal the voice flow reads to speak the whole reply (t-7).
      */
     val lastReply: String? = null,
+    /**
+     * Actions awaiting the user: a single staged timer/alarm (a "Start now?" card) or a multi-action
+     * pending list (each runnable independently). Hand-offs that launched directly never appear here.
+     */
+    val pendingActions: List<PlannedAction> = emptyList(),
+    /** Deterministic, past-tense notes of actions Equerry ran/opened (never "sent"). */
+    val actionNotes: List<String> = emptyList(),
+    /** A one-line guidance string when a requested action couldn't be run (with a Settings link in UI). */
+    val actionGuidance: String? = null,
+    /** True when the CHAT-mapped provider can't run actions — the UI shows the capability banner. */
+    val toolsUnsupported: Boolean = false,
 )
 
 /**
@@ -46,6 +61,7 @@ class ChatViewModel @Inject constructor(
     private val repository: ProviderRepository,
     private val driverFactory: ChatDriverFactory,
     private val session: ChatSession,
+    private val actionRunner: ActionRunner,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ChatUiState())
@@ -84,10 +100,16 @@ class ChatViewModel @Inject constructor(
                     unmapped = false,
                     error = null,
                     lastReply = null,
+                    // Reset per-turn action UI; surface the capability banner if this provider can't run actions.
+                    pendingActions = emptyList(),
+                    actionNotes = emptyList(),
+                    actionGuidance = null,
+                    toolsUnsupported = !profile.type.supportsTools,
                 )
             }
 
             val reply = StringBuilder()
+            val toolCalls = mutableListOf<ChatToken.ToolCall>()
             var failed = false
             driverFactory.send(profile, key, requestMessages)
                 .catch { e ->
@@ -97,17 +119,66 @@ class ChatViewModel @Inject constructor(
                     _state.update { it.copy(error = message, streaming = false) }
                 }
                 .collect { token ->
-                    if (token is ChatToken.Delta) {
-                        reply.append(token.text)
-                        _state.update { it.copy(transcript = it.transcript.withLastAssistant(reply.toString())) }
+                    when (token) {
+                        is ChatToken.Delta -> {
+                            reply.append(token.text)
+                            _state.update { it.copy(transcript = it.transcript.withLastAssistant(reply.toString())) }
+                        }
+                        is ChatToken.ToolCall -> toolCalls.add(token)
+                        ChatToken.Done -> Unit
                     }
                 }
 
             if (!failed) {
-                session.append(ChatMessage(ChatRole.ASSISTANT, reply.toString()))
-                _state.update { it.copy(streaming = false, lastReply = reply.toString()) }
+                val replyText = reply.toString()
+                if (replyText.isNotEmpty()) session.append(ChatMessage(ChatRole.ASSISTANT, replyText))
+                _state.update { it.copy(streaming = false, lastReply = replyText.ifEmpty { null }) }
+                if (toolCalls.isNotEmpty()) dispatchActions(ActionPlanner.plan(toolCalls))
             }
         }
+    }
+
+    /**
+     * Route a planned set of actions. A single hand-off launches directly (handoff_execution); a
+     * single staged timer/alarm becomes a "Start now?" card; several actions become a pending list.
+     * Calls the model couldn't be turned into a valid action become guidance, never a crash (c-5).
+     */
+    private fun dispatchActions(plan: List<PlannedAction>) {
+        val malformed = plan.filterIsInstance<PlannedAction.Malformed>()
+        val runnable = plan.filter { it !is PlannedAction.Malformed }
+        val notes = mutableListOf<String>()
+        var pending = emptyList<PlannedAction>()
+        when {
+            runnable.size == 1 && runnable[0] is PlannedAction.Handoff -> {
+                val action = runnable[0]
+                notes += if (actionRunner.run(action)) ActionNotes.of(action) else NO_HANDLER_NOTE
+            }
+            runnable.isNotEmpty() -> pending = runnable
+        }
+        _state.update {
+            it.copy(
+                pendingActions = pending,
+                actionNotes = it.actionNotes + notes,
+                actionGuidance = if (malformed.isEmpty()) it.actionGuidance else ACTION_GUIDANCE,
+            )
+        }
+    }
+
+    /** Confirm (Start/Open) the pending action at [index]: run it once and post a deterministic note. */
+    fun confirmAction(index: Int) {
+        val action = _state.value.pendingActions.getOrNull(index) ?: return
+        val note = if (actionRunner.run(action)) ActionNotes.of(action) else NO_HANDLER_NOTE
+        _state.update {
+            it.copy(
+                pendingActions = it.pendingActions.filterIndexed { i, _ -> i != index },
+                actionNotes = it.actionNotes + note,
+            )
+        }
+    }
+
+    /** Skip/cancel the pending action at [index] without running it. */
+    fun cancelAction(index: Int) {
+        _state.update { it.copy(pendingActions = it.pendingActions.filterIndexed { i, _ -> i != index }) }
     }
 
     /** "New chat": clear the in-memory thread and reset the screen. */
@@ -123,3 +194,6 @@ class ChatViewModel @Inject constructor(
         return toMutableList().also { it[index] = it[index].copy(content = text) }
     }
 }
+
+private const val NO_HANDLER_NOTE = "Couldn't open an app for that action — none is installed to handle it."
+private const val ACTION_GUIDANCE = "Some requested actions couldn't be run with this provider."

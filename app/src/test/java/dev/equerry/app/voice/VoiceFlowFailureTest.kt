@@ -16,6 +16,7 @@ import dev.equerry.app.providers.drivers.ChatDriverFactory
 import dev.equerry.app.providers.drivers.ChatError
 import dev.equerry.app.providers.drivers.ChatHttpClient
 import dev.equerry.app.providers.drivers.ChatSession
+import dev.equerry.app.tools.actions.ActionRunner
 import dev.equerry.app.providers.drivers.OllamaChatDriver
 import dev.equerry.app.providers.drivers.OpenAiChatDriver
 import dev.equerry.app.ui.chat.ChatViewModel
@@ -96,7 +97,7 @@ class VoiceFlowFailureTest {
         repository = ProviderRepository(ProfileStore(ds), FakeSecretStore(), SlotMappingStore(ds))
         val client = ChatHttpClient.create()
         val factory = ChatDriverFactory(OpenAiChatDriver(client), AnthropicChatDriver(client), OllamaChatDriver(client))
-        vm = ChatViewModel(repository, factory, ChatSession())
+        vm = ChatViewModel(repository, factory, ChatSession(), ActionRunner { false })
         settings = VoiceSettingsStore(ds)
     }
 
