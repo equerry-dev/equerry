@@ -7,10 +7,18 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.service.voice.VoiceInteractionSession
 import android.view.View
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -27,21 +35,58 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import dev.equerry.app.data.ProbeStore
-import dev.equerry.app.ui.probe.ProbeSessionScreen
+import dev.equerry.app.data.VoiceSettingsStore
+import dev.equerry.app.providers.ProviderRepository
+import dev.equerry.app.providers.drivers.ChatDriverFactory
+import dev.equerry.app.providers.drivers.ChatSession
+import dev.equerry.app.ui.chat.ChatScreen
+import dev.equerry.app.ui.chat.ChatViewModel
 import dev.equerry.app.ui.theme.EquerryTheme
+import dev.equerry.app.voice.MicPermission
+import dev.equerry.app.voice.SystemSpeechToText
+import dev.equerry.app.voice.SystemTextToSpeech
+import dev.equerry.app.voice.VoiceFlowController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
- * The assist session. On each invocation its callbacks adapt the AssistStructure and
- * screenshot into a [ProbeRecord] via [ProbeCapture], persist it to [ProbeStore], and
- * render the live capture through [ProbeSessionScreen] in a Compose content view.
+ * The session's lifecycle wiring, extracted from the framework-bound session so it is unit-testable
+ * (see VoiceSessionWiringTest). [onShow] checks mic permission BEFORE arming STT — when denied it
+ * requests the mic instead of blindly arming a recognizer that would immediately error. [onDestroy]
+ * releases exactly once (the underlying stop is idempotent).
+ */
+class VoiceSessionCoordinator(
+    private val isMicGranted: () -> Boolean,
+    private val arm: () -> Unit,
+    private val release: () -> Unit,
+    private val requestMic: () -> Unit,
+) {
+    fun onShow() {
+        if (isMicGranted()) arm() else requestMic()
+    }
+
+    fun onDestroy() {
+        release()
+    }
+}
+
+/**
+ * The assist session. On invocation it renders the phase-04 [ChatScreen] (session_ui_reuse, locked)
+ * driven by a [VoiceFlowController]: the spoken question is captured by system STT, sent to the
+ * CHAT provider, and the reply spoken via TTS. AssistStructure probe capture still feeds [ProbeStore]
+ * (off the rendered surface — the Probe dashboard stays reachable via the Probe log route only).
  *
- * This class is framework-bound and verified manually (c-2). The record-shaping logic
- * lives in [ProbeCapture]/[AssistAnalyzer] which are unit-tested.
+ * Framework-bound (a [VoiceInteractionSession]); verified MANUALLY: assist gesture → listening →
+ * spoken question shown → reply renders as it streams → reply spoken aloud; a denied mic or missing
+ * provider shows guidance instead of crashing (c-1..c-5). The branching/decision logic lives in
+ * [VoiceFlowController] and [VoiceSessionCoordinator], which ARE unit-tested. All collaborators are
+ * pulled from Hilt as singletons via [VoiceEntryPoint]; [ChatViewModel] is constructed directly from
+ * those singletons (it is a @HiltViewModel, so it cannot be exposed through a SingletonComponent
+ * EntryPoint, and the session is not a Hilt ViewModel host).
  */
 class EquerryVoiceInteractionSession(context: Context) :
     VoiceInteractionSession(context),
@@ -49,11 +94,15 @@ class EquerryVoiceInteractionSession(context: Context) :
     ViewModelStoreOwner,
     SavedStateRegistryOwner {
 
-    /** Pulls the singleton [ProbeStore] out of Hilt — a Session is not a Hilt entry point. */
+    /** Pulls the singleton collaborators the voice flow needs — a Session is not a Hilt entry point. */
     @EntryPoint
     @InstallIn(SingletonComponent::class)
-    interface ProbeStoreEntryPoint {
+    interface VoiceEntryPoint {
         fun probeStore(): ProbeStore
+        fun providerRepository(): ProviderRepository
+        fun chatDriverFactory(): ChatDriverFactory
+        fun chatSession(): ChatSession
+        fun voiceSettingsStore(): VoiceSettingsStore
     }
 
     private val lifecycleRegistry = LifecycleRegistry(this)
@@ -67,17 +116,41 @@ class EquerryVoiceInteractionSession(context: Context) :
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    private val probeStore: ProbeStore = EntryPointAccessors
-        .fromApplication(context.applicationContext, ProbeStoreEntryPoint::class.java)
-        .probeStore()
+    private val entry: VoiceEntryPoint = EntryPointAccessors
+        .fromApplication(context.applicationContext, VoiceEntryPoint::class.java)
 
-    private var current by mutableStateOf<ProbeRecord?>(null)
+    private val probeStore: ProbeStore = entry.probeStore()
+
+    // ChatViewModel reuses the phase-04 round-trip; constructed directly from the injected singletons.
+    private val chatViewModel: ChatViewModel = ChatViewModel(
+        entry.providerRepository(),
+        entry.chatDriverFactory(),
+        entry.chatSession(),
+    )
+
+    private val controller: VoiceFlowController = VoiceFlowController(
+        chat = chatViewModel,
+        stt = SystemSpeechToText.fromContext(context.applicationContext),
+        tts = SystemTextToSpeech.fromContext(context.applicationContext),
+        settings = entry.voiceSettingsStore(),
+        scope = scope,
+        isMicGranted = { MicPermission.isGranted(context.applicationContext) },
+        isChatConfigured = { entry.providerRepository().observeChatMapping().first() != null },
+    )
+
+    private val coordinator = VoiceSessionCoordinator(
+        isMicGranted = { MicPermission.isGranted(context.applicationContext) },
+        arm = { controller.start() },
+        // The controller is the single guidance authority: when the mic is denied, start() surfaces
+        // the mic-denied guidance (with the settings path) without arming the recognizer.
+        requestMic = { controller.start() },
+        release = { controller.stop() },
+    )
 
     /** Latest screenshot classification; reset to "blocked" after each capture. */
     private var pendingShot: ScreenshotMeta = AssistAnalyzer.screenshotMeta(null, null)
 
     private val capture = ProbeCapture { record ->
-        current = record
         scope.launch { probeStore.append(record) }
     }
 
@@ -93,9 +166,44 @@ class EquerryVoiceInteractionSession(context: Context) :
             setViewTreeViewModelStoreOwner(this@EquerryVoiceInteractionSession)
             setViewTreeSavedStateRegistryOwner(this@EquerryVoiceInteractionSession)
             setContent {
-                EquerryTheme { ProbeSessionScreen(current) }
+                EquerryTheme {
+                    val state by chatViewModel.state.collectAsState()
+                    val guidance by controller.guidance.collectAsState()
+                    Column(Modifier.fillMaxSize()) {
+                        guidance?.let { g ->
+                            Surface(
+                                color = MaterialTheme.colorScheme.errorContainer,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(
+                                    g.message,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                    modifier = Modifier.padding(16.dp),
+                                )
+                            }
+                        }
+                        ChatScreen(
+                            state = state,
+                            onInput = chatViewModel::onInputChange,
+                            onSend = chatViewModel::send,
+                            onNewChat = chatViewModel::newChat,
+                        )
+                    }
+                }
             }
         }
+
+    /** The session UI is shown on each invocation — begin listening (c-1). */
+    override fun onShow(args: Bundle?, showFlags: Int) {
+        super.onShow(args, showFlags)
+        coordinator.onShow()
+    }
+
+    /** Session hidden — stop the voice loop; restartable on the next onShow. */
+    override fun onHide() {
+        coordinator.onDestroy()
+        super.onHide()
+    }
 
     override fun onHandleScreenshot(screenshot: Bitmap?) {
         super.onHandleScreenshot(screenshot)
@@ -119,6 +227,7 @@ class EquerryVoiceInteractionSession(context: Context) :
     }
 
     override fun onDestroy() {
+        coordinator.onDestroy()
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         scope.cancel()
         super.onDestroy()
