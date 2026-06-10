@@ -1,19 +1,9 @@
 {
   "version": "0.1.5.0",
   "current_milestone": "v0.1",
-  "current_phase": "05-voice-roundtrip",
-  "current_phase_status": "verified",
-  "last_activity": "2026-06-10T16:17:26.747549Z",
-  "last_action": "verified 05-voice-roundtrip: pass (5/5 covered, mutation skipped)",
+  "last_activity": "2026-06-10T16:43:04.093955Z",
+  "last_action": "completed 05-voice-roundtrip",
   "history": [
-    {
-      "at": "2026-06-10T07:37:58.801868Z",
-      "action": "created 04-chat-drivers"
-    },
-    {
-      "at": "2026-06-10T07:47:13.610041Z",
-      "action": "set current_phase=04-chat-drivers"
-    },
     {
       "at": "2026-06-10T07:47:13.617061Z",
       "action": "spec locked: 04-chat-drivers"
@@ -205,6 +195,14 @@
     {
       "at": "2026-06-10T16:17:26.747549Z",
       "action": "verified 05-voice-roundtrip: pass (5/5 covered, mutation skipped)"
+    },
+    {
+      "at": "2026-06-10T16:21:59.166696Z",
+      "action": "shipped 05-voice-roundtrip → https://github.com/equerry-dev/equerry/pull/4"
+    },
+    {
+      "at": "2026-06-10T16:43:04.093955Z",
+      "action": "completed 05-voice-roundtrip"
     }
   ]
 }
