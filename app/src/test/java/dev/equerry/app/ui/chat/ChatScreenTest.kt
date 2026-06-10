@@ -5,10 +5,13 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import dev.equerry.app.providers.drivers.ChatMessage
 import dev.equerry.app.providers.drivers.ChatRole
 import dev.equerry.app.ui.theme.EquerryTheme
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,5 +65,40 @@ class ChatScreenTest {
     fun error_line_renders_when_set() {
         setScreen(ChatUiState(error = "Authentication failed. Check the API key configured for this provider."))
         compose.onNodeWithText("Authentication failed", substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun mic_button_fires_onMic_when_tapped() {
+        var micTapped = false
+        compose.setContent {
+            EquerryTheme {
+                ChatScreen(
+                    state = ChatUiState(),
+                    onInput = {},
+                    onSend = {},
+                    onNewChat = {},
+                    onMic = { micTapped = true },
+                )
+            }
+        }
+        compose.onNodeWithContentDescription("Speak").performClick()
+        assertTrue("tapping the mic must start the voice round-trip", micTapped)
+    }
+
+    @Test
+    fun listening_indicator_shows_while_listening() {
+        compose.setContent {
+            EquerryTheme {
+                ChatScreen(
+                    state = ChatUiState(),
+                    onInput = {},
+                    onSend = {},
+                    onNewChat = {},
+                    listening = true,
+                    onMic = {},
+                )
+            }
+        }
+        compose.onNodeWithText("Listening", substring = true).assertIsDisplayed()
     }
 }
