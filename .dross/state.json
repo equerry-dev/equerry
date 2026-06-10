@@ -1,21 +1,11 @@
 {
   "version": "0.1.0.2",
   "current_milestone": "v0.1",
-  "last_activity": "2026-06-10T13:11:20.080714Z",
-  "last_action": "shipped 04-chat-drivers → https://github.com/equerry-dev/equerry/pull/3 (merged af22e22, preserve-commit merge)",
+  "current_phase": "05-voice-roundtrip",
+  "current_phase_status": "created",
+  "last_activity": "2026-06-10T13:46:18.500028Z",
+  "last_action": "spec locked: 05-voice-roundtrip",
   "history": [
-    {
-      "at": "2026-06-10T05:19:50.860174Z",
-      "action": "set current_phase_status=planned"
-    },
-    {
-      "at": "2026-06-10T05:19:50.867275Z",
-      "action": "plan locked: 03-assist-probe (5 tasks across 3 waves)"
-    },
-    {
-      "at": "2026-06-10T05:21:32.552543Z",
-      "action": "plan reviewed: 03-assist-probe (0 blocking, 4 flags)"
-    },
     {
       "at": "2026-06-10T05:30:55.738969Z",
       "action": "set current_phase_status=planned"
@@ -203,6 +193,18 @@
     {
       "at": "2026-06-10T13:11:20.080714Z",
       "action": "shipped 04-chat-drivers → https://github.com/equerry-dev/equerry/pull/3 (merged af22e22, preserve-commit merge)"
+    },
+    {
+      "at": "2026-06-10T13:33:51.400991Z",
+      "action": "created 05-voice-roundtrip"
+    },
+    {
+      "at": "2026-06-10T13:46:18.494786Z",
+      "action": "set current_phase=05-voice-roundtrip"
+    },
+    {
+      "at": "2026-06-10T13:46:18.500028Z",
+      "action": "spec locked: 05-voice-roundtrip"
     }
   ]
 }
