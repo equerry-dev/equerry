@@ -2,14 +2,10 @@
   "version": "0.1.0.2",
   "current_milestone": "v0.1",
   "current_phase": "03-assist-probe",
-  "current_phase_status": "planned",
-  "last_activity": "2026-06-10T05:37:44.527749Z",
-  "last_action": "plan amended per review: 03-assist-probe (8 tasks across 6 waves; wave-order fixed, share-sheet owned, t-6 split, capture contract added)",
+  "current_phase_status": "complete",
+  "last_activity": "2026-06-10T07:10:18.286632Z",
+  "last_action": "phase 03-assist-probe executed (8/8 done \u0026 green)",
   "history": [
-    {
-      "at": "2026-06-09T09:44:52.562646Z",
-      "action": "dross init"
-    },
     {
       "at": "2026-06-09T10:13:15.781318Z",
       "action": "init complete"
@@ -169,6 +165,46 @@
     {
       "at": "2026-06-10T05:37:44.527749Z",
       "action": "plan amended per review: 03-assist-probe (8 tasks across 6 waves; wave-order fixed, share-sheet owned, t-6 split, capture contract added)"
+    },
+    {
+      "at": "2026-06-10T05:41:17.509012Z",
+      "action": "executed t-1 (Define ProbeRecord + AssistAnalyzer)"
+    },
+    {
+      "at": "2026-06-10T05:42:41.462303Z",
+      "action": "executed t-2 (Add ProbeStore)"
+    },
+    {
+      "at": "2026-06-10T05:43:54.013495Z",
+      "action": "executed t-4 (Add CSV serializer)"
+    },
+    {
+      "at": "2026-06-10T05:45:19.02237Z",
+      "action": "executed t-3 (Probe ViewModels)"
+    },
+    {
+      "at": "2026-06-10T05:47:20.553795Z",
+      "action": "executed t-5 (Probe screens + CSV share intent)"
+    },
+    {
+      "at": "2026-06-10T05:48:32.957139Z",
+      "action": "executed t-7 (Probe log nav route)"
+    },
+    {
+      "at": "2026-06-10T05:52:31.740482Z",
+      "action": "executed t-8 (Session capture wiring)"
+    },
+    {
+      "at": "2026-06-10T07:09:59.306172Z",
+      "action": "executed t-6 (Register VoiceInteractionService + manifest; +RecognitionService per approved deviation)"
+    },
+    {
+      "at": "2026-06-10T07:10:18.280439Z",
+      "action": "set current_phase_status=complete"
+    },
+    {
+      "at": "2026-06-10T07:10:18.286632Z",
+      "action": "phase 03-assist-probe executed (8/8 done \u0026 green)"
     }
   ]
 }

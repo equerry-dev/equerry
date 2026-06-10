@@ -1,0 +1,80 @@
+{
+  "phase": "03-assist-probe",
+  "tasks": {
+    "t-1": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/assistant/ProbeRecord.kt",
+        "app/src/main/java/dev/equerry/app/assistant/AssistAnalyzer.kt",
+        "app/src/test/java/dev/equerry/app/assistant/AssistAnalyzerTest.kt"
+      ],
+      "commit": "4fe6174",
+      "completed_at": "2026-06-10T05:41:17.497219Z"
+    },
+    "t-2": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/data/ProbeStore.kt",
+        "app/src/main/java/dev/equerry/app/di/PersistenceModule.kt",
+        "app/src/test/java/dev/equerry/app/data/ProbeStoreTest.kt"
+      ],
+      "commit": "6048261",
+      "completed_at": "2026-06-10T05:42:41.451724Z"
+    },
+    "t-3": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/probe/ProbeSessionViewModel.kt",
+        "app/src/main/java/dev/equerry/app/ui/probe/ProbeLogViewModel.kt",
+        "app/src/test/java/dev/equerry/app/ui/probe/ProbeViewModelTest.kt"
+      ],
+      "commit": "e1f154b",
+      "completed_at": "2026-06-10T05:45:19.009227Z"
+    },
+    "t-4": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/assistant/ProbeCsv.kt",
+        "app/src/test/java/dev/equerry/app/assistant/ProbeCsvTest.kt"
+      ],
+      "commit": "be63e43",
+      "completed_at": "2026-06-10T05:43:53.998108Z"
+    },
+    "t-5": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/probe/ProbeSessionScreen.kt",
+        "app/src/main/java/dev/equerry/app/ui/probe/ProbeLogScreen.kt",
+        "app/src/main/java/dev/equerry/app/ui/probe/ProbeShare.kt",
+        "app/src/test/java/dev/equerry/app/ui/probe/ProbeScreenTest.kt"
+      ],
+      "commit": "97e8f69",
+      "completed_at": "2026-06-10T05:47:20.540115Z"
+    },
+    "t-6": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionService.kt",
+        "app/src/main/java/dev/equerry/app/assistant/EquerryRecognitionService.kt",
+        "app/src/main/res/xml/voice_interaction_service.xml",
+        "app/src/main/res/xml/recognition_service.xml",
+        "app/src/main/AndroidManifest.xml",
+        "app/src/main/res/values/strings.xml"
+      ],
+      "commit": "6c5df1b",
+      "completed_at": "2026-06-10T07:09:59.294413Z"
+    },
+    "t-7": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/MainActivity.kt",
+        "app/src/test/java/dev/equerry/app/NavigationTest.kt"
+      ],
+      "commit": "d742022",
+      "completed_at": "2026-06-10T05:48:32.943011Z"
+    },
+    "t-8": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/assistant/ProbeCapture.kt",
+        "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSessionService.kt",
+        "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt",
+        "app/src/test/java/dev/equerry/app/assistant/ProbeCaptureTest.kt"
+      ],
+      "commit": "4aaf3b6",
+      "completed_at": "2026-06-10T05:52:31.72708Z"
+    }
+  }
+}
