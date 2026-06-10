@@ -141,7 +141,7 @@ status        = "pending"
 
 [[task]]
 id            = "t-7"
-wave          = 2
+wave          = 3
 depends_on    = ["t-1", "t-2", "t-3", "t-4", "t-5", "t-6"]
 title         = "Voice-flow controller: listen-send-speak loop"
 files         = [
@@ -191,7 +191,7 @@ status        = "pending"
 
 [[task]]
 id            = "t-8"
-wave          = 3
+wave          = 4
 depends_on    = ["t-7"]
 title         = "Concurrency: dismiss + continuous re-arm races"
 files         = [
@@ -215,8 +215,8 @@ status        = "pending"
 
 [[task]]
 id            = "t-11"
-wave          = 3
-depends_on    = ["t-7"]
+wave          = 5
+depends_on    = ["t-7", "t-8"]
 title         = "Failure routing: single guidance surface"
 files         = [
   "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
@@ -242,7 +242,7 @@ status        = "pending"
 
 [[task]]
 id            = "t-10"
-wave          = 4
+wave          = 6
 depends_on    = ["t-7", "t-8", "t-11"]
 title         = "Wire controller into assist session (ChatScreen)"
 files         = [
@@ -251,10 +251,13 @@ files         = [
 ]
 description   = """
 Switch the session content from ProbeSessionScreen to ChatRoute/ChatScreen (session_ui_reuse,
-locked), pull VoiceFlowController/ChatViewModel via a new @EntryPoint (same pattern as
-ProbeStoreEntryPoint), request RECORD_AUDIO + start the controller on onShow/onCreate so
-listening begins on invocation (c-1), release on onDestroy (delegating to t-8's idempotent
-stop). AssistStructure probe capture still feeds ProbeStore but off the rendered surface; Probe
+locked). Pull VoiceFlowController (process-scoped, @Singleton) via a new @EntryPoint (same
+pattern as ProbeStoreEntryPoint). Obtain ChatViewModel NOT via a SingletonComponent EntryPoint
+(it is @HiltViewModel, not a singleton binding) but through a ViewModelProvider backed by the
+session's own ViewModelStore (the session already implements ViewModelStoreOwner) using Hilt's
+ViewModel factory. Request RECORD_AUDIO + start the controller on onShow/onCreate so listening
+begins on invocation (c-1), release on onDestroy (delegating to t-8's idempotent stop).
+AssistStructure probe capture still feeds ProbeStore but off the rendered surface; Probe
 dashboard stays reachable via the Probe log route only. All branching stays in the controller.
 """
 covers        = ["c-1", "c-3", "c-5"]
