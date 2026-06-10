@@ -62,6 +62,9 @@ fun ProviderEditRoute(
         onBaseUrl = viewModel::onBaseUrlChange,
         onKey = viewModel::onKeyChange,
         onModel = viewModel::onModelChange,
+        onSystemPrompt = viewModel::onSystemPromptChange,
+        onTemperature = viewModel::onTemperatureChange,
+        onMaxTokens = viewModel::onMaxTokensChange,
         onSave = viewModel::save,
         onBack = onBack,
     )
@@ -88,6 +91,9 @@ fun ProviderEditScreen(
     onBaseUrl: (String) -> Unit,
     onKey: (String) -> Unit,
     onModel: (String) -> Unit,
+    onSystemPrompt: (String) -> Unit,
+    onTemperature: (String) -> Unit,
+    onMaxTokens: (String) -> Unit,
     onSave: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -175,6 +181,40 @@ fun ProviderEditScreen(
 
             FieldLabel("Model")
             ModelField(value = state.model, presets = state.modelPresets, onValueChange = onModel)
+
+            FieldLabel("Options")
+            OutlinedTextField(
+                value = state.systemPrompt,
+                onValueChange = onSystemPrompt,
+                label = { Text("System prompt") },
+                placeholder = { Text("Optional — leave blank for the provider default") },
+                supportingText = { Text("Sent with every message to this provider.") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = state.temperature,
+                    onValueChange = onTemperature,
+                    label = { Text("Temperature") },
+                    placeholder = { Text("default") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    isError = state.errorFor(ProfileField.TEMPERATURE) != null,
+                    supportingText = { state.errorFor(ProfileField.TEMPERATURE)?.let { Text(it) } },
+                    modifier = Modifier.weight(1f),
+                )
+                OutlinedTextField(
+                    value = state.maxTokens,
+                    onValueChange = onMaxTokens,
+                    label = { Text("Max tokens") },
+                    placeholder = { Text("default") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    isError = state.errorFor(ProfileField.MAX_TOKENS) != null,
+                    supportingText = { state.errorFor(ProfileField.MAX_TOKENS)?.let { Text(it) } },
+                    modifier = Modifier.weight(1f),
+                )
+            }
             Spacer(Modifier.height(24.dp))
         }
     }

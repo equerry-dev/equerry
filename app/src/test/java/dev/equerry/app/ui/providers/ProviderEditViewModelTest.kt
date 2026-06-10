@@ -102,6 +102,34 @@ class ProviderEditViewModelTest {
     }
 
     @Test
+    fun requestParamsSaved() = runBlocking {
+        vm.selectType(ProviderType.OLLAMA)
+        vm.onLabelChange("Tuned Ollama")
+        vm.onModelChange("llama3.2")
+        vm.onSystemPromptChange("be brief")
+        vm.onTemperatureChange("0.7")
+        vm.onMaxTokensChange("256")
+        vm.save()
+
+        val profile = repository.observeProfiles().first { it.isNotEmpty() }.first()
+        assertEquals("be brief", profile.systemPrompt)
+        assertEquals(0.7, profile.temperature!!, 0.0001)
+        assertEquals(256, profile.maxTokens)
+    }
+
+    @Test
+    fun non_numeric_temperature_blocks_save_with_inline_error() = runBlocking {
+        vm.selectType(ProviderType.OLLAMA)
+        vm.onLabelChange("Bad")
+        vm.onModelChange("llama3.2")
+        vm.onTemperatureChange("hot")
+        vm.save()
+
+        assertNotNull("expected an inline TEMPERATURE error", vm.state.value.errorFor(ProfileField.TEMPERATURE))
+        assertTrue("invalid params must not persist a profile", repository.observeProfiles().first().isEmpty())
+    }
+
+    @Test
     fun load_prefills_the_form_and_marks_editing_without_exposing_the_key() = runBlocking {
         val created = repository.addProfile(
             ProfileDraft("Work Claude", ProviderType.ANTHROPIC, "https://api.anthropic.com", "sk-secret", "claude-opus-4-8"),

@@ -25,6 +25,9 @@ data class ProviderEditUiState(
     val baseUrl: String = "",
     val key: String = "",
     val model: String = "",
+    val systemPrompt: String = "",
+    val temperature: String = "",
+    val maxTokens: String = "",
     val errors: List<FieldError> = emptyList(),
     val saved: Boolean = false,
     val editing: Boolean = false,
@@ -64,6 +67,9 @@ class ProviderEditViewModel @Inject constructor(
                 baseUrl = profile.baseUrl,
                 key = "",
                 model = profile.model,
+                systemPrompt = profile.systemPrompt ?: "",
+                temperature = profile.temperature?.toString() ?: "",
+                maxTokens = profile.maxTokens?.toString() ?: "",
                 editing = true,
             )
         }
@@ -73,6 +79,9 @@ class ProviderEditViewModel @Inject constructor(
     fun onBaseUrlChange(value: String) = clearAnd(ProfileField.BASE_URL) { it.copy(baseUrl = value) }
     fun onKeyChange(value: String) = clearAnd(ProfileField.KEY) { it.copy(key = value) }
     fun onModelChange(value: String) = clearAnd(ProfileField.MODEL) { it.copy(model = value) }
+    fun onSystemPromptChange(value: String) = _state.update { it.copy(systemPrompt = value) }
+    fun onTemperatureChange(value: String) = clearAnd(ProfileField.TEMPERATURE) { it.copy(temperature = value) }
+    fun onMaxTokensChange(value: String) = clearAnd(ProfileField.MAX_TOKENS) { it.copy(maxTokens = value) }
 
     fun selectType(type: ProviderType) {
         _state.update {
@@ -87,7 +96,10 @@ class ProviderEditViewModel @Inject constructor(
 
     fun save() {
         val current = _state.value
-        val draft = ProfileDraft(current.label, current.type, current.baseUrl, current.key, current.model)
+        val draft = ProfileDraft(
+            current.label, current.type, current.baseUrl, current.key, current.model,
+            systemPrompt = current.systemPrompt, temperature = current.temperature, maxTokens = current.maxTokens,
+        )
         val id = editingId
         var errors = ProfileValidator.validate(draft)
         // When editing, a blank key means "keep the saved secret" — don't require one.
@@ -101,7 +113,12 @@ class ProviderEditViewModel @Inject constructor(
         viewModelScope.launch {
             if (id != null) {
                 repository.updateProfile(
-                    ProviderProfile(id, current.label, current.type, current.baseUrl, current.model),
+                    ProviderProfile(
+                        id, current.label, current.type, current.baseUrl, current.model,
+                        systemPrompt = current.systemPrompt.takeIf { it.isNotBlank() },
+                        temperature = current.temperature.toDoubleOrNull(),
+                        maxTokens = current.maxTokens.toIntOrNull(),
+                    ),
                     newKey = current.key.ifBlank { null },
                 )
             } else {
