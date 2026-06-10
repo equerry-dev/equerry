@@ -3,6 +3,7 @@ package dev.equerry.app.providers.drivers
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -26,7 +27,7 @@ class OllamaStreamParser {
             if (newline < 0) break
             val line = buffer.substring(0, newline)
             buffer.delete(0, newline + 1)
-            if (line.isNotBlank()) results.add(parseLine(line))
+            if (line.isNotBlank()) results.addAll(parseLines(line))
         }
         return results
     }
@@ -38,19 +39,35 @@ class OllamaStreamParser {
     fun finish(): TokenResult? {
         val rest = buffer.toString().trim()
         buffer.clear()
-        return if (rest.isEmpty()) null else parseLine(rest)
+        return if (rest.isEmpty()) null else parseLines(rest).firstOrNull()
     }
 
-    private fun parseLine(line: String): TokenResult =
+    /**
+     * Parse one complete line. A `message.tool_calls` line yields one [ChatToken.ToolCall] per call
+     * (Ollama supplies arguments as a JSON object, re-serialised into argsJson) — never Delta prose;
+     * otherwise `message.content` -> Delta, `"done":true` -> Done. A list keeps multi-tool lines whole.
+     */
+    private fun parseLines(line: String): List<TokenResult> =
         runCatching {
             val obj = ollamaJson.parseToJsonElement(line.trim()).jsonObject
             if (obj["done"]?.jsonPrimitive?.booleanOrNull == true) {
-                TokenResult.Emit(ChatToken.Done)
+                listOf(TokenResult.Emit(ChatToken.Done))
             } else {
-                val content = obj["message"]?.jsonObject?.get("content")?.jsonPrimitive?.contentOrNull
-                if (content.isNullOrEmpty()) TokenResult.Skip else TokenResult.Emit(ChatToken.Delta(content))
+                val message = obj["message"]?.jsonObject
+                val toolCalls = message?.get("tool_calls")?.jsonArray
+                if (!toolCalls.isNullOrEmpty()) {
+                    toolCalls.map { tc ->
+                        val fn = tc.jsonObject["function"]?.jsonObject
+                        val name = fn?.get("name")?.jsonPrimitive?.contentOrNull.orEmpty()
+                        val args = fn?.get("arguments")?.toString() ?: "{}"
+                        TokenResult.Emit(ChatToken.ToolCall(name, args, id = null))
+                    }
+                } else {
+                    val content = message?.get("content")?.jsonPrimitive?.contentOrNull
+                    if (content.isNullOrEmpty()) listOf(TokenResult.Skip) else listOf(TokenResult.Emit(ChatToken.Delta(content)))
+                }
             }
-        }.getOrElse { TokenResult.Fail(ChatError.Malformed) }
+        }.getOrElse { listOf(TokenResult.Fail(ChatError.Malformed)) }
 
     private companion object {
         val ollamaJson = Json { ignoreUnknownKeys = true }
