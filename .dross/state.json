@@ -2,18 +2,10 @@
   "version": "0.1.5.3",
   "current_milestone": "v0.1",
   "current_phase": "06-tools-actions",
-  "current_phase_status": "created",
-  "last_activity": "2026-06-10T18:30:55.338217Z",
-  "last_action": "spec locked: 06-tools-actions",
+  "current_phase_status": "planned",
+  "last_activity": "2026-06-10T18:42:03.64754Z",
+  "last_action": "plan locked (panel): 06-tools-actions (9 tasks across 3 waves)",
   "history": [
-    {
-      "at": "2026-06-10T08:56:40.64863Z",
-      "action": "executed t-5 (Add request-params fields to profile + store + repo)"
-    },
-    {
-      "at": "2026-06-10T08:58:48.600031Z",
-      "action": "executed t-6 (Streaming token parsers SSE + Ollama NDJSON)"
-    },
     {
       "at": "2026-06-10T09:00:44.487475Z",
       "action": "executed t-7 (Request body builders per provider type)"
@@ -205,6 +197,14 @@
     {
       "at": "2026-06-10T18:30:55.338217Z",
       "action": "spec locked: 06-tools-actions"
+    },
+    {
+      "at": "2026-06-10T18:42:03.639495Z",
+      "action": "set current_phase_status=planned"
+    },
+    {
+      "at": "2026-06-10T18:42:03.64754Z",
+      "action": "plan locked (panel): 06-tools-actions (9 tasks across 3 waves)"
     }
   ]
 }

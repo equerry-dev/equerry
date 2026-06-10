@@ -1,0 +1,212 @@
+[phase]
+id = "06-tools-actions"
+
+[[task]]
+id            = "t-1"
+wave          = 1
+title         = "Add ToolCall token + tool-call parsers"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/drivers/ChatModels.kt",
+  "app/src/main/java/dev/equerry/app/providers/drivers/SseTokenParser.kt",
+  "app/src/main/java/dev/equerry/app/providers/drivers/OllamaStreamParser.kt",
+  "app/src/test/java/dev/equerry/app/providers/drivers/SseTokenParserTest.kt",
+  "app/src/test/java/dev/equerry/app/providers/drivers/OllamaStreamParserTest.kt",
+]
+description   = """
+Add a ChatToken.ToolCall(name, argsJson, id) variant and teach the OpenAI, Anthropic, and
+Ollama parsers to surface tool calls instead of prose. OpenAI fragments tool_calls arguments
+across SSE events — add the accumulation seam to the currently-stateless parseOpenAiData.
+"""
+covers        = ["c-1", "c-5"]
+test_contract = [
+  "ChatToken gains a ToolCall(name, argsJson, id) variant so the collect path can distinguish prose from an action — drop it and ChatModels/parser tests fail to compile",
+  "an Anthropic content_block_start(tool_use)+input_json_delta*+content_block_stop sequence yields ONE ToolCall with reassembled JSON args, not Delta/Skip",
+  "an OpenAI multi-event choices[].delta.tool_calls[].function.arguments stream accumulates fragments across events into one assembled ToolCall at finish_reason 'tool_calls'",
+  "an Ollama message.tool_calls line yields a ToolCall, not Delta prose",
+  "any of the three wire formats with non-JSON / truncated args yields TokenResult.Fail(ChatError.Malformed) — never a crash, never a half-parsed ToolCall, never prose (feeds c-5)",
+]
+depends_on    = []
+status        = "pending"
+
+[[task]]
+id            = "t-2"
+wave          = 1
+title         = "Register five tool specs in request body"
+files         = [
+  "app/src/main/java/dev/equerry/app/tools/ToolSpecs.kt",
+  "app/src/main/java/dev/equerry/app/providers/drivers/ChatRequestBuilder.kt",
+  "app/src/test/java/dev/equerry/app/providers/drivers/ChatRequestBuilderTest.kt",
+  "app/src/test/java/dev/equerry/app/tools/ToolSpecsTest.kt",
+]
+description   = """
+ToolSpecs is the single source for the five tools and their params. ChatRequestBuilder emits
+the per-provider tools payload: Anthropic top-level tools array (input_schema), OpenAI
+type:"function" tools; Ollama (best-effort tool-incapable) carries no tools array.
+"""
+covers        = ["c-1", "c-4"]
+test_contract = [
+  "ToolSpecs declares EXACTLY five tools (set_timer, set_alarm, create_calendar_event, draft_email, draft_sms) each with its locked param set — add/rename/drop one and the count+name assertion fails (tool_scope locked)",
+  "the Anthropic request body carries a top-level tools array (input_schema shape) listing all five tools",
+  "the OpenAI request body carries tools of type:'function' listing all five tools",
+  "the Ollama request body carries NO tools array (driver-level best-effort incapable)",
+  "no tool spec, header, or request field ever contains the configured key string (r-03 guard)",
+]
+depends_on    = []
+status        = "pending"
+
+[[task]]
+id            = "t-3"
+wave          = 1
+title         = "Add per-type tool-capability flag"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",
+  "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt",
+]
+description   = """
+Expose ProviderType.supportsTools so the UI can show the capability banner and the dispatch
+path can route incapable providers to guidance. Capability is judged best-effort at the
+driver/type level (unsupported_provider_ux locked decision).
+"""
+covers        = ["c-5"]
+test_contract = [
+  "ANTHROPIC, OPENAI_COMPATIBLE, OPENROUTER report supportsTools == true; OLLAMA reports its best-effort value (incapable) — flip any row and the table-test fails",
+]
+depends_on    = []
+status        = "pending"
+
+[[task]]
+id            = "t-4"
+wave          = 1
+title         = "Pure intent-builders for the five actions"
+files         = [
+  "app/src/main/java/dev/equerry/app/tools/actions/TimerAlarmIntents.kt",
+  "app/src/main/java/dev/equerry/app/tools/actions/HandoffIntents.kt",
+  "app/src/test/java/dev/equerry/app/tools/actions/TimerAlarmIntentsTest.kt",
+  "app/src/test/java/dev/equerry/app/tools/actions/HandoffIntentsTest.kt",
+]
+description   = """
+Builders RETURN Intents (never startActivity), so action-string + extras are directly
+assertable. Two files keep the r-02 boundary visible: benign on-device (timer/alarm) vs
+outward hand-off (calendar/email/sms).
+"""
+covers        = ["c-3", "c-4"]
+test_contract = [
+  "setTimerIntent(300) -> ACTION_SET_TIMER with EXTRA_LENGTH=300 and EXTRA_SKIP_UI=false; setAlarmIntent -> ACTION_SET_ALARM with EXTRA_HOUR/EXTRA_MINUTES",
+  "calendarIntent -> ACTION_INSERT on Events.CONTENT_URI with TITLE + BEGIN/END extras; emailIntent -> ACTION_SENDTO mailto: with subject+body; smsIntent -> ACTION_SENDTO sms: with body",
+  "no builder emits ACTION_SEND / ACTION_EDIT / any auto-commit action — the 'stages, never commits (r-02)' assertion fails if it does",
+]
+depends_on    = []
+status        = "pending"
+
+[[task]]
+id            = "t-5"
+wave          = 1
+title         = "Pure ToolCall to ActionPlan mapper"
+files         = [
+  "app/src/main/java/dev/equerry/app/tools/actions/Action.kt",
+  "app/src/main/java/dev/equerry/app/tools/actions/ActionPlanner.kt",
+  "app/src/test/java/dev/equerry/app/tools/actions/ActionPlannerTest.kt",
+]
+description   = """
+Pure mapper from parsed ToolCalls to a typed ActionPlan (Staged for timer/alarm, Handoff for
+calendar/email/sms, Malformed for bad args), preserving type and order for multi-action turns.
+"""
+covers        = ["c-2", "c-4", "c-5", "c-6"]
+test_contract = [
+  "planner(listOf(timerCall)) -> a single Staged(Timer) entry, NOT fired",
+  "planner of one email call -> a single Handoff(Email) with recipient/subject/body threaded from the call args",
+  "planner of [timer, email, alarm] -> a 3-entry plan preserving type and order (c-6)",
+  "a call with a missing/invalid required arg -> a Malformed entry, not a thrown exception (feeds c-5)",
+]
+depends_on    = []
+status        = "pending"
+
+[[task]]
+id            = "t-6"
+wave          = 1
+title         = "Pure yes/no grammar recogniser"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/YesNoGrammar.kt",
+  "app/src/test/java/dev/equerry/app/voice/YesNoGrammarTest.kt",
+]
+description   = """
+Narrow classifier mapping a transcript to Yes / No / Unrecognised for the spoken Start-now
+confirm. Deliberately narrow so ambiguous speech never collapses to Yes.
+"""
+covers        = ["c-2"]
+test_contract = [
+  "classify('yes')/('yeah')/('start it') -> Yes; classify('no')/('cancel')/('stop') -> No",
+  "classify('what time is it')/('maybe') -> Unrecognised — an ambiguous or off-topic utterance NEVER classifies as Yes (mis-recognition safeguard, timer_alarm_confirm)",
+]
+depends_on    = []
+status        = "pending"
+
+[[task]]
+id            = "t-7"
+wave          = 2
+title         = "Dispatch tool calls + staging + guidance in ChatViewModel"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt",
+  "app/src/main/java/dev/equerry/app/tools/actions/ActionRunner.kt",
+  "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt",
+]
+description   = """
+On a ToolCall in the stream, build the ActionPlan, hold staged/pending actions in UI state,
+run them via ActionRunner on confirm, and post a deterministic note. Route malformed/incapable
+cases to in-UI guidance + the banner flag. The note is emitted inline (no standalone task).
+"""
+covers        = ["c-1", "c-2", "c-5", "c-6"]
+test_contract = [
+  "a stream yielding one ToolCall produces a staged/launchable action, NOT assistant prose (c-1)",
+  "a single timer ToolCall leaves exactly one staged Start-now action and does NOT auto-fire; confirm() invokes the runner once; cancel discards",
+  "the posted note reads like 'Timer started — 5:00' / 'Opened Messages to Mum (you send it)' and NEVER contains 'sent' (action_followup; no second model call)",
+  "a stream of two ToolCalls -> a 2-entry pendingActions list, each independently runnable; skipping entry 0 leaves entry 1 runnable (multi_action, c-6)",
+  "a ToolCall whose args fail the planner, OR a Malformed parse, OR a send to a supportsTools==false provider -> a one-line in-UI note with a Settings link and the banner flag set; never crashes, never drops the request (c-5)",
+]
+depends_on    = ["t-1", "t-3", "t-4", "t-5"]
+status        = "pending"
+
+[[task]]
+id            = "t-8"
+wave          = 2
+title         = "Action cards, pending list, banner in ChatScreen"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt",
+  "app/src/test/java/dev/equerry/app/ui/chat/ChatScreenTest.kt",
+]
+description   = """
+Render the staged Start/Cancel card, the multi-action pending list (per-row Start or Open + a
+skip control), the passive tool-incapable banner, and the failed-action Settings link.
+"""
+covers        = ["c-2", "c-3", "c-5", "c-6"]
+test_contract = [
+  "a staged timer state renders a Start/Cancel card — tapping Start invokes onConfirm, Cancel invokes onCancel; the timer NEVER fires without the tap (r-02 tap-gate)",
+  "a multi-action state renders a pending-actions list with per-row Start (timer/alarm) or Open (hand-off) plus a skip control (c-6)",
+  "the tool-incapable flag renders the 'Actions need a tool-capable provider' banner with a Change-in-Settings link; a failed-action note renders its Settings link (c-5)",
+]
+depends_on    = ["t-7"]
+status        = "pending"
+
+[[task]]
+id            = "t-9"
+wave          = 3
+title         = "Spoken Start-now + yes/no confirm in voice flow"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+  "app/src/main/java/dev/equerry/app/voice/VoiceGuidance.kt",
+  "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt",
+]
+description   = """
+When a turn stages a timer/alarm in a voice session, speak "Start now?" then arm a narrow
+yes/no listen (YesNoGrammar). Yes fires once; No discards; timeout leaves it staged as the
+tappable card. Email/SMS hand-offs are never voice-fired.
+"""
+covers        = ["c-2"]
+test_contract = [
+  "the controller speaks 'Start now?' and only then arms the listen — arming before tts.awaitDone() fails the 'prompt finishes before mic arms (not re-transcribed as yes)' assertion",
+  "a 'yes' via YesNoGrammar fires the staged action EXACTLY once; a 'no' discards it; a non-yes/no transcript does NOT fire",
+  "a listen timeout leaves the action staged as the tappable card (never auto-fires)",
+  "email/SMS hand-offs are NEVER voice-fired (benign_voice_confirm)",
+]
+depends_on    = ["t-6", "t-7"]
+status        = "pending"
