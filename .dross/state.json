@@ -3,13 +3,9 @@
   "current_milestone": "v0.1",
   "current_phase": "04-chat-drivers",
   "current_phase_status": "planned",
-  "last_activity": "2026-06-10T08:25:19.290634Z",
-  "last_action": "plan reviewed: 04-chat-drivers (0 blocking, 4 flags)",
+  "last_activity": "2026-06-10T08:42:07.363242Z",
+  "last_action": "plan amended per review: 04-chat-drivers (10 tasks across 4 waves; t-6/t-7 parsers merged, t-10 split, t-5 +repo, t-3 logging-live contract)",
   "history": [
-    {
-      "at": "2026-06-09T15:12:47.141158Z",
-      "action": "executed t-1 (Provider domain model + per-type rules + validation)"
-    },
     {
       "at": "2026-06-09T15:18:35.924273Z",
       "action": "executed t-2 (Dependencies + JVM test infrastructure)"
@@ -205,6 +201,10 @@
     {
       "at": "2026-06-10T08:25:19.290634Z",
       "action": "plan reviewed: 04-chat-drivers (0 blocking, 4 flags)"
+    },
+    {
+      "at": "2026-06-10T08:42:07.363242Z",
+      "action": "plan amended per review: 04-chat-drivers (10 tasks across 4 waves; t-6/t-7 parsers merged, t-10 split, t-5 +repo, t-3 logging-live contract)"
     }
   ]
 }

@@ -50,13 +50,14 @@ files         = [
 ]
 description   = """
 KeyRedaction.redact(text, key) masks every occurrence of a non-blank key (no-op for blank).
-ChatHttpClient factory returns one shared OkHttpClient whose logging interceptor redacts
-Authorization/x-api-key headers and never logs bodies; auth is injected via header only.
+ChatHttpClient factory returns one shared OkHttpClient whose logging interceptor IS installed,
+redacts Authorization/x-api-key headers, and never logs bodies; auth is injected via header only.
 """
 covers        = ["c-4"]
 test_contract = [
   "if redaction misses an occurrence or runs on a blank key, KeyRedactionTest.keyNeverSurvivesRedaction fails",
   "if a key reaches the log sink or the request URL, ChatHttpClientTest.key_never_in_logged_request fails",
+  "if the logging interceptor is not actually installed (a silent client), ChatHttpClientTest.logging_is_live fails — it asserts a non-key request field IS observable in the log sink while the key is masked",
 ]
 status        = "pending"
 
@@ -82,22 +83,24 @@ status        = "pending"
 [[task]]
 id            = "t-5"
 wave          = 1
-title         = "Add request-params fields to profile + store + validator"
+title         = "Add request-params fields to profile + store + repo"
 files         = [
   "app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt",
   "app/src/main/java/dev/equerry/app/providers/ProfileValidator.kt",
   "app/src/main/java/dev/equerry/app/data/ProfileStore.kt",
+  "app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt",
 ]
 description   = """
 ProviderProfile + ProfileDraft gain optional systemPrompt:String?, temperature:Double?,
 maxTokens:Int? (blank/null = provider default, per locked request_params). StoredProfile
-round-trips them; ProfileValidator gains numeric validation for the two numeric fields.
+round-trips them; ProviderRepository.addProfile/updateProfile carry the new fields through;
+ProfileValidator gains numeric validation for temperature/maxTokens.
 """
 covers        = ["c-1", "c-5"]
 test_contract = [
   "if legacy JSON without the new keys fails to decode, ProfileStoreTest.legacyJsonStillDecodes fails",
   "if a non-numeric temperature/maxTokens is accepted, ProfileValidatorTest.rejects_garbage_numeric_params fails",
-  "if the three fields do not survive addProfile->observeProfiles (or the key gets persisted), ProviderRepositoryTest fails",
+  "if addProfile->observeProfiles drops the three fields (or persists the key), ProviderRepositoryTest's round-trip assertion fails",
 ]
 status        = "pending"
 
@@ -105,38 +108,28 @@ status        = "pending"
 id            = "t-6"
 wave          = 2
 depends_on    = ["t-1", "t-2", "t-3"]
-title         = "SSE token parser (Anthropic + OpenAI/OpenRouter)"
-files         = ["app/src/main/java/dev/equerry/app/providers/drivers/SseTokenParser.kt"]
+title         = "Streaming token parsers (SSE + Ollama NDJSON)"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/drivers/SseTokenParser.kt",
+  "app/src/main/java/dev/equerry/app/providers/drivers/OllamaStreamParser.kt",
+]
 description   = """
-Pure functions decoding one OpenAI `data:` chunk and one Anthropic content_block_delta event
-into Delta(text); OpenAI `[DONE]` sentinel and Anthropic message_stop yield Done.
+Pure parsers for the two wire formats. SseTokenParser decodes one OpenAI `data:` chunk and one
+Anthropic content_block_delta into Delta(text); `[DONE]`/message_stop yield Done. OllamaStreamParser
+decodes newline-delimited JSON, emitting Delta(message.content) per line and Done on `"done":true`,
+buffering an incomplete final line rather than crashing.
 """
 covers        = ["c-2", "c-4"]
 test_contract = [
-  "if either format's delta decode breaks, SseTokenParserTest's per-format concatenation-equals-reply assertion fails",
+  "if either SSE format's delta decode breaks, SseTokenParserTest's per-format concatenation-equals-reply assertion fails",
   "if a malformed/partial `data:` line throws (or `[DONE]` is parsed as JSON), SseTokenParserTest's malformed-line->Malformed assertion fails",
+  "if Ollama NDJSON decoding breaks, OllamaStreamParserTest's multi-line-concatenates-to-reply assertion fails",
+  "if a truncated final NDJSON line crashes instead of buffering/mapping to Malformed, OllamaStreamParserTest's half-buffered-line assertion fails",
 ]
 status        = "pending"
 
 [[task]]
 id            = "t-7"
-wave          = 2
-depends_on    = ["t-1", "t-2", "t-3"]
-title         = "Ollama streaming-JSON token parser"
-files         = ["app/src/main/java/dev/equerry/app/providers/drivers/OllamaStreamParser.kt"]
-description   = """
-Decodes Ollama newline-delimited JSON, emitting Delta(message.content) per line and Done on
-`"done":true`. Buffers an incomplete final line until newline rather than crashing the Flow.
-"""
-covers        = ["c-2", "c-4"]
-test_contract = [
-  "if NDJSON line decoding breaks, OllamaStreamParserTest's multi-line-concatenates-to-reply assertion fails",
-  "if a truncated final line crashes instead of buffering/mapping to Malformed, OllamaStreamParserTest's half-buffered-line assertion fails",
-]
-status        = "pending"
-
-[[task]]
-id            = "t-8"
 wave          = 2
 depends_on    = ["t-1", "t-4", "t-5"]
 title         = "Request body builders per provider type"
@@ -155,9 +148,30 @@ test_contract = [
 status        = "pending"
 
 [[task]]
+id            = "t-8"
+wave          = 2
+depends_on    = ["t-5"]
+title         = "Provider-form request-param inputs"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt",
+  "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt",
+]
+description   = """
+Add optional system-prompt / temperature / max-tokens inputs to the existing provider edit form,
+wired to the t-5 ProfileDraft fields (blank = provider default). Validation errors from
+ProfileValidator's numeric checks surface inline like the existing field errors.
+"""
+covers        = ["c-1"]
+test_contract = [
+  "if the three request-param inputs do not persist through a ProviderEdit save, ProviderEditViewModelTest.requestParamsSaved fails",
+  "if a non-numeric temperature/maxTokens input does not surface an inline error, ProviderEditViewModelTest's numeric-validation assertion fails",
+]
+status        = "pending"
+
+[[task]]
 id            = "t-9"
 wave          = 3
-depends_on    = ["t-6", "t-7", "t-8"]
+depends_on    = ["t-6", "t-7"]
 title         = "ChatDriver wiring + factory + MockWebServer e2e"
 files         = [
   "app/src/main/java/dev/equerry/app/providers/drivers/ChatDriver.kt",
@@ -166,7 +180,7 @@ files         = [
 ]
 description   = """
 ChatDriver.send(profile, key, messages): Flow<ChatToken> wires the t-3 OkHttp client (+SSE
-EventSource) to the t-6/t-7 parsers and t-8 builders. ChatDriverFactory selects by
+EventSource) to the t-6 parsers and t-7 builders. ChatDriverFactory selects by
 profile.type.driverType (OpenRouter -> OpenAI-compatible). Adds testImplementation
 okhttp3:mockwebserver (okhttp 4.12.0) to libs.versions.toml + app/build.gradle.kts.
 """
@@ -182,21 +196,18 @@ status        = "pending"
 [[task]]
 id            = "t-10"
 wave          = 4
-depends_on    = ["t-4", "t-5", "t-9"]
-title         = "Chat screen + VM + nav route + provider-form fields"
+depends_on    = ["t-4", "t-9"]
+title         = "Chat screen + ViewModel + nav route"
 files         = [
   "app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt",
   "app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt",
   "app/src/main/java/dev/equerry/app/MainActivity.kt",
-  "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt",
-  "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt",
 ]
 description   = """
 Dedicated chat screen (locked chat_surface): ChatViewModel(repository, driverFactory, session)
 exposes messages + unmapped-guidance flag + per-message error; live tokens append to the
 growing assistant bubble. Add Route.CHAT + a chatContent composable to EquerryNavHost and an
 onChat HomeEntry, following the existing providersContent/slotsContent/probeContent pattern.
-ProviderEdit VM/Screen gain optional system-prompt/temperature/max-tokens inputs wired to t-5.
 """
 covers        = ["c-1", "c-3", "c-4", "c-5"]
 test_contract = [
@@ -205,6 +216,5 @@ test_contract = [
   "if a second send drops the first turn, ChatViewModelTest's session-carry assertion fails (c-5); if newChat() does not clear, its reset assertion fails",
   "if a ChatError renders non-readable or leaks the key, ChatViewModelTest's keyless-error-bubble assertion fails (c-4)",
   "if Home cannot navigate to Route.CHAT, NavigationTest's chatContent assertion fails",
-  "if the request-param inputs do not persist, ProviderEditViewModelTest.requestParamsSaved fails",
 ]
 status        = "pending"
