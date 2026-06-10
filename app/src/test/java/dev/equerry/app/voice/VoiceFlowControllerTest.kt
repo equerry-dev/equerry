@@ -65,6 +65,7 @@ class VoiceFlowControllerTest {
         override suspend fun init() = TtsInitResult.Ready
         override fun speak(utterance: String) { spoken.add(utterance) }
         override suspend fun speakSentences(sentences: Flow<String>) = sentences.collect { spoken.add(it) }
+        override suspend fun awaitDone() = Unit
         override fun stop() = Unit
         override fun shutdown() = Unit
     }

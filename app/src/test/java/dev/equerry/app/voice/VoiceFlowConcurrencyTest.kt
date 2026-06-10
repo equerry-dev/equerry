@@ -21,6 +21,7 @@ import dev.equerry.app.ui.chat.ChatViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.awaitClose
@@ -77,11 +78,13 @@ class VoiceFlowConcurrencyTest {
         }
     }
 
-    private class FakeTextToSpeech : TextToSpeech {
+    /** [doneGate], when supplied, makes awaitDone() suspend until the test completes it. */
+    private class FakeTextToSpeech(private val doneGate: CompletableDeferred<Unit>? = null) : TextToSpeech {
         val spoken = mutableListOf<String>()
         override suspend fun init() = TtsInitResult.Ready
         override fun speak(utterance: String) { spoken.add(utterance) }
         override suspend fun speakSentences(sentences: Flow<String>) = sentences.collect { spoken.add(it) }
+        override suspend fun awaitDone() { doneGate?.await() }
         override fun stop() = Unit
         override fun shutdown() = Unit
     }
@@ -209,5 +212,30 @@ class VoiceFlowConcurrencyTest {
         withTimeout(5_000) { vm.state.first { !it.streaming && it.transcript.size == 2 && it.lastReply != null } }
         withTimeout(5_000) { controller.state.first { it == VoiceFlowState.Idle } }
         assertEquals(1, stt.starts.value) // listened exactly once
+    }
+
+    @Test
+    fun continuous_does_not_rearm_until_tts_finishes_speaking() = runBlocking {
+        configureChatProvider()
+        settings.setTurnControl(TurnControl.CONTINUOUS)
+        server.enqueue(sseReply("Hi"))
+        // TTS stays "speaking" until the test releases this gate.
+        val speaking = CompletableDeferred<Unit>()
+        val tts = FakeTextToSpeech(doneGate = speaking)
+        val stt = ScriptedStt(listOf(listOf(SttEvent.EndOfSpeech, SttEvent.Final("q1")), null))
+        val controller = controllerWith(stt, tts)
+
+        controller.start()
+
+        // Turn 1's reply is rendered and handed to TTS; the controller is now blocked in awaitDone().
+        withTimeout(5_000) { vm.state.first { !it.streaming && it.transcript.size == 2 && it.lastReply != null } }
+        // While TTS is still "speaking", the mic must NOT be re-armed (no self-listen).
+        assertEquals(listOf("Hi"), tts.spoken)
+        assertEquals(1, stt.starts.value)
+
+        // Once speech finishes, the loop re-arms for the follow-up.
+        speaking.complete(Unit)
+        val rearmed = withTimeout(5_000) { stt.starts.first { it == 2 } }
+        assertEquals(2, rearmed)
     }
 }

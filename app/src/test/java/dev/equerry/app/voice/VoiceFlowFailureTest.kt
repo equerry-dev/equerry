@@ -70,6 +70,7 @@ class VoiceFlowFailureTest {
         override suspend fun init() = initResult
         override fun speak(utterance: String) { spoken.add(utterance) }
         override suspend fun speakSentences(sentences: Flow<String>) = sentences.collect { spoken.add(it) }
+        override suspend fun awaitDone() = Unit
         override fun stop() = Unit
         override fun shutdown() = Unit
     }

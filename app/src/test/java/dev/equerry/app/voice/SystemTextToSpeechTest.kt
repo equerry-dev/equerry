@@ -20,6 +20,7 @@ class SystemTextToSpeechTest {
         override fun speak(text: String) {
             spoken.add(text)
         }
+        override suspend fun awaitDone() = Unit
         override fun stop() = Unit
         override fun shutdown() {
             shutdown = true

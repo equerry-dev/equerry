@@ -28,6 +28,13 @@ interface TextToSpeech {
     /** Speak each emitted string as it arrives (sentence-by-sentence timing). No-op unless Ready. */
     suspend fun speakSentences(sentences: Flow<String>)
 
+    /**
+     * Suspend until all queued speech has finished playing (or returns immediately if nothing is
+     * speaking / TTS isn't ready). Callers use this to avoid re-opening the mic while Equerry is
+     * still talking — otherwise STT captures the TTS output and the assistant answers itself.
+     */
+    suspend fun awaitDone()
+
     /** Stop current and queued speech. */
     fun stop()
 

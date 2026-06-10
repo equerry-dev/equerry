@@ -164,10 +164,15 @@ class VoiceFlowController(
         if (!ttsReady) {
             // The reply is already rendered in the transcript; we just can't speak it (c-5).
             _guidance.value = VoiceGuidanceFactory.ttsUnavailable()
-        } else if (timing == SpeakTiming.SENTENCE_BY_SENTENCE) {
-            chunker.finish().forEach { tts.speak(it) }
         } else {
-            finalUi.lastReply?.let { tts.speak(it) }
+            if (timing == SpeakTiming.SENTENCE_BY_SENTENCE) {
+                chunker.finish().forEach { tts.speak(it) }
+            } else {
+                finalUi.lastReply?.let { tts.speak(it) }
+            }
+            // Wait until Equerry has actually stopped talking before the loop re-arms the mic,
+            // otherwise STT captures the TTS output and the assistant answers itself (continuous).
+            tts.awaitDone()
         }
         _state.value = VoiceFlowState.Idle
     }
