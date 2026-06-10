@@ -9,19 +9,21 @@ files         = [
   "app/src/main/java/dev/equerry/app/providers/drivers/ChatModels.kt",
   "app/src/main/java/dev/equerry/app/providers/drivers/SseTokenParser.kt",
   "app/src/main/java/dev/equerry/app/providers/drivers/OllamaStreamParser.kt",
+  "app/src/main/java/dev/equerry/app/providers/drivers/ChatDriver.kt",
   "app/src/test/java/dev/equerry/app/providers/drivers/SseTokenParserTest.kt",
   "app/src/test/java/dev/equerry/app/providers/drivers/OllamaStreamParserTest.kt",
 ]
 description   = """
 Add a ChatToken.ToolCall(name, argsJson, id) variant and teach the OpenAI, Anthropic, and
 Ollama parsers to surface tool calls instead of prose. OpenAI fragments tool_calls arguments
-across SSE events — add the accumulation seam to the currently-stateless parseOpenAiData.
+across SSE events: parseOpenAiData is a stateless function the transport invokes per-event, so
+thread a per-stream OpenAI accumulator through sseChatFlow in ChatDriver.kt to hold the fragments.
 """
 covers        = ["c-1", "c-5"]
 test_contract = [
   "ChatToken gains a ToolCall(name, argsJson, id) variant so the collect path can distinguish prose from an action — drop it and ChatModels/parser tests fail to compile",
   "an Anthropic content_block_start(tool_use)+input_json_delta*+content_block_stop sequence yields ONE ToolCall with reassembled JSON args, not Delta/Skip",
-  "an OpenAI multi-event choices[].delta.tool_calls[].function.arguments stream accumulates fragments across events into one assembled ToolCall at finish_reason 'tool_calls'",
+  "an OpenAI tool_calls stream fragmented across multiple SSE events is accumulated by the per-stream accumulator threaded through sseChatFlow and emitted as one assembled ToolCall at finish_reason 'tool_calls' — feeding the events one at a time to a stateless parseOpenAiData (no accumulator) fails this test",
   "an Ollama message.tool_calls line yields a ToolCall, not Delta prose",
   "any of the three wire formats with non-JSON / truncated args yields TokenResult.Fail(ChatError.Malformed) — never a crash, never a half-parsed ToolCall, never prose (feeds c-5)",
 ]
@@ -189,7 +191,7 @@ status        = "pending"
 
 [[task]]
 id            = "t-9"
-wave          = 3
+wave          = 2
 title         = "Spoken Start-now + yes/no confirm in voice flow"
 files         = [
   "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",

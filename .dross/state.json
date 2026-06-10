@@ -3,13 +3,9 @@
   "current_milestone": "v0.1",
   "current_phase": "06-tools-actions",
   "current_phase_status": "planned",
-  "last_activity": "2026-06-10T18:43:59.225052Z",
-  "last_action": "plan reviewed: 06-tools-actions (0 blocking, 3 flags)",
+  "last_activity": "2026-06-10T18:45:01.195958Z",
+  "last_action": "plan amended post-review: 06-tools-actions (t-1 +ChatDriver.kt seam; t-9 -\u003e wave 2; now 2 waves)",
   "history": [
-    {
-      "at": "2026-06-10T11:09:23.404818Z",
-      "action": "executed t-8 (Provider-form request-param inputs)"
-    },
     {
       "at": "2026-06-10T11:29:16.052179Z",
       "action": "fixed flaky ProbeViewModelTest hang (test-only; full suite green)"
@@ -205,6 +201,10 @@
     {
       "at": "2026-06-10T18:43:59.225052Z",
       "action": "plan reviewed: 06-tools-actions (0 blocking, 3 flags)"
+    },
+    {
+      "at": "2026-06-10T18:45:01.195958Z",
+      "action": "plan amended post-review: 06-tools-actions (t-1 +ChatDriver.kt seam; t-9 -\u003e wave 2; now 2 waves)"
     }
   ]
 }
