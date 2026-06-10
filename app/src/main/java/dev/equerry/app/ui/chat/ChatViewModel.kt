@@ -132,8 +132,10 @@ class ChatViewModel @Inject constructor(
             if (!failed) {
                 val replyText = reply.toString()
                 if (replyText.isNotEmpty()) session.append(ChatMessage(ChatRole.ASSISTANT, replyText))
-                _state.update { it.copy(streaming = false, lastReply = replyText.ifEmpty { null }) }
+                // Dispatch BEFORE clearing `streaming`, so a watcher resuming on !streaming already
+                // sees the staged/pending actions (the voice flow's spoken-confirm relies on this).
                 if (toolCalls.isNotEmpty()) dispatchActions(ActionPlanner.plan(toolCalls))
+                _state.update { it.copy(streaming = false, lastReply = replyText.ifEmpty { null }) }
             }
         }
     }

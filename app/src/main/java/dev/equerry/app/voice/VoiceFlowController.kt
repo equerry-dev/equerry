@@ -4,6 +4,7 @@ import dev.equerry.app.data.SpeakTiming
 import dev.equerry.app.data.TurnControl
 import dev.equerry.app.data.VoiceSettingsStore
 import dev.equerry.app.providers.drivers.ChatRole
+import dev.equerry.app.tools.actions.PlannedAction
 import dev.equerry.app.ui.chat.ChatViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -143,7 +144,9 @@ class VoiceFlowController(
                     }
                 }
             }
-            .first { sawStreaming && !it.streaming && (it.lastReply != null || it.error != null || it.unmapped) }
+            // A turn settles when streaming stops — whether it produced reply text, an error, an
+            // unmapped state, or only tool calls (which leave lastReply null but stage actions).
+            .first { sawStreaming && !it.streaming }
 
         val finalUi = chat.state.value
         when {
@@ -174,6 +177,36 @@ class VoiceFlowController(
             // otherwise STT captures the TTS output and the assistant answers itself (continuous).
             tts.awaitDone()
         }
+        // If the turn staged a benign on-device action, offer a spoken "Start now?" before settling.
+        confirmStagedActionByVoice()
         _state.value = VoiceFlowState.Idle
+    }
+
+    /**
+     * Spoken confirm for a staged timer/alarm. Speaks "Start now?" and only AFTER the prompt finishes
+     * ([TextToSpeech.awaitDone]) arms a narrow yes/no listen — arming earlier would let the spoken
+     * prompt be re-transcribed as a "yes". A "yes" fires the action once; a "no" discards it; anything
+     * else (including a silent timeout) leaves it staged as a tappable card. Outward hand-offs
+     * (email/SMS) are never voice-fired — only [PlannedAction.Staged] actions reach here
+     * (benign_voice_confirm).
+     */
+    private suspend fun confirmStagedActionByVoice() {
+        val index = chat.state.value.pendingActions.indexOfFirst { it is PlannedAction.Staged }
+        if (index < 0) return
+        if (!ttsReady) return // can't ask aloud — leave it staged as a tappable card
+
+        _state.value = VoiceFlowState.Speaking
+        tts.speak("Start now?")
+        tts.awaitDone()
+
+        _state.value = VoiceFlowState.Listening
+        var answer: String? = null
+        stt.listen().collect { event -> if (event is SttEvent.Final) answer = event.text }
+
+        when (YesNoGrammar.classify(answer.orEmpty())) {
+            YesNoGrammar.Verdict.YES -> chat.confirmAction(index)
+            YesNoGrammar.Verdict.NO -> chat.cancelAction(index)
+            YesNoGrammar.Verdict.UNRECOGNISED -> Unit // leave it staged as a tappable card
+        }
     }
 }
