@@ -1,0 +1,282 @@
+[phase]
+id = "08-remote-stt-tts"
+
+[[task]]
+id            = "t-1"
+wave          = 1
+title         = "Add supportsStt/supportsTts flags to ProviderType"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",
+  "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt",
+]
+description   = """
+Add supportsStt/supportsTts as computed val getters on ProviderType, true only for
+OPENAI_COMPATIBLE, mirroring the existing supportsImages getter.
+"""
+covers        = ["c-1", "c-2"]
+test_contract = [
+  "if supportsStt/supportsTts is granted to ANTHROPIC/OLLAMA/OPENROUTER, the new ProviderTypeTest rows fail",
+  "if OPENAI_COMPATIBLE loses either flag, the same ProviderTypeTest rows fail",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-2"
+wave          = 1
+title         = "Activate STT and TTS capability slots"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/CapabilitySlot.kt",
+  "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt",
+]
+description   = """
+Flip CapabilitySlot.STT.active and .TTS.active to true; narrow the existing
+"rest are coming-soon" assertion to OCR + EMBEDDINGS only.
+"""
+covers        = ["c-1", "c-2"]
+test_contract = [
+  "if STT.active or TTS.active regresses to false, the slot-active test fails",
+  "if OCR or EMBEDDINGS is wrongly activated, the narrowed inactive-slots assertion fails",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-3"
+wave          = 1
+title         = "Build transcribe HTTP request (pure)"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/drivers/TranscribeRequestBuilder.kt",
+  "app/src/test/java/dev/equerry/app/providers/drivers/TranscribeRequestBuilderTest.kt",
+]
+description   = """
+Pure builder for the remote STT call: path "audio/transcriptions", multipart body
+carrying the profile.model; API key injected only into the Authorization header.
+Mirrors ChatRequestBuilder.
+"""
+covers        = ["c-3", "c-6"]
+test_contract = [
+  "if the key reaches the request path, query, or body, the no-key-substring assertion fails (r-03)",
+  "if the Authorization header omits the key, the header-carries-key assertion fails",
+  "if the path is not audio/transcriptions or the model field is dropped, the builder test fails",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-4"
+wave          = 1
+title         = "Build speech HTTP request (pure)"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/drivers/SpeechRequestBuilder.kt",
+  "app/src/test/java/dev/equerry/app/providers/drivers/SpeechRequestBuilderTest.kt",
+]
+description   = """
+Pure builder for the remote TTS call: path "audio/speech", JSON body with model,
+input text, selected voice, and response_format "mp3"; key only in Authorization header.
+"""
+covers        = ["c-4", "c-6"]
+test_contract = [
+  "if voice is dropped from the body, the speech-builder test fails",
+  "if response_format is not mp3, the format assertion fails",
+  "if the key reaches the body/path/query, the no-key-substring assertion fails (r-03)",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-5"
+wave          = 1
+title         = "Silence VAD auto-stop (pure)"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/SilenceVad.kt",
+  "app/src/test/java/dev/equerry/app/voice/SilenceVadTest.kt",
+]
+description   = """
+Pure energy/amplitude silence detector: after loud frames, a trailing run of silence
+of the configured window returns shouldStop=true at the window boundary.
+"""
+covers        = ["c-3"]
+test_contract = [
+  "loud frames then a trailing-silence run returns shouldStop=true exactly at the window boundary — not one frame early",
+  "a single amplitude dip does not trip shouldStop",
+  "a never-quiet frame sequence never returns shouldStop=true",
+  "growing or shrinking the window by one frame makes SilenceVadTest fail",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-6"
+wave          = 1
+title         = "Map audio errors to key-free guidance (pure)"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/RemoteAudioError.kt",
+  "app/src/main/java/dev/equerry/app/voice/VoiceGuidance.kt",
+  "app/src/test/java/dev/equerry/app/voice/VoiceGuidanceFactoryTest.kt",
+]
+description   = """
+Derive a routable RemoteAudioError from status code / exception type only (never copying
+a response body or message). Add VoiceGuidanceFactory.remoteEngineFailed(...) building a
+fixed-template message.
+"""
+covers        = ["c-6"]
+test_contract = [
+  "feeding a 401 body containing a fake secret, the guidance message does not contain that substring (r-03)",
+  "401, network, and unavailable each yield a distinct guidance message",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-7"
+wave          = 2
+title         = "RemoteSpeechToText over recorder + transport"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/RemoteSpeechToText.kt",
+  "app/src/test/java/dev/equerry/app/voice/RemoteSpeechToTextTest.kt",
+]
+description   = """
+SpeechToText impl: record via a recorder seam, stop on SilenceVad, POST the clip via a
+transport seam (TranscribeRequestBuilder), emit the transcript. AudioRecord stays at the
+seam edge like SystemRecognizerHandle.
+"""
+covers        = ["c-3", "c-6"]
+test_contract = [
+  "driving a fake recorder + fake transport, listen() emits exactly [EndOfSpeech, Final] and zero Partial",
+  "a transport 401 yields a terminal Error mapped to SttError.Unavailable and the flow completes without hanging",
+]
+depends_on    = ["t-3", "t-5", "t-6"]
+status        = "pending"
+
+[[task]]
+id            = "t-8"
+wave          = 2
+title         = "RemoteTextToSpeech over transport + player"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/RemoteTextToSpeech.kt",
+  "app/src/test/java/dev/equerry/app/voice/RemoteTextToSpeechTest.kt",
+]
+description   = """
+TextToSpeech impl: POST text via a transport seam (SpeechRequestBuilder), enqueue returned
+clips on a player seam; speakSentences reuses SpeakChunker; awaitDone suspends until the
+player drains. Media3 ExoPlayer stays at the seam edge.
+"""
+covers        = ["c-4", "c-6"]
+test_contract = [
+  "speak() POSTs once and enqueues one clip; speakSentences POSTs per sentence and enqueues clips in order",
+  "awaitDone() resumes only after the fake player drains (proves it gates mic re-arm)",
+  "speak() on a Failed init is a guarded no-op that never throws (c-5)",
+  "a transport 500 surfaces RemoteAudioError without throwing into the caller (c-6)",
+  "a blank ttsVoice omits the voice field (provider default)",
+]
+depends_on    = ["t-4", "t-6"]
+status        = "pending"
+
+[[task]]
+id            = "t-9"
+wave          = 2
+title         = "Add Media3 dependency for audio playback"
+files         = [
+  "gradle/libs.versions.toml",
+  "app/build.gradle.kts",
+]
+description   = """
+Add androidx.media3 exoplayer + common to the version catalog and the app module so the
+production AudioPlayer (used by RemoteTextToSpeech) can decode and play mp3 clips. Lands
+before t-8's production player.
+"""
+covers        = ["c-4"]
+test_contract = [
+  "if the androidx.media3 dependency is missing or misversioned, :app:compileDebugKotlin fails to resolve the media3 imports",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-10"
+wave          = 2
+title         = "Voice field on profile + back-compat store"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt",
+  "app/src/main/java/dev/equerry/app/data/ProfileStore.kt",
+  "app/src/test/java/dev/equerry/app/data/ProfileStoreTest.kt",
+]
+description   = """
+Add optional ttsVoice: String? to ProviderProfile + ProfileDraft + the StoredProfile DTO
+(nullable default, leaning on the existing ignoreUnknownKeys + nullable-default pattern).
+"""
+covers        = ["c-2", "c-4"]
+test_contract = [
+  "a profile saved with ttsVoice=\"alloy\" round-trips encode->decode unchanged",
+  "legacy JSON written without the ttsVoice field still decodes (ttsVoice == null, no exception)",
+]
+depends_on    = ["t-1"]
+status        = "pending"
+
+[[task]]
+id            = "t-11"
+wave          = 3
+title         = "STT/TTS mappings + filtered pickers + voice UI"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt",
+  "app/src/main/java/dev/equerry/app/ui/slots/SlotsViewModel.kt",
+  "app/src/main/java/dev/equerry/app/ui/slots/SlotsScreen.kt",
+  "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt",
+  "app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt",
+  "app/src/test/java/dev/equerry/app/ui/slots/SlotsViewModelTest.kt",
+]
+description   = """
+Add observeSttMapping/observeTtsMapping + setSttSlot/setTtsSlot (mirroring CHAT/VISION);
+SlotsUiState routes STT/TTS; picker sheets filter profiles by type.supportsStt/supportsTts;
+the edit form shows the optional ttsVoice field only for TTS-capable types.
+"""
+covers        = ["c-1", "c-2", "c-5"]
+test_contract = [
+  "setSttSlot persists via SlotMappingStore and observeSttMapping re-resolves the profile from a fresh repository over the same store (restart survival, c-1)",
+  "an Ollama/Anthropic profile is excluded from the STT candidate list (picker filtering)",
+  "deleting a mapped profile clears its STT/TTS mapping (deleteProfile cascade over CapabilitySlot.entries)",
+]
+depends_on    = ["t-1", "t-2", "t-10"]
+status        = "pending"
+
+[[task]]
+id            = "t-12"
+wave          = 4
+title         = "Resolve remote-vs-system engine per mapping"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/VoiceEngineSelector.kt",
+  "app/src/main/java/dev/equerry/app/voice/VoiceComponentsEntryPoint.kt",
+  "app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt",
+  "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt",
+  "app/src/test/java/dev/equerry/app/voice/VoiceEngineSelectorTest.kt",
+]
+description   = """
+Pure VoiceEngineSelector resolves the SpeechToText/TextToSpeech for a turn: a mapped profile
+yields the Remote impl built around that profile + its key (keyFor); an unmapped slot yields
+the System impl. Both construction sites build engines through the selector.
+"""
+covers        = ["c-3", "c-4", "c-5"]
+test_contract = [
+  "null mapping yields the System impl and the Remote impl is never constructed (c-5 no-regression)",
+  "a mapped profile yields the Remote impl built around that profile",
+  "on a mapped-STT path the spoken transcript reaches chat.send via the remote transcript, not system STT",
+]
+depends_on    = ["t-7", "t-8", "t-11"]
+status        = "pending"
+
+[[task]]
+id            = "t-13"
+wave          = 4
+title         = "Consented system-engine fallback in controller"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+  "app/src/test/java/dev/equerry/app/voice/VoiceFlowFailureTest.kt",
+]
+description   = """
+On a remote STT/TTS Error or init-Failed mid-turn, set guidance via remoteEngineFailed
+carrying a retryWithSystem action; expose retryWithSystem() that re-runs the current turn on
+the System impl only after the user invokes it. Never auto-switch (locked failover_consented).
+"""
+covers        = ["c-6"]
+test_contract = [
+  "on a remote engine error, exactly one failure guidance is shown",
+  "the system-engine spy is NOT invoked until retryWithSystem() fires",
+  "the system-engine spy IS invoked after retryWithSystem() fires",
+  "any silent fallback (a system call recorded without consent) fails VoiceFlowFailureTest",
+]
+depends_on    = ["t-12"]
+status        = "pending"
