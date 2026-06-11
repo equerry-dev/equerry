@@ -23,15 +23,16 @@ class ChatModelsTest {
     }
 
     @Test
-    fun chat_token_distinguishes_delta_from_done() {
-        val token: ChatToken = ChatToken.Delta("hi")
-        // Exhaustive when over the sealed hierarchy: dropping a case fails to compile.
-        val text: String = when (token) {
+    fun chat_token_distinguishes_delta_done_and_tool_call() {
+        // Exhaustive when over the sealed hierarchy: dropping a case (incl. ToolCall) fails to compile.
+        fun describe(token: ChatToken): String = when (token) {
             is ChatToken.Delta -> token.text
+            is ChatToken.ToolCall -> token.name
             ChatToken.Done -> ""
         }
-        assertEquals("hi", text)
-        assertEquals("", run { val d: ChatToken = ChatToken.Done; if (d is ChatToken.Delta) d.text else "" })
+        assertEquals("hi", describe(ChatToken.Delta("hi")))
+        assertEquals("set_timer", describe(ChatToken.ToolCall("set_timer", """{"seconds":300}""", "id1")))
+        assertEquals("", describe(ChatToken.Done))
     }
 
     @Test

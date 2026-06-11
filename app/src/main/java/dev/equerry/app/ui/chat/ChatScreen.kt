@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.EntryPointAccessors
 import dev.equerry.app.providers.drivers.ChatMessage
 import dev.equerry.app.providers.drivers.ChatRole
+import dev.equerry.app.tools.actions.PlannedAction
 import dev.equerry.app.voice.MicPermission
 import dev.equerry.app.voice.SystemSpeechToText
 import dev.equerry.app.voice.SystemTextToSpeech
@@ -89,6 +91,8 @@ fun ChatRoute(viewModel: ChatViewModel = hiltViewModel()) {
         onInput = viewModel::onInputChange,
         onSend = viewModel::send,
         onNewChat = viewModel::newChat,
+        onConfirmAction = viewModel::confirmAction,
+        onCancelAction = viewModel::cancelAction,
         onMic = {
             if (MicPermission.isGranted(context.applicationContext)) {
                 controller.start()
@@ -113,6 +117,9 @@ fun ChatScreen(
     onNewChat: () -> Unit,
     listening: Boolean = false,
     onMic: () -> Unit = {},
+    onConfirmAction: (Int) -> Unit = {},
+    onCancelAction: (Int) -> Unit = {},
+    onOpenSettings: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -126,12 +133,28 @@ fun ChatScreen(
             if (state.unmapped) {
                 GuidanceBanner()
             }
+            if (state.toolsUnsupported) {
+                CapabilityBanner(onOpenSettings)
+            }
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(state.transcript) { message -> MessageBubble(message) }
             }
+            // Staged/pending actions: a single staged timer/alarm is a "Start/Cancel" card; several
+            // become a list where each row is independently runnable (Start/Open) or skippable.
+            state.pendingActions.forEachIndexed { index, action ->
+                ActionCard(
+                    action = action,
+                    index = index,
+                    isList = state.pendingActions.size > 1,
+                    onConfirm = onConfirmAction,
+                    onCancel = onCancelAction,
+                )
+            }
+            state.actionNotes.forEach { ActionNoteLine(it) }
+            state.actionGuidance?.let { ActionGuidanceLine(it, onOpenSettings) }
             state.error?.let { ErrorLine(it) }
             if (listening) {
                 Text(
@@ -166,6 +189,91 @@ private fun GuidanceBanner() {
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier.padding(16.dp),
         )
+    }
+}
+
+@Composable
+private fun CapabilityBanner(onOpenSettings: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(12.dp),
+    ) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                "Actions need a tool-capable provider.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = onOpenSettings) { Text("Change in Settings") }
+        }
+    }
+}
+
+/** Human-readable label for a pending action shown on its card/list row. */
+private fun actionLabel(action: PlannedAction): String = when (action) {
+    is PlannedAction.Staged.Timer -> "Timer — ${action.seconds / 60}:${(action.seconds % 60).toString().padStart(2, '0')}"
+    is PlannedAction.Staged.Alarm -> "Alarm — ${action.hour}:${action.minute.toString().padStart(2, '0')}"
+    is PlannedAction.Handoff.Calendar -> "Calendar: ${action.title}"
+    is PlannedAction.Handoff.Email -> "Email to ${action.to}"
+    is PlannedAction.Handoff.Sms -> "Text to ${action.to ?: "your contact"}"
+    is PlannedAction.Malformed -> action.toolName
+}
+
+@Composable
+private fun ActionCard(
+    action: PlannedAction,
+    index: Int,
+    isList: Boolean,
+    onConfirm: (Int) -> Unit,
+    onCancel: (Int) -> Unit,
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(12.dp),
+    ) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(actionLabel(action), modifier = Modifier.weight(1f))
+            // A multi-action row skips; a single staged card cancels.
+            TextButton(onClick = { onCancel(index) }) { Text(if (isList) "Skip" else "Cancel") }
+            // Benign staged actions start; hand-offs open the target app.
+            Button(onClick = { onConfirm(index) }) { Text(if (action is PlannedAction.Staged) "Start" else "Open") }
+        }
+    }
+}
+
+@Composable
+private fun ActionNoteLine(text: String) {
+    Text(
+        "✓ $text",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp),
+    )
+}
+
+@Composable
+private fun ActionGuidanceLine(text: String, onOpenSettings: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.weight(1f),
+        )
+        TextButton(onClick = onOpenSettings) { Text("Settings") }
     }
 }
 

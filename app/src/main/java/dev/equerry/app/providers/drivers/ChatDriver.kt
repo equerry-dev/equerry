@@ -52,22 +52,28 @@ private fun buildRequest(profile: ProviderProfile, key: String, messages: List<C
 private fun sseChatFlow(
     client: OkHttpClient,
     request: Request,
-    parse: (String) -> TokenResult,
+    parse: (String) -> List<TokenResult>,
 ): Flow<ChatToken> = callbackFlow {
     val listener = object : EventSourceListener() {
         override fun onEvent(eventSource: EventSource, id: String?, type: String?, data: String) {
-            when (val result = parse(data)) {
-                is TokenResult.Emit -> {
-                    trySend(result.token)
-                    if (result.token is ChatToken.Done) {
-                        eventSource.cancel()
-                        close()
+            // One SSE event can decode to several tokens (e.g. an assembled tool call at finish),
+            // so the per-stream parser returns a list rather than a single result.
+            for (result in parse(data)) {
+                when (result) {
+                    is TokenResult.Emit -> {
+                        trySend(result.token)
+                        if (result.token is ChatToken.Done) {
+                            eventSource.cancel()
+                            close()
+                            return
+                        }
                     }
-                }
-                TokenResult.Skip -> Unit
-                is TokenResult.Fail -> {
-                    eventSource.cancel()
-                    close(ChatException(result.error))
+                    TokenResult.Skip -> Unit
+                    is TokenResult.Fail -> {
+                        eventSource.cancel()
+                        close(ChatException(result.error))
+                        return
+                    }
                 }
             }
         }
@@ -92,13 +98,13 @@ private fun sseChatFlow(
 /** OpenAI / OpenRouter — SSE with the `choices[].delta` shape. */
 class OpenAiChatDriver @Inject constructor(private val client: OkHttpClient) : ChatDriver {
     override fun send(profile: ProviderProfile, key: String, messages: List<ChatMessage>): Flow<ChatToken> =
-        sseChatFlow(client, buildRequest(profile, key, messages), SseTokenParser::parseOpenAiData)
+        sseChatFlow(client, buildRequest(profile, key, messages), OpenAiStreamParser()::feed)
 }
 
 /** Anthropic — SSE with typed `content_block_delta` / `message_stop` events. */
 class AnthropicChatDriver @Inject constructor(private val client: OkHttpClient) : ChatDriver {
     override fun send(profile: ProviderProfile, key: String, messages: List<ChatMessage>): Flow<ChatToken> =
-        sseChatFlow(client, buildRequest(profile, key, messages), SseTokenParser::parseAnthropicData)
+        sseChatFlow(client, buildRequest(profile, key, messages), AnthropicStreamParser()::feed)
 }
 
 /** Ollama — newline-delimited JSON (not SSE); read the streamed body line by line. */

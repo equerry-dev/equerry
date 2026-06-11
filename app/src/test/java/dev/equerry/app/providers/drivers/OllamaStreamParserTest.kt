@@ -48,4 +48,14 @@ class OllamaStreamParserTest {
     fun finish_with_nothing_buffered_returns_null() {
         assertEquals(null, OllamaStreamParser().finish())
     }
+
+    @Test
+    fun a_message_with_tool_calls_yields_a_toolcall_not_prose() {
+        val line = """{"message":{"role":"assistant","tool_calls":[{"function":{"name":"set_timer","arguments":{"seconds":300}}}]},"done":false}""" + "\n"
+
+        val tokens = OllamaStreamParser().feed(line)
+            .filterIsInstance<TokenResult.Emit>().map { it.token }
+
+        assertEquals(listOf(ChatToken.ToolCall("set_timer", """{"seconds":300}""", null)), tokens)
+    }
 }

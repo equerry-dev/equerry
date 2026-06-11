@@ -1,6 +1,7 @@
 package dev.equerry.app.providers.drivers
 
 import dev.equerry.app.providers.ProviderType
+import dev.equerry.app.tools.ToolSpecs
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -64,6 +65,17 @@ object ChatRequestBuilder {
                     put("content", m.content)
                 }
             }
+            // OpenAI/OpenRouter tools: [{ type:"function", function:{ name, description, parameters } }].
+            putJsonArray("tools") {
+                for (t in ToolSpecs.ALL) addJsonObject {
+                    put("type", "function")
+                    putJsonObject("function") {
+                        put("name", t.name)
+                        put("description", t.description)
+                        put("parameters", t.parameters)
+                    }
+                }
+            }
             temperature?.let { put("temperature", it) }
             maxTokens?.let { put("max_tokens", it) }
         }
@@ -97,6 +109,14 @@ object ChatRequestBuilder {
                 for (m in turns) addJsonObject {
                     put("role", m.role.wire())
                     put("content", m.content)
+                }
+            }
+            // Anthropic tools: [{ name, description, input_schema }].
+            putJsonArray("tools") {
+                for (t in ToolSpecs.ALL) addJsonObject {
+                    put("name", t.name)
+                    put("description", t.description)
+                    put("input_schema", t.parameters)
                 }
             }
             temperature?.let { put("temperature", it) }

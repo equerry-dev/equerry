@@ -1,0 +1,87 @@
+{
+  "phase": "06-tools-actions",
+  "tasks": {
+    "t-1": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/drivers/ChatModels.kt",
+        "app/src/main/java/dev/equerry/app/providers/drivers/SseTokenParser.kt",
+        "app/src/main/java/dev/equerry/app/providers/drivers/OllamaStreamParser.kt",
+        "app/src/main/java/dev/equerry/app/providers/drivers/ChatDriver.kt",
+        "app/src/test/java/dev/equerry/app/providers/drivers/SseTokenParserTest.kt",
+        "app/src/test/java/dev/equerry/app/providers/drivers/OllamaStreamParserTest.kt"
+      ],
+      "commit": "f65d35a",
+      "completed_at": "2026-06-10T18:52:26.364312Z"
+    },
+    "t-2": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/tools/ToolSpecs.kt",
+        "app/src/main/java/dev/equerry/app/providers/drivers/ChatRequestBuilder.kt",
+        "app/src/test/java/dev/equerry/app/providers/drivers/ChatRequestBuilderTest.kt",
+        "app/src/test/java/dev/equerry/app/tools/ToolSpecsTest.kt"
+      ],
+      "commit": "2da57b8",
+      "completed_at": "2026-06-10T18:54:44.136588Z"
+    },
+    "t-3": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",
+        "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt"
+      ],
+      "commit": "47d0019",
+      "completed_at": "2026-06-10T18:55:28.593687Z"
+    },
+    "t-4": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/tools/actions/TimerAlarmIntents.kt",
+        "app/src/main/java/dev/equerry/app/tools/actions/HandoffIntents.kt",
+        "app/src/test/java/dev/equerry/app/tools/actions/TimerAlarmIntentsTest.kt",
+        "app/src/test/java/dev/equerry/app/tools/actions/HandoffIntentsTest.kt"
+      ],
+      "commit": "33ed298",
+      "completed_at": "2026-06-10T18:57:51.337718Z"
+    },
+    "t-5": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/tools/actions/Action.kt",
+        "app/src/main/java/dev/equerry/app/tools/actions/ActionPlanner.kt",
+        "app/src/test/java/dev/equerry/app/tools/actions/ActionPlannerTest.kt"
+      ],
+      "commit": "58b2474",
+      "completed_at": "2026-06-10T18:59:33.731557Z"
+    },
+    "t-6": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/YesNoGrammar.kt",
+        "app/src/test/java/dev/equerry/app/voice/YesNoGrammarTest.kt"
+      ],
+      "commit": "8a3990c",
+      "completed_at": "2026-06-10T19:00:23.449512Z"
+    },
+    "t-7": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt",
+        "app/src/main/java/dev/equerry/app/tools/actions/ActionRunner.kt",
+        "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt"
+      ],
+      "commit": "74b1cce",
+      "completed_at": "2026-06-10T19:07:40.791529Z"
+    },
+    "t-8": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt",
+        "app/src/test/java/dev/equerry/app/ui/chat/ChatScreenTest.kt"
+      ],
+      "commit": "267b938",
+      "completed_at": "2026-06-10T19:10:38.347517Z"
+    },
+    "t-9": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+        "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt"
+      ],
+      "commit": "22b84ab",
+      "completed_at": "2026-06-10T19:16:54.135569Z"
+    }
+  }
+}

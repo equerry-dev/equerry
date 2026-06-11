@@ -99,4 +99,40 @@ class ChatRequestBuilderTest {
         assertEquals(0.3, options["temperature"]!!.jsonPrimitive.double, 0.0001)
         assertEquals(50, options["num_predict"]!!.jsonPrimitive.int)
     }
+
+    private val toolNames = listOf("set_timer", "set_alarm", "create_calendar_event", "draft_email", "draft_sms")
+
+    @Test
+    fun openai_body_carries_all_five_tools_as_functions() {
+        val req = ChatRequestBuilder.build(ProviderType.OPENAI_COMPATIBLE, "gpt-4o", listOf(ChatMessage(ChatRole.USER, "hi")), key)
+        val tools = body(req)["tools"]!!.jsonArray
+
+        assertEquals(5, tools.size)
+        assertTrue("every OpenAI tool is type:function", tools.all { it.jsonObject["type"]!!.jsonPrimitive.content == "function" })
+        assertEquals(toolNames, tools.map { it.jsonObject["function"]!!.jsonObject["name"]!!.jsonPrimitive.content })
+    }
+
+    @Test
+    fun anthropic_body_carries_all_five_tools_with_input_schema() {
+        val req = ChatRequestBuilder.build(ProviderType.ANTHROPIC, "claude-sonnet-4-6", listOf(ChatMessage(ChatRole.USER, "hi")), key)
+        val tools = body(req)["tools"]!!.jsonArray
+
+        assertEquals(5, tools.size)
+        assertEquals(toolNames, tools.map { it.jsonObject["name"]!!.jsonPrimitive.content })
+        assertTrue("every Anthropic tool carries input_schema", tools.all { it.jsonObject.containsKey("input_schema") })
+    }
+
+    @Test
+    fun ollama_body_carries_no_tools_array() {
+        val req = ChatRequestBuilder.build(ProviderType.OLLAMA, "llama3.2", listOf(ChatMessage(ChatRole.USER, "hi")), key = "")
+        assertFalse("Ollama is judged tool-incapable; no tools array", body(req).containsKey("tools"))
+    }
+
+    @Test
+    fun tools_payload_never_embeds_the_api_key() {
+        val openai = ChatRequestBuilder.build(ProviderType.OPENAI_COMPATIBLE, "gpt-4o", listOf(ChatMessage(ChatRole.USER, "hi")), key)
+        val anthropic = ChatRequestBuilder.build(ProviderType.ANTHROPIC, "claude-sonnet-4-6", listOf(ChatMessage(ChatRole.USER, "hi")), key)
+        assertFalse(openai.body.contains(key))
+        assertFalse(anthropic.body.contains(key))
+    }
 }

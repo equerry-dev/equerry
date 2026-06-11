@@ -50,4 +50,12 @@ enum class ProviderType(
     /** The driver type that services this provider. OpenRouter reuses the OpenAI-compatible driver. */
     val driverType: ProviderType
         get() = if (this == OPENROUTER) OPENAI_COMPATIBLE else this
+
+    /**
+     * Whether this type is treated as tool-call capable — drives the action-tools payload (t-2) and
+     * the chat-screen capability banner (unsupported_provider_ux). Judged best-effort at the type
+     * level: Ollama tool support varies by model, so it is treated as incapable here.
+     */
+    val supportsTools: Boolean
+        get() = this != OLLAMA
 }

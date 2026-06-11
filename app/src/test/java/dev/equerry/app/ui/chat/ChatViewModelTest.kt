@@ -17,6 +17,8 @@ import dev.equerry.app.providers.drivers.ChatHttpClient
 import dev.equerry.app.providers.drivers.ChatRole
 import dev.equerry.app.providers.drivers.OllamaChatDriver
 import dev.equerry.app.providers.drivers.OpenAiChatDriver
+import dev.equerry.app.tools.actions.ActionRunner
+import dev.equerry.app.tools.actions.PlannedAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,9 +54,17 @@ class ChatViewModelTest {
         override fun removeKey(profileId: String) { keys.remove(profileId) }
     }
 
+    /** Records what was launched without touching the Android activity stack. */
+    private class FakeActionRunner : ActionRunner {
+        val ran = mutableListOf<PlannedAction>()
+        var launches = true
+        override fun run(action: PlannedAction): Boolean { ran += action; return launches }
+    }
+
     private lateinit var scope: CoroutineScope
     private lateinit var server: MockWebServer
     private lateinit var repository: ProviderRepository
+    private lateinit var runner: FakeActionRunner
     private lateinit var vm: ChatViewModel
 
     private val key = "sk-secret-ABCDEF1234567890"
@@ -70,7 +80,8 @@ class ChatViewModelTest {
         repository = ProviderRepository(ProfileStore(ds), FakeSecretStore(), SlotMappingStore(ds))
         val client = ChatHttpClient.create()
         val factory = ChatDriverFactory(OpenAiChatDriver(client), AnthropicChatDriver(client), OllamaChatDriver(client))
-        vm = ChatViewModel(repository, factory, dev.equerry.app.providers.drivers.ChatSession())
+        runner = FakeActionRunner()
+        vm = ChatViewModel(repository, factory, dev.equerry.app.providers.drivers.ChatSession(), runner)
     }
 
     @After
@@ -201,5 +212,131 @@ class ChatViewModelTest {
         val errored = awaitState { it.error != null }
         assertEquals(ChatError.Auth.message, errored.error)
         assertFalse("error must never leak the key", errored.error!!.contains(key))
+    }
+
+    private suspend fun configureOllamaProvider(): ProviderProfile {
+        val created = repository.addProfile(
+            ProfileDraft("Local", ProviderType.OLLAMA, server.url("/").toString(), "", "llama3.2"),
+        )
+        repository.setChatSlot(created.id)
+        return created
+    }
+
+    /** An OpenAI tool-call SSE reply: one tool call (args delivered whole), then finish + DONE. */
+    private fun sseToolReply(name: String, argsEscaped: String, id: String = "call_1"): MockResponse =
+        MockResponse().setHeader("Content-Type", "text/event-stream").setBody(
+            """data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"$id","function":{"name":"$name","arguments":"$argsEscaped"}}]}}]}""" + "\n\n" +
+                """data: {"choices":[{"delta":{},"finish_reason":"tool_calls"}]}""" + "\n\n" +
+                "data: [DONE]\n\n",
+        )
+
+    /** An OpenAI SSE reply carrying two tool calls (indexes 0 and 1) then finish + DONE. */
+    private fun sseTwoToolReply(): MockResponse =
+        MockResponse().setHeader("Content-Type", "text/event-stream").setBody(
+            """data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"c0","function":{"name":"set_timer","arguments":"{\"seconds\":60}"}}]}}]}""" + "\n\n" +
+                """data: {"choices":[{"delta":{"tool_calls":[{"index":1,"id":"c1","function":{"name":"set_alarm","arguments":"{\"hour\":7,\"minute\":30}"}}]}}]}""" + "\n\n" +
+                """data: {"choices":[{"delta":{},"finish_reason":"tool_calls"}]}""" + "\n\n" +
+                "data: [DONE]\n\n",
+        )
+
+    private fun ndjsonReply(text: String): MockResponse =
+        MockResponse().setHeader("Content-Type", "application/x-ndjson").setBody(
+            """{"message":{"role":"assistant","content":"$text"},"done":false}""" + "\n" + """{"done":true}""" + "\n",
+        )
+
+    @Test
+    fun a_single_timer_tool_call_is_staged_and_not_fired() = runBlocking {
+        configureChatProvider()
+        server.enqueue(sseToolReply("set_timer", """{\"seconds\":300}"""))
+
+        vm.send("set a 5 minute timer")
+
+        val s = awaitState { !it.streaming && it.pendingActions.isNotEmpty() }
+        assertEquals(1, s.pendingActions.size)
+        assertTrue("a tool call must produce an action, not prose", s.pendingActions[0] is PlannedAction.Staged.Timer)
+        assertTrue("a staged timer must not auto-fire", runner.ran.isEmpty())
+    }
+
+    @Test
+    fun confirming_a_staged_timer_runs_it_once_with_a_note_that_never_says_sent() = runBlocking {
+        configureChatProvider()
+        server.enqueue(sseToolReply("set_timer", """{\"seconds\":300}"""))
+
+        vm.send("set a 5 minute timer")
+        awaitState { it.pendingActions.isNotEmpty() }
+        vm.confirmAction(0)
+
+        val s = vm.state.value
+        assertEquals(1, runner.ran.size)
+        assertTrue(s.pendingActions.isEmpty())
+        val note = s.actionNotes.last()
+        assertTrue("note describes the timer", note.contains("Timer"))
+        assertFalse("note must never claim a send", note.contains("sent"))
+    }
+
+    @Test
+    fun cancelling_a_staged_action_discards_it_without_running() = runBlocking {
+        configureChatProvider()
+        server.enqueue(sseToolReply("set_timer", """{\"seconds\":300}"""))
+
+        vm.send("set a timer")
+        awaitState { it.pendingActions.isNotEmpty() }
+        vm.cancelAction(0)
+
+        assertTrue(vm.state.value.pendingActions.isEmpty())
+        assertTrue("cancel must not run the action", runner.ran.isEmpty())
+    }
+
+    @Test
+    fun a_single_handoff_launches_directly_with_a_note() = runBlocking {
+        configureChatProvider()
+        server.enqueue(sseToolReply("draft_sms", """{\"to\":\"Mum\",\"body\":\"omw\"}"""))
+
+        vm.send("text mum omw")
+
+        val s = awaitState { !it.streaming && it.actionNotes.isNotEmpty() }
+        assertEquals("single hand-off launches directly", 1, runner.ran.size)
+        assertTrue(s.pendingActions.isEmpty())
+        assertTrue(s.actionNotes.last().contains("Opened"))
+        assertFalse(s.actionNotes.last().contains("sent"))
+    }
+
+    @Test
+    fun two_tool_calls_make_a_two_entry_pending_list_each_independently_runnable() = runBlocking {
+        configureChatProvider()
+        server.enqueue(sseTwoToolReply())
+
+        vm.send("set a timer and an alarm")
+        awaitState { !it.streaming && it.pendingActions.size == 2 }
+
+        // Skip entry 0; entry 1 stays runnable.
+        vm.cancelAction(0)
+        assertEquals(1, vm.state.value.pendingActions.size)
+        vm.confirmAction(0)
+        assertEquals(1, runner.ran.size)
+        assertTrue(vm.state.value.pendingActions.isEmpty())
+    }
+
+    @Test
+    fun a_malformed_tool_call_posts_guidance_without_crashing() = runBlocking {
+        configureChatProvider()
+        // Valid JSON args but the required 'seconds' is missing -> planner Malformed.
+        server.enqueue(sseToolReply("set_timer", """{\"label\":\"tea\"}"""))
+
+        vm.send("set a timer")
+
+        val s = awaitState { !it.streaming && it.actionGuidance != null }
+        assertTrue(s.actionGuidance != null)
+        assertTrue("malformed call drops no pending action and never crashes", s.pendingActions.isEmpty())
+    }
+
+    @Test
+    fun sending_with_a_tool_incapable_provider_sets_the_banner_flag() = runBlocking {
+        configureOllamaProvider()
+        server.enqueue(ndjsonReply("hi"))
+
+        vm.send("hello")
+
+        assertTrue(awaitState { it.toolsUnsupported }.toolsUnsupported)
     }
 }

@@ -7,6 +7,15 @@ package dev.equerry.app.providers.drivers
  */
 sealed interface ChatToken {
     data class Delta(val text: String) : ChatToken
+
+    /**
+     * The provider asked to invoke a tool/function instead of (or alongside) replying in prose.
+     * [argsJson] is the raw JSON arguments object, validated parseable before this is emitted (a
+     * truncated/non-JSON args stream maps to [ChatError.Malformed], never a half-formed ToolCall).
+     * [id] is the provider's tool-call id when one is supplied (OpenAI/Anthropic), else null (Ollama).
+     */
+    data class ToolCall(val name: String, val argsJson: String, val id: String?) : ChatToken
+
     data object Done : ChatToken
 }
 

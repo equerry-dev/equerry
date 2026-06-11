@@ -39,6 +39,7 @@ import dev.equerry.app.data.VoiceSettingsStore
 import dev.equerry.app.providers.ProviderRepository
 import dev.equerry.app.providers.drivers.ChatDriverFactory
 import dev.equerry.app.providers.drivers.ChatSession
+import dev.equerry.app.tools.actions.ActionRunner
 import dev.equerry.app.ui.chat.ChatScreen
 import dev.equerry.app.ui.chat.ChatViewModel
 import dev.equerry.app.ui.theme.EquerryTheme
@@ -103,6 +104,7 @@ class EquerryVoiceInteractionSession(context: Context) :
         fun chatDriverFactory(): ChatDriverFactory
         fun chatSession(): ChatSession
         fun voiceSettingsStore(): VoiceSettingsStore
+        fun actionRunner(): ActionRunner
     }
 
     private val lifecycleRegistry = LifecycleRegistry(this)
@@ -126,6 +128,7 @@ class EquerryVoiceInteractionSession(context: Context) :
         entry.providerRepository(),
         entry.chatDriverFactory(),
         entry.chatSession(),
+        entry.actionRunner(),
     )
 
     private val controller: VoiceFlowController = VoiceFlowController(
