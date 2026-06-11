@@ -1,15 +1,9 @@
 {
   "version": "0.1.5.4",
   "current_milestone": "v0.1",
-  "current_phase": "07-screen-context",
-  "current_phase_status": "verified",
-  "last_activity": "2026-06-11T08:10:43.658104Z",
-  "last_action": "verified 07-screen-context: pass (6/6 covered; mutation skipped — Kotlin)",
+  "last_activity": "2026-06-11T08:15:32.379166Z",
+  "last_action": "completed 07-screen-context",
   "history": [
-    {
-      "at": "2026-06-10T17:35:08.858251Z",
-      "action": "bump internal 0.1.5.1 → 0.1.5.2"
-    },
     {
       "at": "2026-06-10T17:35:08.865562Z",
       "action": "quick: wait for TTS to finish before re-arming the mic"
@@ -205,6 +199,10 @@
     {
       "at": "2026-06-11T08:10:43.658104Z",
       "action": "verified 07-screen-context: pass (6/6 covered; mutation skipped — Kotlin)"
+    },
+    {
+      "at": "2026-06-11T08:15:32.379166Z",
+      "action": "completed 07-screen-context"
     }
   ]
 }
