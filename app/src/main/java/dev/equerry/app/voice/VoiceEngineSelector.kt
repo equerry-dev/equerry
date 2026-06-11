@@ -45,6 +45,18 @@ class VoiceEngineSelector(
     /** A [TextToSpeech] that resolves its engine on [TextToSpeech.init] and delegates thereafter. */
     fun ttsEngine(): TextToSpeech = SelectingTextToSpeech(::resolveTts)
 
+    /** A fresh System STT engine — the consented fallback the controller retries on (failover_consented). */
+    fun systemSttEngine(): SpeechToText = systemStt()
+
+    /** A fresh System TTS engine — the consented fallback the controller retries on (failover_consented). */
+    fun systemTtsEngine(): TextToSpeech = systemTts()
+
+    /** Whether the STT slot currently maps to a remote provider — gates offering the consented retry. */
+    suspend fun isSttMapped(): Boolean = repository.observeSttMapping().first() != null
+
+    /** Whether the TTS slot currently maps to a remote provider — gates offering the consented retry. */
+    suspend fun isTtsMapped(): Boolean = repository.observeTtsMapping().first() != null
+
     companion object {
         /** Production wiring: System engines via their fromContext factories, Remote via fromProfile. */
         fun fromContext(context: Context, repository: ProviderRepository): VoiceEngineSelector {

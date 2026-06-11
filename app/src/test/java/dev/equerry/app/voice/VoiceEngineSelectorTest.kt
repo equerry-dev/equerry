@@ -21,6 +21,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Rule
 import org.junit.Test
@@ -126,6 +127,28 @@ class VoiceEngineSelectorTest {
         val profile = repo.addProfile(openAiDraft("TTS Box"))
         repo.setTtsSlot(profile.id)
         assertSame(remote, selector.resolveTts())
+    }
+
+    @Test
+    fun is_mapped_predicates_reflect_the_slot_mapping() = withRepo { repo ->
+        val selector = VoiceEngineSelector(
+            repository = repo,
+            systemStt = { NoopStt() },
+            remoteStt = { _, _ -> NoopStt() },
+            systemTts = { NoopTts() },
+            remoteTts = { _, _ -> NoopTts() },
+        )
+
+        assertFalse(selector.isSttMapped())
+        assertFalse(selector.isTtsMapped())
+
+        val profile = repo.addProfile(openAiDraft())
+        repo.setSttSlot(profile.id)
+        assertTrue(selector.isSttMapped())
+        assertFalse("only STT was mapped", selector.isTtsMapped())
+
+        repo.setTtsSlot(profile.id)
+        assertTrue(selector.isTtsMapped())
     }
 
     @Test

@@ -76,6 +76,11 @@ fun ChatRoute(viewModel: ChatViewModel = hiltViewModel()) {
             scope = scope,
             isMicGranted = { MicPermission.isGranted(context.applicationContext) },
             isChatConfigured = { entry.providerRepository().observeChatMapping().first() != null },
+            // Consented fallback: on a remote-engine failure, offer a one-tap retry on the system engine.
+            systemStt = selector.systemSttEngine(),
+            systemTts = selector.systemTtsEngine(),
+            isSttRemote = selector::isSttMapped,
+            isTtsRemote = selector::isTtsMapped,
         )
     }
     val voiceState by controller.state.collectAsState()

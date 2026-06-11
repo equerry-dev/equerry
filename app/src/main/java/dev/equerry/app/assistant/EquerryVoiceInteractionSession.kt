@@ -139,6 +139,11 @@ class EquerryVoiceInteractionSession(context: Context) :
         isMicGranted = { MicPermission.isGranted(context.applicationContext) },
         isChatConfigured = { entry.providerRepository().observeChatMapping().first() != null },
         screenContext = { currentScreenContext() },
+        // Consented fallback: on a remote-engine failure, offer a one-tap retry on the system engine.
+        systemStt = engineSelector.systemSttEngine(),
+        systemTts = engineSelector.systemTtsEngine(),
+        isSttRemote = engineSelector::isSttMapped,
+        isTtsRemote = engineSelector::isTtsMapped,
     )
 
     private val coordinator = VoiceSessionCoordinator(
