@@ -23,6 +23,8 @@ captures/
 
 # Secrets
 *.env
+# Real release signing credentials — only keystore.properties.example is committed (r-03).
+keystore.properties
 
 # Tesseract OCR model — multi-MB binary, fetched locally (see app/src/main/assets/tessdata/README.md)
 app/src/main/assets/tessdata/*.traineddata

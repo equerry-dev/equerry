@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,6 +8,17 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
+
+// Release signing is resolved from a gitignored keystore.properties (see keystore.properties.example)
+// or from environment variables — never from anything committed (r-03). When neither is present the
+// release build still assembles, just unsigned, which is fine for F-Droid (it signs independently).
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) keystorePropertiesFile.inputStream().use { load(it) }
+}
+fun resolveSigning(propKey: String, envKey: String): String? =
+    keystoreProperties.getProperty(propKey) ?: System.getenv(envKey)
+val releaseStoreFile: String? = resolveSigning("storeFile", "EQUERRY_KEYSTORE_FILE")
 
 android {
     namespace = "dev.equerry.app"
@@ -21,6 +34,19 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            // Populated only when a keystore is supplied out-of-repo; left empty otherwise so the
+            // build configures cleanly with no secrets present.
+            if (releaseStoreFile != null) {
+                storeFile = file(releaseStoreFile)
+                storePassword = resolveSigning("storePassword", "EQUERRY_KEYSTORE_PASSWORD")
+                keyAlias = resolveSigning("keyAlias", "EQUERRY_KEY_ALIAS")
+                keyPassword = resolveSigning("keyPassword", "EQUERRY_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             // Explicit: no debug leftovers in a shippable build (c-6). Guarded by ReleaseBuildConfigTest.
@@ -31,6 +57,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            // Sign only when a keystore was provided out-of-repo; unsigned otherwise (F-Droid signs).
+            signingConfig = if (releaseStoreFile != null) signingConfigs.getByName("release") else null
         }
     }
 
