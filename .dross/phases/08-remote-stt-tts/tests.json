@@ -1,0 +1,147 @@
+{
+  "phase": "08-remote-stt-tts",
+  "generated_at": "2026-06-11T12:28:03.69921Z",
+  "languages": null,
+  "skipped": [
+    {
+      "file": "app/build.gradle.kts",
+      "reason": "no mutation adapter for .kts"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/data/ProfileStore.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/CapabilitySlot.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/SpeechRequestBuilder.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/TranscribeRequestBuilder.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/slots/SlotsScreen.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/slots/SlotsViewModel.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/voice/RemoteAudioError.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/voice/RemoteSpeechToText.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/voice/RemoteTextToSpeech.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/voice/SilenceVad.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/voice/VoiceComponentsEntryPoint.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/voice/VoiceEngineSelector.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/voice/VoiceGuidance.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/data/ProfileStoreTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/drivers/SpeechRequestBuilderTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/drivers/TranscribeRequestBuilderTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/slots/SlotsScreenTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/slots/SlotsViewModelTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/voice/RemoteSpeechToTextTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/voice/RemoteTextToSpeechTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/voice/SilenceVadTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/voice/VoiceEngineSelectorTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/voice/VoiceFlowFailureTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/voice/VoiceGuidanceFactoryTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "gradle/libs.versions.toml",
+      "reason": "no mutation adapter for .toml"
+    }
+  ]
+}

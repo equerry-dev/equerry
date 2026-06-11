@@ -2,18 +2,10 @@
   "version": "0.1.5.4",
   "current_milestone": "v0.1",
   "current_phase": "08-remote-stt-tts",
-  "current_phase_status": "complete",
-  "last_activity": "2026-06-11T11:00:21.960057Z",
-  "last_action": "phase 08-remote-stt-tts executed (13/13 done \u0026 green)",
+  "current_phase_status": "verified",
+  "last_activity": "2026-06-11T12:30:05.126588Z",
+  "last_action": "verified 08-remote-stt-tts: partial (6/6 covered, 2 flags; mutation skipped — Kotlin)",
   "history": [
-    {
-      "at": "2026-06-11T05:16:52.189718Z",
-      "action": "set current_phase_status=verified"
-    },
-    {
-      "at": "2026-06-11T05:16:52.195349Z",
-      "action": "verified 06-tools-actions: pass (6/6 covered; mutation skipped — Kotlin)"
-    },
     {
       "at": "2026-06-11T05:21:37.200244Z",
       "action": "shipped 06-tools-actions → https://github.com/equerry-dev/equerry/pull/5"
@@ -205,6 +197,14 @@
     {
       "at": "2026-06-11T11:00:21.960057Z",
       "action": "phase 08-remote-stt-tts executed (13/13 done \u0026 green)"
+    },
+    {
+      "at": "2026-06-11T12:30:05.119095Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-11T12:30:05.126588Z",
+      "action": "verified 08-remote-stt-tts: partial (6/6 covered, 2 flags; mutation skipped — Kotlin)"
     }
   ]
 }
