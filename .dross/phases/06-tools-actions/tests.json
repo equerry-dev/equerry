@@ -1,0 +1,119 @@
+{
+  "phase": "06-tools-actions",
+  "generated_at": "2026-06-11T05:15:10.726595Z",
+  "languages": null,
+  "skipped": [
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/ChatDriver.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/ChatModels.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/ChatRequestBuilder.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/OllamaStreamParser.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/SseTokenParser.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/tools/ToolSpecs.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/tools/actions/Action.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/tools/actions/ActionPlanner.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/tools/actions/ActionRunner.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/tools/actions/HandoffIntents.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/tools/actions/TimerAlarmIntents.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/voice/YesNoGrammar.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/drivers/ChatRequestBuilderTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/drivers/OllamaStreamParserTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/drivers/SseTokenParserTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/tools/ToolSpecsTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/tools/actions/ActionPlannerTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/tools/actions/HandoffIntentsTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/tools/actions/TimerAlarmIntentsTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/chat/ChatScreenTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/voice/YesNoGrammarTest.kt",
+      "reason": "no mutation adapter for .kt"
+    }
+  ]
+}

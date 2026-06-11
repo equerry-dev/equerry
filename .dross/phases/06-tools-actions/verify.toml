@@ -1,0 +1,91 @@
+[verify]
+  phase = "06-tools-actions"
+  generated_at = 2026-06-11T05:15:10.726595Z
+  verdict = "pass"
+
+[summary]
+  mutation_status = "skipped"
+  mutation_score = 0.0
+  mutants_killed = 0
+  mutants_survived = 0
+  mutants_not_covered = 0
+  criteria_total = 6
+  criteria_covered = 6
+  criteria_uncovered = 0
+
+[[criterion]]
+  id = "c-1"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/providers/drivers/SseTokenParserTest.kt:openai_tool_call_fragmented_across_events_assembles_one_toolcall",
+    "app/src/test/java/dev/equerry/app/providers/drivers/SseTokenParserTest.kt:anthropic_tool_use_sequence_assembles_one_toolcall",
+    "app/src/test/java/dev/equerry/app/providers/drivers/OllamaStreamParserTest.kt:a_message_with_tool_calls_yields_a_toolcall_not_prose",
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:a_single_timer_tool_call_is_staged_and_not_fired",
+  ]
+  notes = "Parsers surface ToolCall (not prose) per wire format; ChatViewModel acts on it (staged action, not assistant text)."
+
+[[criterion]]
+  id = "c-2"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:confirming_a_staged_timer_runs_it_once_with_a_note_that_never_says_sent",
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:cancelling_a_staged_action_discards_it_without_running",
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatScreenTest.kt:staged_timer_renders_start_cancel_card_and_fires_callbacks",
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt:staged_timer_asks_start_now_then_arms_listen_and_yes_fires_once",
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt:staged_timer_no_discards_without_firing",
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt:staged_timer_unrecognised_reply_leaves_it_staged_and_never_fires",
+    "app/src/test/java/dev/equerry/app/voice/YesNoGrammarTest.kt:ambiguous_or_offtopic_is_unrecognised_and_never_yes",
+  ]
+  notes = "Tap path (card Start/Cancel) and voice path (spoken yes fires once, no discards, unrecognised leaves staged) both covered; prompt-before-listen ordering asserted."
+
+[[criterion]]
+  id = "c-3"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/tools/actions/HandoffIntentsTest.kt:calendar_event_inserts_into_events_with_title_and_times",
+    "app/src/test/java/dev/equerry/app/tools/actions/HandoffIntentsTest.kt:email_uses_sendto_mailto_with_subject_and_body",
+    "app/src/test/java/dev/equerry/app/tools/actions/HandoffIntentsTest.kt:sms_uses_sendto_sms_with_body",
+    "app/src/test/java/dev/equerry/app/tools/actions/HandoffIntentsTest.kt:handoff_builders_never_auto_send",
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:a_single_handoff_launches_directly_with_a_note",
+  ]
+  notes = "Builders return ACTION_INSERT/ACTION_SENDTO pre-fills and never an auto-commit action (r-02); the deterministic note never says 'sent'."
+
+[[criterion]]
+  id = "c-4"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/tools/ToolSpecsTest.kt:exposes_exactly_the_five_locked_tools_in_order",
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatRequestBuilderTest.kt:openai_body_carries_all_five_tools_as_functions",
+    "app/src/test/java/dev/equerry/app/tools/actions/ActionPlannerTest.kt:multiple_calls_preserve_type_and_order",
+    "app/src/test/java/dev/equerry/app/tools/actions/ActionPlannerTest.kt:calendar_start_iso_is_converted_to_epoch_millis_in_the_device_zone",
+    "app/src/test/java/dev/equerry/app/tools/actions/TimerAlarmIntentsTest.kt:set_timer_targets_the_clock_with_length_and_visible_ui",
+  ]
+  notes = "Five tools registered + arg-threaded through planner to populated intents; timer (staged) and sms (hand-off) also exercised via the SSE->ViewModel path. Each tool's planner branch is hit."
+
+[[criterion]]
+  id = "c-5"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/providers/drivers/SseTokenParserTest.kt:openai_tool_call_args_truncated_at_finish_map_to_malformed",
+    "app/src/test/java/dev/equerry/app/tools/actions/ActionPlannerTest.kt:missing_required_arg_yields_malformed_not_an_exception",
+    "app/src/test/java/dev/equerry/app/tools/actions/ActionPlannerTest.kt:non_json_args_yield_malformed_not_an_exception",
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:a_malformed_tool_call_posts_guidance_without_crashing",
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:sending_with_a_tool_incapable_provider_sets_the_banner_flag",
+    "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt:tool_capability_is_true_for_all_types_except_ollama",
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatScreenTest.kt:capability_banner_renders_with_settings_link_when_tools_unsupported",
+  ]
+  notes = "Malformed parses/args map to Malformed (never crash); guidance + capability banner with Settings link surfaced; no silently-dropped request."
+
+[[criterion]]
+  id = "c-6"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/tools/actions/ActionPlannerTest.kt:multiple_calls_preserve_type_and_order",
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:two_tool_calls_make_a_two_entry_pending_list_each_independently_runnable",
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatScreenTest.kt:multi_action_list_renders_start_open_and_skip",
+  ]
+  notes = "A request with several tool calls yields a multi-entry plan preserving type+order, rendered as an independently-runnable/skippable pending list."
+
+[[finding]]
+  severity = "NOTE"
+  text = "Mutation efficacy unmeasured: project is Kotlin and dross has no .kt mutation adapter (all 30 touched files skipped). Verdict is based on criterion coverage alone — all 6 criteria covered by specific tests; no BLOCKING/FLAG findings."
