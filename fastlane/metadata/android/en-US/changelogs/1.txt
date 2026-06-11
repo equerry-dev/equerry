@@ -1,0 +1,9 @@
+First release.
+
+* Set Equerry as your system default assistant and invoke it with the assist gesture.
+* Bring-your-own-backend provider profiles: Ollama, Anthropic, OpenAI-compatible, OpenRouter — keys stored encrypted on-device.
+* Per-job capability slots: route Chat, Vision, Speech-to-Text, and Text-to-Speech to different providers.
+* Spoken question-and-answer, with optional remote STT/TTS backends.
+* Ask about the current screen via Android's sanctioned Assist API.
+* Stage timers, alarms, calendar events, and email/SMS drafts — nothing fires until you confirm.
+* No accounts, no telemetry. GPL-3.0.

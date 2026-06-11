@@ -1,0 +1,29 @@
+Equerry is a privacy-first digital assistant you can set as your phone's default — but instead of routing everything to a single vendor's cloud, you bring your own AI backends and wire each job to the provider you choose.
+
+Privacy is the product, enforced in code:
+
+* No accounts, no sign-up, no telemetry, no analytics.
+* Your data flows only to the providers you configure — nowhere else.
+* Fully open source under the GPL-3.0. Every fork stays open.
+
+Bring your own backend:
+
+* Configure provider profiles for Ollama (self-hosted), Anthropic, OpenAI-compatible endpoints, and OpenRouter.
+* Your API keys are stored encrypted on-device (Android Keystore) and are never logged or placed in URLs.
+
+Per-job capability slots:
+
+* Route Chat, Vision, Speech-to-Text, and Text-to-Speech to different providers, so you can split jobs across backends for cost, privacy, and quality.
+* Use a local model for some jobs and a hosted one for others — your call.
+
+What it does:
+
+* Set Equerry as your system default assistant and invoke it with the assist gesture.
+* Hold a spoken question-and-answer conversation end to end.
+* Ask about what's on your screen — read only through Android's sanctioned Assist API, never an accessibility service.
+* Ask it to set a timer or alarm, or to draft a calendar event, email, or SMS. Equerry only stages these actions; nothing is sent or saved until you confirm with a tap.
+
+Equerry is free and always will be. If it's useful to you and you'd like to help cover development, there's an optional tip jar — no subscriptions, just a coffee:
+
+* Liberapay: https://liberapay.com/equerry
+* GitHub Sponsors: https://github.com/sponsors/equerry-dev
