@@ -1,7 +1,7 @@
 [verify]
   phase = "07-screen-context"
-  generated_at = 2026-06-11T07:56:53.233969Z
-  verdict = "partial"
+  generated_at = 2026-06-11T08:09:39.170477Z
+  verdict = "pass"
 
 [summary]
   mutation_status = "skipped"
@@ -10,18 +10,18 @@
   mutants_survived = 0
   mutants_not_covered = 0
   criteria_total = 6
-  criteria_covered = 5
-  criteria_uncovered = 1
+  criteria_covered = 6
+  criteria_uncovered = 0
 
 [[criterion]]
   id = "c-1"
-  status = "weak"
+  status = "covered"
   tests = [
     "app/src/test/java/dev/equerry/app/voice/ScreenQueryGrammarTest.kt:recognises_screen_referencing_utterances",
-    "app/src/test/java/dev/equerry/app/voice/ScreenQueryGrammarTest.kt:ignores_ordinary_questions",
     "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt:a_spoken_screen_query_routes_to_ask_about_screen",
+    "app/src/test/java/dev/equerry/app/assistant/AssistSessionContentTest.kt:tapping_ask_about_this_screen_invokes_the_callback",
   ]
-  notes = "Spoken-trigger half fully covered (grammar + voice routing). The on-screen 'Ask about this screen' button lives in EquerryVoiceInteractionSession (Compose, framework-bound) — manually verified only; no automated test fails if the button wiring breaks. askAboutScreen itself is covered by c-2/c-3 tests."
+  notes = "Both trigger surfaces now tested: the spoken trigger (grammar + voice routing) and the on-screen button (AssistSessionContent extracted from the framework session; a Robolectric test asserts the tap invokes onAskScreen)."
 
 [[criterion]]
   id = "c-2"
@@ -77,6 +77,10 @@
 [[finding]]
   severity = "NOTE"
   text = "skipped app/src/main/java/dev/equerry/app/assistant/AssistAnalyzer.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/assistant/AssistSessionContent.kt: no mutation adapter for .kt"
 
 [[finding]]
   severity = "NOTE"
@@ -161,10 +165,6 @@
 [[finding]]
   severity = "NOTE"
   text = "skipped settings.gradle.kts: no mutation adapter for .kts"
-
-[[finding]]
-  severity = "FLAG"
-  text = "c-1: the on-screen 'Ask about this screen' button (EquerryVoiceInteractionSession, Compose) is framework-bound and manually verified only — no automated test fails if its wiring to askAboutScreen breaks. The spoken-trigger half is fully covered."
 
 [[finding]]
   severity = "NOTE"

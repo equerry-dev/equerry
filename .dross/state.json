@@ -3,17 +3,9 @@
   "current_milestone": "v0.1",
   "current_phase": "07-screen-context",
   "current_phase_status": "verified",
-  "last_activity": "2026-06-11T08:08:52.120685Z",
-  "last_action": "amended t-9: extracted testable AssistSessionContent (c-1 button now covered)",
+  "last_activity": "2026-06-11T08:10:43.658104Z",
+  "last_action": "verified 07-screen-context: pass (6/6 covered; mutation skipped — Kotlin)",
   "history": [
-    {
-      "at": "2026-06-10T17:28:39.546772Z",
-      "action": "bump internal 0.1.5.0 → 0.1.5.1"
-    },
-    {
-      "at": "2026-06-10T17:28:39.554245Z",
-      "action": "quick: permit cleartext HTTP for user-configured providers"
-    },
     {
       "at": "2026-06-10T17:35:08.858251Z",
       "action": "bump internal 0.1.5.1 → 0.1.5.2"
@@ -205,6 +197,14 @@
     {
       "at": "2026-06-11T08:08:52.120685Z",
       "action": "amended t-9: extracted testable AssistSessionContent (c-1 button now covered)"
+    },
+    {
+      "at": "2026-06-11T08:10:43.650929Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-11T08:10:43.658104Z",
+      "action": "verified 07-screen-context: pass (6/6 covered; mutation skipped — Kotlin)"
     }
   ]
 }

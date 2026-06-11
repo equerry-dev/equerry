@@ -1,6 +1,6 @@
 {
   "phase": "07-screen-context",
-  "generated_at": "2026-06-11T07:56:53.233969Z",
+  "generated_at": "2026-06-11T08:09:39.170477Z",
   "languages": null,
   "skipped": [
     {
@@ -9,6 +9,10 @@
     },
     {
       "file": "app/src/main/java/dev/equerry/app/assistant/AssistAnalyzer.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/AssistSessionContent.kt",
       "reason": "no mutation adapter for .kt"
     },
     {
