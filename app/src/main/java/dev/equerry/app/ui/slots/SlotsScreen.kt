@@ -110,7 +110,7 @@ fun SlotsScreen(
         LazyColumn(
             contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(pad).padding(horizontal = 16.dp),
+            modifier = Modifier.padding(pad).padding(horizontal = 16.dp).testTag("slotsList"),
         ) {
             if (state.chatUnconfigured) item { UnmappedBanner(onAddProvider) }
 
@@ -140,6 +140,7 @@ fun SlotsScreen(
                     mappedLabel = null,
                     subtitle = subtitleFor(slot),
                     onClick = {},
+                    modifier = Modifier.testTag("${slot.name.lowercase()}Slot"),
                 )
             }
         }
@@ -149,7 +150,7 @@ fun SlotsScreen(
         ModalBottomSheet(onDismissRequest = { pickerSlot = null }) {
             ProfilePickerSheet(
                 slotName = slot.name,
-                profiles = state.profiles,
+                profiles = state.candidatesFor(slot),
                 selectedId = state.mappedProfile(slot)?.id,
                 onPick = { onMap(slot, it); pickerSlot = null },
                 onAddProvider = { pickerSlot = null; onAddProvider() },

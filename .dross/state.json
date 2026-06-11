@@ -1,125 +1,11 @@
 {
-  "version": "0.1.5.4",
+  "version": "0.1.5.6",
   "current_milestone": "v0.1",
-  "last_activity": "2026-06-11T08:15:32.379166Z",
-  "last_action": "completed 07-screen-context",
+  "current_phase": "08-remote-stt-tts",
+  "current_phase_status": "verified",
+  "last_activity": "2026-06-11T12:41:32.653846Z",
+  "last_action": "verified 08-remote-stt-tts: pass (6/6 covered; mutation skipped — Kotlin; both flags resolved)",
   "history": [
-    {
-      "at": "2026-06-10T17:35:08.865562Z",
-      "action": "quick: wait for TTS to finish before re-arming the mic"
-    },
-    {
-      "at": "2026-06-10T17:42:20.18661Z",
-      "action": "bump internal 0.1.5.2 → 0.1.5.3"
-    },
-    {
-      "at": "2026-06-10T17:42:20.193996Z",
-      "action": "quick: add mic button to chat for the voice round-trip"
-    },
-    {
-      "at": "2026-06-10T17:53:45.76256Z",
-      "action": "created 06-tools-actions"
-    },
-    {
-      "at": "2026-06-10T18:30:55.33003Z",
-      "action": "set current_phase=06-tools-actions"
-    },
-    {
-      "at": "2026-06-10T18:30:55.338217Z",
-      "action": "spec locked: 06-tools-actions"
-    },
-    {
-      "at": "2026-06-10T18:42:03.639495Z",
-      "action": "set current_phase_status=planned"
-    },
-    {
-      "at": "2026-06-10T18:42:03.64754Z",
-      "action": "plan locked (panel): 06-tools-actions (9 tasks across 3 waves)"
-    },
-    {
-      "at": "2026-06-10T18:43:59.225052Z",
-      "action": "plan reviewed: 06-tools-actions (0 blocking, 3 flags)"
-    },
-    {
-      "at": "2026-06-10T18:45:01.195958Z",
-      "action": "plan amended post-review: 06-tools-actions (t-1 +ChatDriver.kt seam; t-9 -\u003e wave 2; now 2 waves)"
-    },
-    {
-      "at": "2026-06-10T18:52:26.382193Z",
-      "action": "executed t-1 (Add ToolCall token + tool-call parsers)"
-    },
-    {
-      "at": "2026-06-10T18:54:44.152167Z",
-      "action": "executed t-2 (Register five tool specs in request body)"
-    },
-    {
-      "at": "2026-06-10T18:55:28.608632Z",
-      "action": "executed t-3 (Add per-type tool-capability flag)"
-    },
-    {
-      "at": "2026-06-10T18:57:51.354078Z",
-      "action": "executed t-4 (Pure intent-builders for the five actions)"
-    },
-    {
-      "at": "2026-06-10T18:59:33.744115Z",
-      "action": "executed t-5 (Pure ToolCall to ActionPlan mapper)"
-    },
-    {
-      "at": "2026-06-10T19:00:23.459772Z",
-      "action": "executed t-6 (Pure yes/no grammar recogniser)"
-    },
-    {
-      "at": "2026-06-10T19:07:40.803483Z",
-      "action": "executed t-7 (Dispatch tool calls + staging + guidance in ChatViewModel)"
-    },
-    {
-      "at": "2026-06-10T19:10:38.363206Z",
-      "action": "executed t-8 (Action cards, pending list, banner in ChatScreen)"
-    },
-    {
-      "at": "2026-06-10T19:16:54.150435Z",
-      "action": "executed t-9 (Spoken Start-now + yes/no confirm in voice flow)"
-    },
-    {
-      "at": "2026-06-10T19:17:25.514213Z",
-      "action": "set current_phase_status=complete"
-    },
-    {
-      "at": "2026-06-10T19:17:25.520716Z",
-      "action": "phase 06-tools-actions executed (9/9 done \u0026 green)"
-    },
-    {
-      "at": "2026-06-11T05:16:52.189718Z",
-      "action": "set current_phase_status=verified"
-    },
-    {
-      "at": "2026-06-11T05:16:52.195349Z",
-      "action": "verified 06-tools-actions: pass (6/6 covered; mutation skipped — Kotlin)"
-    },
-    {
-      "at": "2026-06-11T05:21:37.200244Z",
-      "action": "shipped 06-tools-actions → https://github.com/equerry-dev/equerry/pull/5"
-    },
-    {
-      "at": "2026-06-11T05:23:13.176305Z",
-      "action": "completed 06-tools-actions"
-    },
-    {
-      "at": "2026-06-11T05:33:44.954682Z",
-      "action": "created 07-screen-context"
-    },
-    {
-      "at": "2026-06-11T05:46:31.725964Z",
-      "action": "set current_phase=07-screen-context"
-    },
-    {
-      "at": "2026-06-11T05:46:31.733268Z",
-      "action": "spec locked: 07-screen-context"
-    },
-    {
-      "at": "2026-06-11T05:59:43.557267Z",
-      "action": "set current_phase_status=planned"
-    },
     {
       "at": "2026-06-11T05:59:43.564869Z",
       "action": "plan locked: 07-screen-context (9 tasks across 5 waves)"
@@ -203,6 +89,122 @@
     {
       "at": "2026-06-11T08:15:32.379166Z",
       "action": "completed 07-screen-context"
+    },
+    {
+      "at": "2026-06-11T09:05:34.250792Z",
+      "action": "created 08-remote-stt-tts"
+    },
+    {
+      "at": "2026-06-11T09:25:27.548933Z",
+      "action": "set current_phase=08-remote-stt-tts"
+    },
+    {
+      "at": "2026-06-11T09:25:27.556191Z",
+      "action": "spec locked: 08-remote-stt-tts"
+    },
+    {
+      "at": "2026-06-11T09:49:40.477536Z",
+      "action": "set current_phase_status=planned"
+    },
+    {
+      "at": "2026-06-11T09:49:40.483883Z",
+      "action": "plan locked (panel): 08-remote-stt-tts (13 tasks across 4 waves)"
+    },
+    {
+      "at": "2026-06-11T09:52:25.185139Z",
+      "action": "plan reviewed: 08-remote-stt-tts (0 blocking, 5 flags)"
+    },
+    {
+      "at": "2026-06-11T09:56:20.867633Z",
+      "action": "executed t-1 (Add supportsStt/supportsTts flags to ProviderType)"
+    },
+    {
+      "at": "2026-06-11T09:57:02.626101Z",
+      "action": "executed t-2 (Activate STT and TTS capability slots)"
+    },
+    {
+      "at": "2026-06-11T09:58:20.873507Z",
+      "action": "executed t-3 (Build transcribe HTTP request)"
+    },
+    {
+      "at": "2026-06-11T09:59:03.034201Z",
+      "action": "executed t-4 (Build speech HTTP request)"
+    },
+    {
+      "at": "2026-06-11T10:00:15.345384Z",
+      "action": "executed t-5 (Silence VAD auto-stop)"
+    },
+    {
+      "at": "2026-06-11T10:01:46.502354Z",
+      "action": "executed t-6 (Map audio errors to key-free guidance)"
+    },
+    {
+      "at": "2026-06-11T10:03:09.86593Z",
+      "action": "executed t-10 (Voice field on profile + back-compat store)"
+    },
+    {
+      "at": "2026-06-11T10:06:45.469679Z",
+      "action": "executed t-7 (RemoteSpeechToText over recorder + transport)"
+    },
+    {
+      "at": "2026-06-11T10:08:14.890008Z",
+      "action": "executed t-9 (Add Media3 dependency for audio playback)"
+    },
+    {
+      "at": "2026-06-11T10:13:49.495858Z",
+      "action": "executed t-8 (RemoteTextToSpeech over transport + player)"
+    },
+    {
+      "at": "2026-06-11T10:49:46.275377Z",
+      "action": "executed t-11 (STT/TTS mappings + filtered pickers + voice UI)"
+    },
+    {
+      "at": "2026-06-11T10:54:39.700393Z",
+      "action": "executed t-12 (Resolve remote-vs-system engine per mapping)"
+    },
+    {
+      "at": "2026-06-11T10:59:53.50725Z",
+      "action": "executed t-13 (Consented system-engine fallback in controller)"
+    },
+    {
+      "at": "2026-06-11T11:00:21.950669Z",
+      "action": "set current_phase_status=complete"
+    },
+    {
+      "at": "2026-06-11T11:00:21.960057Z",
+      "action": "phase 08-remote-stt-tts executed (13/13 done \u0026 green)"
+    },
+    {
+      "at": "2026-06-11T12:30:05.119095Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-11T12:30:05.126588Z",
+      "action": "verified 08-remote-stt-tts: partial (6/6 covered, 2 flags; mutation skipped — Kotlin)"
+    },
+    {
+      "at": "2026-06-11T12:33:54.394345Z",
+      "action": "bump internal 0.1.5.4 → 0.1.5.5"
+    },
+    {
+      "at": "2026-06-11T12:33:54.409318Z",
+      "action": "quick: wire consented system-engine fallback into production"
+    },
+    {
+      "at": "2026-06-11T12:39:05.433217Z",
+      "action": "bump internal 0.1.5.5 → 0.1.5.6"
+    },
+    {
+      "at": "2026-06-11T12:39:05.447953Z",
+      "action": "quick: add TTS voice field to the provider edit form"
+    },
+    {
+      "at": "2026-06-11T12:41:32.646668Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-11T12:41:32.653846Z",
+      "action": "verified 08-remote-stt-tts: pass (6/6 covered; mutation skipped — Kotlin; both flags resolved)"
     }
   ]
 }

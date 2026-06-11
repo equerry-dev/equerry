@@ -67,11 +67,41 @@ class SlotsViewModelTest {
     }
 
     @Test
-    fun chat_and_vision_slots_are_active_and_the_rest_are_not() {
-        val slots = vm.state.value.slots
-        assertTrue(slots.first { it == CapabilitySlot.CHAT }.active)
-        assertTrue(slots.first { it == CapabilitySlot.VISION }.active)
-        assertTrue(slots.filter { it != CapabilitySlot.CHAT && it != CapabilitySlot.VISION }.none { it.active })
+    fun wired_slots_are_active_and_only_ocr_and_embeddings_are_not() {
+        assertTrue(CapabilitySlot.CHAT.active)
+        assertTrue(CapabilitySlot.VISION.active)
+        assertTrue(CapabilitySlot.STT.active)
+        assertTrue(CapabilitySlot.TTS.active)
+        assertFalse(CapabilitySlot.OCR.active)
+        assertFalse(CapabilitySlot.EMBEDDINGS.active)
+    }
+
+    @Test
+    fun mapping_the_stt_slot_sets_the_stt_profile() = runBlocking {
+        val profile = repository.addProfile(
+            ProfileDraft("OpenAI", ProviderType.OPENAI_COMPATIBLE, "https://api.openai.com/v1", "sk-o", "whisper-1"),
+        )
+
+        vm.map(CapabilitySlot.STT, profile.id)
+
+        val mapped = vm.state.first { it.sttProfile != null }
+        assertEquals(profile.id, mapped.sttProfile?.id)
+        assertEquals(profile.id, mapped.mappedProfile(CapabilitySlot.STT)?.id)
+    }
+
+    @Test
+    fun stt_picker_excludes_types_without_audio_support() = runBlocking {
+        repository.addProfile(ProfileDraft("Local", ProviderType.OLLAMA, "http://localhost:11434", "", "llama3.2"))
+        repository.addProfile(
+            ProfileDraft("Claude", ProviderType.ANTHROPIC, "https://api.anthropic.com", "sk-a", "claude-sonnet-4-6"),
+        )
+        val openai = repository.addProfile(
+            ProfileDraft("OpenAI", ProviderType.OPENAI_COMPATIBLE, "https://api.openai.com/v1", "sk-o", "whisper-1"),
+        )
+
+        val state = vm.state.first { it.profiles.size == 3 }
+        // Only the OpenAI-compatible profile is an eligible STT candidate; Ollama/Anthropic are filtered out.
+        assertEquals(listOf(openai.id), state.candidatesFor(CapabilitySlot.STT).map { it.id })
     }
 
     @Test

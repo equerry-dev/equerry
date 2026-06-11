@@ -1,0 +1,230 @@
+[verify]
+  phase = "08-remote-stt-tts"
+  generated_at = 2026-06-11T12:40:27.533666Z
+  verdict = "pass"
+
+[summary]
+  mutation_status = "skipped"
+  mutation_score = 0.0
+  mutants_killed = 0
+  mutants_survived = 0
+  mutants_not_covered = 0
+  criteria_total = 6
+  criteria_covered = 6
+  criteria_uncovered = 0
+
+[[criterion]]
+  id = "c-1"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt:setSttSlot_persists_and_resolves_from_a_fresh_repository",
+    "app/src/test/java/dev/equerry/app/ui/slots/SlotsViewModelTest.kt:mapping_the_stt_slot_sets_the_stt_profile",
+    "app/src/test/java/dev/equerry/app/ui/slots/SlotsViewModelTest.kt:stt_picker_excludes_types_without_audio_support",
+  ]
+  notes = "Restart survival proven by re-resolving observeSttMapping from a fresh repository over the same DataStore; picker filtering restricts candidates to supportsStt types."
+
+[[criterion]]
+  id = "c-2"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt:setTtsSlot_round_trips_through_observeTtsMapping",
+    "app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt:addProfile_carries_the_tts_voice",
+    "app/src/test/java/dev/equerry/app/data/ProfileStoreTest.kt:tts_voice_round_trips_across_a_reload",
+    "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditViewModelTest.kt:tts_voice_field_is_visible_only_for_tts_capable_types_and_persists_on_save",
+  ]
+  notes = "TTS-slot restart reuses the SlotMappingStore path proven fresh-repo for STT (c-1); the edit form now exposes + persists ttsVoice, and config restart is directly tested over a fresh DataStore plus legacy-decode back-compat."
+
+[[criterion]]
+  id = "c-3"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/voice/VoiceEngineSelectorTest.kt:mapped_stt_resolves_to_remote_built_with_the_profile_and_key",
+    "app/src/test/java/dev/equerry/app/voice/VoiceEngineSelectorTest.kt:stt_engine_streams_the_remote_transcript_when_mapped",
+    "app/src/test/java/dev/equerry/app/voice/RemoteSpeechToTextTest.kt:emits_exactly_endofspeech_then_final_with_no_partials",
+  ]
+  notes = "Selector resolves the remote engine when mapped (system never built); the switching engine streams the remote transcript that flows to chat.send."
+
+[[criterion]]
+  id = "c-4"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/voice/VoiceEngineSelectorTest.kt:unmapped_tts_resolves_to_system_and_mapped_tts_resolves_to_remote",
+    "app/src/test/java/dev/equerry/app/voice/RemoteTextToSpeechTest.kt:speak_sentences_posts_per_sentence_and_enqueues_clips_in_order",
+    "app/src/test/java/dev/equerry/app/voice/RemoteTextToSpeechTest.kt:production_synth_posts_to_audio_speech_and_omits_a_blank_voice",
+  ]
+  notes = "Mapped TTS resolves to the remote engine; remote TTS POSTs per utterance and plays clips in order via the production audio/speech transport (voice omitted when blank)."
+
+[[criterion]]
+  id = "c-5"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/voice/VoiceEngineSelectorTest.kt:unmapped_stt_resolves_to_system_and_never_constructs_remote",
+    "app/src/test/java/dev/equerry/app/voice/VoiceEngineSelectorTest.kt:unmapped_tts_resolves_to_system_and_mapped_tts_resolves_to_remote",
+  ]
+  notes = "Unmapped slots resolve to the system engines and the remote engine is never constructed — the zero-config path is unchanged."
+
+[[criterion]]
+  id = "c-6"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/voice/VoiceGuidanceFactoryTest.kt:a_401_with_a_secret_in_the_body_never_leaks_into_the_guidance",
+    "app/src/test/java/dev/equerry/app/voice/RemoteSpeechToTextTest.kt:transport_401_yields_terminal_unavailable_error_and_completes",
+    "app/src/test/java/dev/equerry/app/voice/RemoteTextToSpeechTest.kt:a_transport_500_surfaces_remote_audio_error_without_throwing",
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowFailureTest.kt:remote_stt_failure_offers_consented_retry_and_uses_system_only_after_invoked",
+    "app/src/test/java/dev/equerry/app/voice/VoiceEngineSelectorTest.kt:is_mapped_predicates_reflect_the_slot_mapping",
+    "app/src/test/java/dev/equerry/app/providers/drivers/TranscribeRequestBuilderTest.kt:key_lives_in_the_authorization_header_only_never_in_path_or_form",
+    "app/src/test/java/dev/equerry/app/providers/drivers/SpeechRequestBuilderTest.kt:key_lives_in_the_authorization_header_only_never_in_body_or_path",
+  ]
+  notes = "Failures surface key-free guidance without crashing/hanging; the consented system-engine retry is now wired into production (gated by the isSttMapped/isTtsMapped predicates) and never auto-switches. r-03 enforced at every request surface and in error-mapping (status/type only, never response body)."
+
+[[finding]]
+  severity = "NOTE"
+  text = "mutation skipped: no Kotlin mutation adapter — verdict is based on criterion coverage alone (all 6 covered). Both prior FLAGs (consented-fallback wiring, ttsVoice form field) were resolved by quick tasks 0.1.5.5 and 0.1.5.6."
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/build.gradle.kts: no mutation adapter for .kts"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/data/ProfileStore.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/CapabilitySlot.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/ProviderType.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/SpeechRequestBuilder.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/TranscribeRequestBuilder.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/ui/slots/SlotsScreen.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/ui/slots/SlotsViewModel.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/voice/RemoteAudioError.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/voice/RemoteSpeechToText.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/voice/RemoteTextToSpeech.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/voice/SilenceVad.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/voice/VoiceComponentsEntryPoint.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/voice/VoiceEngineSelector.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/voice/VoiceGuidance.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/data/ProfileStoreTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/providers/drivers/SpeechRequestBuilderTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/providers/drivers/TranscribeRequestBuilderTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/ui/providers/ProviderEditViewModelTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/ui/slots/SlotsScreenTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/ui/slots/SlotsViewModelTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/voice/RemoteSpeechToTextTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/voice/RemoteTextToSpeechTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/voice/SilenceVadTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/voice/VoiceEngineSelectorTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/voice/VoiceFlowFailureTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/voice/VoiceGuidanceFactoryTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped gradle/libs.versions.toml: no mutation adapter for .toml"

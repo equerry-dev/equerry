@@ -21,6 +21,8 @@ import javax.inject.Inject
 data class SlotsUiState(
     val chatProfile: ProviderProfile? = null,
     val visionProfile: ProviderProfile? = null,
+    val sttProfile: ProviderProfile? = null,
+    val ttsProfile: ProviderProfile? = null,
     val profiles: List<ProviderProfile> = emptyList(),
 ) {
     val slots: List<CapabilitySlot> = CapabilitySlot.entries
@@ -30,7 +32,19 @@ data class SlotsUiState(
     fun mappedProfile(slot: CapabilitySlot): ProviderProfile? = when (slot) {
         CapabilitySlot.CHAT -> chatProfile
         CapabilitySlot.VISION -> visionProfile
+        CapabilitySlot.STT -> sttProfile
+        CapabilitySlot.TTS -> ttsProfile
         else -> null
+    }
+
+    /**
+     * Profiles eligible to map to [slot]. STT/TTS filter to the types that host those endpoints
+     * (`provider_config_capability_flags`); CHAT/VISION accept any saved profile.
+     */
+    fun candidatesFor(slot: CapabilitySlot): List<ProviderProfile> = when (slot) {
+        CapabilitySlot.STT -> profiles.filter { it.type.supportsStt }
+        CapabilitySlot.TTS -> profiles.filter { it.type.supportsTts }
+        else -> profiles
     }
 }
 
@@ -43,17 +57,24 @@ class SlotsViewModel @Inject constructor(
         combine(
             repository.observeChatMapping(),
             repository.observeVisionMapping(),
+            repository.observeSttMapping(),
+            repository.observeTtsMapping(),
             repository.observeProfiles(),
-        ) { chat, vision, profiles ->
-            SlotsUiState(chatProfile = chat, visionProfile = vision, profiles = profiles)
+        ) { chat, vision, stt, tts, profiles ->
+            SlotsUiState(
+                chatProfile = chat, visionProfile = vision,
+                sttProfile = stt, ttsProfile = tts, profiles = profiles,
+            )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SlotsUiState())
 
-    /** Map [slot] to [profileId]. Only the active slots (CHAT, VISION) are mappable. */
+    /** Map [slot] to [profileId]. Only the active slots (CHAT, VISION, STT, TTS) are mappable. */
     fun map(slot: CapabilitySlot, profileId: String) {
         viewModelScope.launch {
             when (slot) {
                 CapabilitySlot.CHAT -> repository.setChatSlot(profileId)
                 CapabilitySlot.VISION -> repository.setVisionSlot(profileId)
+                CapabilitySlot.STT -> repository.setSttSlot(profileId)
+                CapabilitySlot.TTS -> repository.setTtsSlot(profileId)
                 else -> Unit
             }
         }
@@ -65,6 +86,8 @@ class SlotsViewModel @Inject constructor(
             when (slot) {
                 CapabilitySlot.CHAT -> repository.setChatSlot(null)
                 CapabilitySlot.VISION -> repository.setVisionSlot(null)
+                CapabilitySlot.STT -> repository.setSttSlot(null)
+                CapabilitySlot.TTS -> repository.setTtsSlot(null)
                 else -> Unit
             }
         }

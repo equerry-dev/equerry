@@ -94,6 +94,46 @@ class ProfileStoreTest {
     }
 
     @Test
+    fun tts_voice_round_trips_across_a_reload() = runBlocking {
+        val file = File(tmp.root, "voice.preferences_pb")
+        val profiles = listOf(
+            ProviderProfile(
+                "id-1", "Whisper+TTS", ProviderType.OPENAI_COMPATIBLE, "https://api.openai.com/v1",
+                "tts-1", ttsVoice = "alloy",
+            ),
+        )
+
+        val scope1 = newScope()
+        ProfileStore(dataStore(scope1, file)).save(profiles)
+        scope1.close()
+
+        val scope2 = newScope()
+        val loaded = ProfileStore(dataStore(scope2, file)).profiles().first()
+        scope2.close()
+
+        assertEquals(profiles, loaded)
+        assertEquals("alloy", loaded.single().ttsVoice)
+    }
+
+    @Test
+    fun legacy_json_without_tts_voice_decodes_to_null() = runBlocking {
+        val file = File(tmp.root, "legacy_voice.preferences_pb")
+        // JSON written before the ttsVoice field existed.
+        val legacy =
+            """[{"id":"id-1","label":"Old","type":"OPENAI_COMPATIBLE","baseUrl":"https://api.openai.com/v1","model":"tts-1"}]"""
+
+        val scope1 = newScope()
+        dataStore(scope1, file).edit { it[stringPreferencesKey("profiles_json")] = legacy }
+        scope1.close()
+
+        val scope2 = newScope()
+        val loaded = ProfileStore(dataStore(scope2, file)).profiles().first()
+        scope2.close()
+
+        assertEquals(null, loaded.single().ttsVoice)
+    }
+
+    @Test
     fun empty_store_returns_empty_list() = runBlocking {
         val file = File(tmp.root, "empty.preferences_pb")
         val scope = newScope()

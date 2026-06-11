@@ -67,4 +67,22 @@ enum class ProviderType(
      */
     val supportsImages: Boolean
         get() = this != OLLAMA
+
+    /**
+     * Whether this type is treated as remote speech-to-text (STT) capable — gates eligibility for the
+     * STT capability slot picker (`provider_config_capability_flags`). Scoped to OPENAI_COMPATIBLE in
+     * v0.1: that one type covers OpenAI's transcribe endpoint (via base URL) and self-hosted
+     * whisper.cpp; Anthropic/Ollama/OpenRouter expose no audio-transcription API to flag.
+     */
+    val supportsStt: Boolean
+        get() = this == OPENAI_COMPATIBLE
+
+    /**
+     * Whether this type is treated as remote text-to-speech (TTS) capable — gates eligibility for the
+     * TTS capability slot picker (`provider_config_capability_flags`). Scoped to OPENAI_COMPATIBLE in
+     * v0.1: that one type covers OpenAI's speech endpoint and OpenAI-compatible TTS servers;
+     * Anthropic/Ollama/OpenRouter expose no audio-speech API to flag.
+     */
+    val supportsTts: Boolean
+        get() = this == OPENAI_COMPATIBLE
 }

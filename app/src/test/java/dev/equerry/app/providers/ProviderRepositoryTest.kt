@@ -38,6 +38,9 @@ class ProviderRepositoryTest {
     private fun draft(label: String = "Work Claude", key: String = "sk-secret-xyz") =
         ProfileDraft(label, ProviderType.ANTHROPIC, "https://api.anthropic.com", key, "claude-sonnet-4-6")
 
+    private fun openAiDraft(label: String = "Whisper") =
+        ProfileDraft(label, ProviderType.OPENAI_COMPATIBLE, "https://api.openai.com/v1", "sk-o", "whisper-1")
+
     private fun withRepo(
         block: suspend (repo: ProviderRepository, secret: FakeSecretStore, dataStore: DataStore<Preferences>) -> Unit,
     ) = runBlocking {
@@ -119,6 +122,49 @@ class ProviderRepositoryTest {
         repo.deleteProfile(created.id)
 
         assertNull("deleting the mapped profile cascades to the VISION slot", repo.observeVisionMapping().first())
+    }
+
+    @Test
+    fun setSttSlot_persists_and_resolves_from_a_fresh_repository() = withRepo { repo, secret, dataStore ->
+        val created = repo.addProfile(openAiDraft())
+        assertNull("STT starts unmapped", repo.observeSttMapping().first())
+
+        repo.setSttSlot(created.id)
+
+        // A fresh repository over the same store simulates an app restart (criterion c-1).
+        val restarted = ProviderRepository(ProfileStore(dataStore), secret, SlotMappingStore(dataStore))
+        assertEquals(created.id, restarted.observeSttMapping().first()?.id)
+    }
+
+    @Test
+    fun setTtsSlot_round_trips_through_observeTtsMapping() = withRepo { repo, _, _ ->
+        val created = repo.addProfile(openAiDraft("TTS Box"))
+        assertNull("TTS starts unmapped", repo.observeTtsMapping().first())
+
+        repo.setTtsSlot(created.id)
+        assertEquals(created.id, repo.observeTtsMapping().first()?.id)
+
+        repo.setTtsSlot(null)
+        assertNull(repo.observeTtsMapping().first())
+    }
+
+    @Test
+    fun deleteProfile_clears_stt_and_tts_mappings() = withRepo { repo, _, _ ->
+        val created = repo.addProfile(openAiDraft())
+        repo.setSttSlot(created.id)
+        repo.setTtsSlot(created.id)
+
+        repo.deleteProfile(created.id)
+
+        assertNull("deleting the mapped profile cascades to the STT slot", repo.observeSttMapping().first())
+        assertNull("deleting the mapped profile cascades to the TTS slot", repo.observeTtsMapping().first())
+    }
+
+    @Test
+    fun addProfile_carries_the_tts_voice() = withRepo { repo, _, _ ->
+        val created = repo.addProfile(openAiDraft().copy(ttsVoice = "alloy"))
+        val loaded = repo.observeProfiles().first().first { it.id == created.id }
+        assertEquals("alloy", loaded.ttsVoice)
     }
 
     @Test

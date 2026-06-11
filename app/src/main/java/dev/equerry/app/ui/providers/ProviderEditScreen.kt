@@ -65,6 +65,7 @@ fun ProviderEditRoute(
         onSystemPrompt = viewModel::onSystemPromptChange,
         onTemperature = viewModel::onTemperatureChange,
         onMaxTokens = viewModel::onMaxTokensChange,
+        onTtsVoice = viewModel::onTtsVoiceChange,
         onSave = viewModel::save,
         onBack = onBack,
     )
@@ -94,6 +95,7 @@ fun ProviderEditScreen(
     onSystemPrompt: (String) -> Unit,
     onTemperature: (String) -> Unit,
     onMaxTokens: (String) -> Unit,
+    onTtsVoice: (String) -> Unit,
     onSave: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -213,6 +215,17 @@ fun ProviderEditScreen(
                     isError = state.errorFor(ProfileField.MAX_TOKENS) != null,
                     supportingText = { state.errorFor(ProfileField.MAX_TOKENS)?.let { Text(it) } },
                     modifier = Modifier.weight(1f),
+                )
+            }
+            if (state.ttsVoiceFieldVisible) {
+                OutlinedTextField(
+                    value = state.ttsVoice,
+                    onValueChange = onTtsVoice,
+                    label = { Text("TTS voice") },
+                    placeholder = { Text("Optional — leave blank for the provider default") },
+                    supportingText = { Text("Used when this provider is mapped to the TTS slot.") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
             Spacer(Modifier.height(24.dp))

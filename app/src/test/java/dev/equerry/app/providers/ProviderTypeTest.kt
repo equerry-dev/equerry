@@ -63,10 +63,29 @@ class ProviderTypeTest {
     }
 
     @Test
-    fun chat_and_vision_slots_are_active_and_the_rest_are_not() {
+    fun stt_and_tts_capability_are_true_only_for_openai_compatible() {
+        // Remote audio (Whisper-style transcribe / OpenAI-style speech) is scoped to the one type
+        // that hosts those endpoints (provider_config_capability_flags). Flip any row and this fails:
+        // granting a flag to a wrong type OR removing it from OPENAI_COMPATIBLE both go red.
+        assertTrue(ProviderType.OPENAI_COMPATIBLE.supportsStt)
+        assertTrue(ProviderType.OPENAI_COMPATIBLE.supportsTts)
+        assertFalse(ProviderType.ANTHROPIC.supportsStt)
+        assertFalse(ProviderType.ANTHROPIC.supportsTts)
+        assertFalse(ProviderType.OLLAMA.supportsStt)
+        assertFalse(ProviderType.OLLAMA.supportsTts)
+        assertFalse(ProviderType.OPENROUTER.supportsStt)
+        assertFalse(ProviderType.OPENROUTER.supportsTts)
+    }
+
+    @Test
+    fun wired_slots_are_active_and_only_ocr_and_embeddings_are_not() {
         assertTrue(CapabilitySlot.CHAT.active)
         assertTrue("VISION is wired by the screen-context phase", CapabilitySlot.VISION.active)
-        val rest = CapabilitySlot.entries.filter { it != CapabilitySlot.CHAT && it != CapabilitySlot.VISION }
-        assertTrue(rest.none { it.active })
+        assertTrue("STT is wired by the remote-stt-tts phase", CapabilitySlot.STT.active)
+        assertTrue("TTS is wired by the remote-stt-tts phase", CapabilitySlot.TTS.active)
+        // Only OCR and EMBEDDINGS remain coming-soon; if either is activated this fails,
+        // and if STT/TTS regress to inactive the asserts above fail.
+        val inactive = CapabilitySlot.entries.filter { !it.active }
+        assertEquals(listOf(CapabilitySlot.OCR, CapabilitySlot.EMBEDDINGS), inactive)
     }
 }

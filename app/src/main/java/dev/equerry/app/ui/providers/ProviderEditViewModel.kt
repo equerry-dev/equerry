@@ -28,6 +28,7 @@ data class ProviderEditUiState(
     val systemPrompt: String = "",
     val temperature: String = "",
     val maxTokens: String = "",
+    val ttsVoice: String = "",
     val errors: List<FieldError> = emptyList(),
     val saved: Boolean = false,
     val editing: Boolean = false,
@@ -35,6 +36,8 @@ data class ProviderEditUiState(
     val keyFieldVisible: Boolean get() = type.requiresKey
     val baseUrlLocked: Boolean get() = type.baseUrlLocked
     val modelPresets: List<String> get() = type.modelPresets
+    /** The optional TTS voice field is only meaningful for types that host a speech endpoint. */
+    val ttsVoiceFieldVisible: Boolean get() = type.supportsTts
     fun errorFor(field: ProfileField): String? = errors.firstOrNull { it.field == field }?.message
 }
 
@@ -70,6 +73,7 @@ class ProviderEditViewModel @Inject constructor(
                 systemPrompt = profile.systemPrompt ?: "",
                 temperature = profile.temperature?.toString() ?: "",
                 maxTokens = profile.maxTokens?.toString() ?: "",
+                ttsVoice = profile.ttsVoice ?: "",
                 editing = true,
             )
         }
@@ -80,6 +84,7 @@ class ProviderEditViewModel @Inject constructor(
     fun onKeyChange(value: String) = clearAnd(ProfileField.KEY) { it.copy(key = value) }
     fun onModelChange(value: String) = clearAnd(ProfileField.MODEL) { it.copy(model = value) }
     fun onSystemPromptChange(value: String) = _state.update { it.copy(systemPrompt = value) }
+    fun onTtsVoiceChange(value: String) = _state.update { it.copy(ttsVoice = value) }
     fun onTemperatureChange(value: String) = clearAnd(ProfileField.TEMPERATURE) { it.copy(temperature = value) }
     fun onMaxTokensChange(value: String) = clearAnd(ProfileField.MAX_TOKENS) { it.copy(maxTokens = value) }
 
@@ -99,6 +104,7 @@ class ProviderEditViewModel @Inject constructor(
         val draft = ProfileDraft(
             current.label, current.type, current.baseUrl, current.key, current.model,
             systemPrompt = current.systemPrompt, temperature = current.temperature, maxTokens = current.maxTokens,
+            ttsVoice = current.ttsVoice,
         )
         val id = editingId
         var errors = ProfileValidator.validate(draft)
@@ -118,6 +124,7 @@ class ProviderEditViewModel @Inject constructor(
                         systemPrompt = current.systemPrompt.takeIf { it.isNotBlank() },
                         temperature = current.temperature.toDoubleOrNull(),
                         maxTokens = current.maxTokens.toIntOrNull(),
+                        ttsVoice = current.ttsVoice.takeIf { it.isNotBlank() },
                     ),
                     newKey = current.key.ifBlank { null },
                 )

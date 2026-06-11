@@ -1,0 +1,139 @@
+{
+  "phase": "08-remote-stt-tts",
+  "tasks": {
+    "quick-5": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/VoiceEngineSelector.kt",
+        "app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt",
+        "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt",
+        "app/src/test/java/dev/equerry/app/voice/VoiceEngineSelectorTest.kt"
+      ],
+      "commit": "427c830",
+      "completed_at": "2026-06-11T12:33:54.402669Z",
+      "notes": "quick: wire consented system-engine fallback into production"
+    },
+    "quick-6": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt",
+        "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditViewModelTest.kt"
+      ],
+      "commit": "d4c9064",
+      "completed_at": "2026-06-11T12:39:05.441173Z",
+      "notes": "quick: add TTS voice field to the provider edit form"
+    },
+    "t-1": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",
+        "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt"
+      ],
+      "commit": "e9ba324",
+      "completed_at": "2026-06-11T09:56:20.853216Z"
+    },
+    "t-10": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/ProviderProfile.kt",
+        "app/src/main/java/dev/equerry/app/data/ProfileStore.kt",
+        "app/src/test/java/dev/equerry/app/data/ProfileStoreTest.kt"
+      ],
+      "commit": "ace3b91",
+      "completed_at": "2026-06-11T10:03:09.851585Z"
+    },
+    "t-11": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt",
+        "app/src/main/java/dev/equerry/app/ui/slots/SlotsViewModel.kt",
+        "app/src/main/java/dev/equerry/app/ui/slots/SlotsScreen.kt",
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditViewModel.kt",
+        "app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt",
+        "app/src/test/java/dev/equerry/app/ui/slots/SlotsViewModelTest.kt",
+        "app/src/test/java/dev/equerry/app/ui/slots/SlotsScreenTest.kt"
+      ],
+      "commit": "6966796",
+      "completed_at": "2026-06-11T10:49:46.261047Z"
+    },
+    "t-12": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/VoiceEngineSelector.kt",
+        "app/src/main/java/dev/equerry/app/voice/VoiceComponentsEntryPoint.kt",
+        "app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt",
+        "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt",
+        "app/src/test/java/dev/equerry/app/voice/VoiceEngineSelectorTest.kt"
+      ],
+      "commit": "5571202",
+      "completed_at": "2026-06-11T10:54:39.684432Z"
+    },
+    "t-13": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+        "app/src/test/java/dev/equerry/app/voice/VoiceFlowFailureTest.kt"
+      ],
+      "commit": "84fe26e",
+      "completed_at": "2026-06-11T10:59:53.493681Z"
+    },
+    "t-2": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/CapabilitySlot.kt",
+        "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt"
+      ],
+      "commit": "f9bcbd1",
+      "completed_at": "2026-06-11T09:57:02.611876Z"
+    },
+    "t-3": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/drivers/TranscribeRequestBuilder.kt",
+        "app/src/test/java/dev/equerry/app/providers/drivers/TranscribeRequestBuilderTest.kt"
+      ],
+      "commit": "77aeac6",
+      "completed_at": "2026-06-11T09:58:20.858835Z"
+    },
+    "t-4": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/drivers/SpeechRequestBuilder.kt",
+        "app/src/test/java/dev/equerry/app/providers/drivers/SpeechRequestBuilderTest.kt"
+      ],
+      "commit": "1e4f9a6",
+      "completed_at": "2026-06-11T09:59:03.019518Z"
+    },
+    "t-5": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/SilenceVad.kt",
+        "app/src/test/java/dev/equerry/app/voice/SilenceVadTest.kt"
+      ],
+      "commit": "46cf907",
+      "completed_at": "2026-06-11T10:00:15.331158Z"
+    },
+    "t-6": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/RemoteAudioError.kt",
+        "app/src/main/java/dev/equerry/app/voice/VoiceGuidance.kt",
+        "app/src/test/java/dev/equerry/app/voice/VoiceGuidanceFactoryTest.kt"
+      ],
+      "commit": "0509539",
+      "completed_at": "2026-06-11T10:01:46.485206Z"
+    },
+    "t-7": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/RemoteSpeechToText.kt",
+        "app/src/test/java/dev/equerry/app/voice/RemoteSpeechToTextTest.kt"
+      ],
+      "commit": "60e8669",
+      "completed_at": "2026-06-11T10:06:45.453167Z"
+    },
+    "t-8": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/RemoteTextToSpeech.kt",
+        "app/src/test/java/dev/equerry/app/voice/RemoteTextToSpeechTest.kt"
+      ],
+      "commit": "3496f99",
+      "completed_at": "2026-06-11T10:13:49.479481Z"
+    },
+    "t-9": {
+      "files": [
+        "gradle/libs.versions.toml",
+        "app/build.gradle.kts"
+      ],
+      "commit": "91c2323",
+      "completed_at": "2026-06-11T10:08:14.873594Z"
+    }
+  }
+}

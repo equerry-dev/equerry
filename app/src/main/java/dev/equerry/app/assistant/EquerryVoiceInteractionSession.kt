@@ -37,8 +37,7 @@ import dev.equerry.app.tools.ocr.OcrEngine
 import dev.equerry.app.ui.chat.ChatViewModel
 import dev.equerry.app.ui.theme.EquerryTheme
 import dev.equerry.app.voice.MicPermission
-import dev.equerry.app.voice.SystemSpeechToText
-import dev.equerry.app.voice.SystemTextToSpeech
+import dev.equerry.app.voice.VoiceEngineSelector
 import dev.equerry.app.voice.VoiceFlowController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -127,15 +126,24 @@ class EquerryVoiceInteractionSession(context: Context) :
         entry.ocrEngine(),
     )
 
+    // Engines are resolved per turn from the STT/TTS slot mapping: remote when mapped, system otherwise.
+    private val engineSelector: VoiceEngineSelector =
+        VoiceEngineSelector.fromContext(context.applicationContext, entry.providerRepository())
+
     private val controller: VoiceFlowController = VoiceFlowController(
         chat = chatViewModel,
-        stt = SystemSpeechToText.fromContext(context.applicationContext),
-        tts = SystemTextToSpeech.fromContext(context.applicationContext),
+        stt = engineSelector.sttEngine(),
+        tts = engineSelector.ttsEngine(),
         settings = entry.voiceSettingsStore(),
         scope = scope,
         isMicGranted = { MicPermission.isGranted(context.applicationContext) },
         isChatConfigured = { entry.providerRepository().observeChatMapping().first() != null },
         screenContext = { currentScreenContext() },
+        // Consented fallback: on a remote-engine failure, offer a one-tap retry on the system engine.
+        systemStt = engineSelector.systemSttEngine(),
+        systemTts = engineSelector.systemTtsEngine(),
+        isSttRemote = engineSelector::isSttMapped,
+        isTtsRemote = engineSelector::isTtsMapped,
     )
 
     private val coordinator = VoiceSessionCoordinator(

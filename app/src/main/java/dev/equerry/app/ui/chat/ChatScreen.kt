@@ -44,9 +44,8 @@ import dev.equerry.app.providers.drivers.ChatMessage
 import dev.equerry.app.providers.drivers.ChatRole
 import dev.equerry.app.tools.actions.PlannedAction
 import dev.equerry.app.voice.MicPermission
-import dev.equerry.app.voice.SystemSpeechToText
-import dev.equerry.app.voice.SystemTextToSpeech
 import dev.equerry.app.voice.VoiceComponentsEntryPoint
+import dev.equerry.app.voice.VoiceEngineSelector
 import dev.equerry.app.voice.VoiceFlowController
 import dev.equerry.app.voice.VoiceFlowState
 import kotlinx.coroutines.flow.first
@@ -67,14 +66,21 @@ fun ChatRoute(viewModel: ChatViewModel = hiltViewModel()) {
             context.applicationContext,
             VoiceComponentsEntryPoint::class.java,
         )
+        // Engines are resolved per turn from the STT/TTS slot mapping: remote when mapped, system otherwise.
+        val selector = VoiceEngineSelector.fromContext(context.applicationContext, entry.providerRepository())
         VoiceFlowController(
             chat = viewModel,
-            stt = SystemSpeechToText.fromContext(context.applicationContext),
-            tts = SystemTextToSpeech.fromContext(context.applicationContext),
+            stt = selector.sttEngine(),
+            tts = selector.ttsEngine(),
             settings = entry.voiceSettingsStore(),
             scope = scope,
             isMicGranted = { MicPermission.isGranted(context.applicationContext) },
             isChatConfigured = { entry.providerRepository().observeChatMapping().first() != null },
+            // Consented fallback: on a remote-engine failure, offer a one-tap retry on the system engine.
+            systemStt = selector.systemSttEngine(),
+            systemTts = selector.systemTtsEngine(),
+            isSttRemote = selector::isSttMapped,
+            isTtsRemote = selector::isTtsMapped,
         )
     }
     val voiceState by controller.state.collectAsState()

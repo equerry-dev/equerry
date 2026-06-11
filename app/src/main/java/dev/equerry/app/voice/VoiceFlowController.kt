@@ -44,10 +44,25 @@ class VoiceFlowController(
     // so the utterance falls through to a normal chat send. Defaulted so non-session callers/tests
     // (which never ask about the screen) are unaffected.
     private val screenContext: () -> ScreenContext? = { null },
+    // Consented system-engine fallback (locked `failover_consented`): when the active engine is a
+    // remote one and it fails, the user is offered a one-tap retry on these system engines — never an
+    // automatic switch. Defaulted to inert (no fallback) so callers that don't wire it are unaffected.
+    private val systemStt: SpeechToText? = null,
+    private val systemTts: TextToSpeech? = null,
+    private val isSttRemote: suspend () -> Boolean = { false },
+    private val isTtsRemote: suspend () -> Boolean = { false },
 ) {
 
     private val _state = MutableStateFlow(VoiceFlowState.Idle)
     val state: StateFlow<VoiceFlowState> = _state.asStateFlow()
+
+    // The engines this and subsequent turns use. They start as the injected (possibly remote) engines
+    // and only switch to the system engines after the user invokes [retryWithSystem].
+    private var activeStt: SpeechToText = stt
+    private var activeTts: TextToSpeech = tts
+
+    // True when the last turn failed on a remote engine and a consented system-retry is available.
+    private var systemRetryPending: Boolean = false
 
     /** The current failure guidance, or null when none. The single surface for every failure mode (c-5). */
     private val _guidance = MutableStateFlow<VoiceGuidance?>(null)
@@ -76,14 +91,22 @@ class VoiceFlowController(
                     _state.value = VoiceFlowState.Idle
                     return@launch
                 }
-                ttsReady = tts.init() == TtsInitResult.Ready
+                ttsReady = activeTts.init() == TtsInitResult.Ready
+                // A remote TTS that failed to init offers a consented system retry instead of going
+                // silent (locked failover_consented) — never an automatic switch.
+                if (!ttsReady && canOfferSystemFallback(activeTts, systemTts, isTtsRemote())) {
+                    _guidance.value = VoiceGuidanceFactory.remoteEngineFailed(RemoteAudioError.Unavailable)
+                    systemRetryPending = true
+                    _state.value = VoiceFlowState.Idle
+                    return@launch
+                }
                 do {
                     _guidance.value = null
                     _state.value = VoiceFlowState.Listening
 
                     var finalText: String? = null
                     var sttError: SttError? = null
-                    stt.listen().collect { event ->
+                    activeStt.listen().collect { event ->
                         when (event) {
                             is SttEvent.Partial -> _state.value = VoiceFlowState.Transcribing
                             is SttEvent.Final -> {
@@ -95,8 +118,16 @@ class VoiceFlowController(
                         }
                     }
 
-                    // The STT flow has completed — speech ended (or errored).
-                    sttError?.let { _guidance.value = VoiceGuidanceFactory.sttError(it) }
+                    // The STT flow has completed — speech ended (or errored). A remote-engine failure
+                    // offers a consented system retry rather than the generic STT guidance.
+                    sttError?.let { error ->
+                        _guidance.value = if (canOfferSystemFallback(activeStt, systemStt, isSttRemote())) {
+                            systemRetryPending = true
+                            VoiceGuidanceFactory.remoteEngineFailed(RemoteAudioError.Unavailable)
+                        } else {
+                            VoiceGuidanceFactory.sttError(error)
+                        }
+                    }
                     val text = finalText
                     if (text.isNullOrBlank()) break
                     // A spoken screen-context query routes to askAboutScreen when a capture is
@@ -130,9 +161,33 @@ class VoiceFlowController(
     fun stop() {
         job?.cancel()
         job = null
-        tts.stop()
+        activeTts.stop()
         _state.value = VoiceFlowState.Idle
     }
+
+    /**
+     * Consented system-engine retry (locked `failover_consented`). No-op unless a remote-engine
+     * failure left a retry pending and a system fallback is configured: only then — and only when the
+     * user invokes this — does the controller switch [activeStt]/[activeTts] to the system engines and
+     * re-run the turn. Never called automatically, so a remote failure never silently routes audio to
+     * the system engine.
+     */
+    fun retryWithSystem() {
+        if (!systemRetryPending) return
+        systemRetryPending = false
+        systemStt?.let { activeStt = it }
+        systemTts?.let { activeTts = it }
+        _guidance.value = null
+        start()
+    }
+
+    /**
+     * Whether a failure on [active] should offer the consented system retry: a system fallback exists,
+     * the active engine isn't already that fallback (so we don't loop), and the active engine was the
+     * remote one for this turn.
+     */
+    private fun canOfferSystemFallback(active: Any, fallback: Any?, remote: Boolean): Boolean =
+        fallback != null && active !== fallback && remote
 
     /**
      * Run one turn: [dispatch] kicks off the round-trip on [ChatViewModel] (a normal send or a
@@ -158,7 +213,7 @@ class VoiceFlowController(
                     if (assistant.length > spokenSoFar.length) {
                         val delta = assistant.substring(spokenSoFar.length)
                         spokenSoFar = assistant
-                        chunker.feed(delta).forEach { tts.speak(it) }
+                        chunker.feed(delta).forEach { activeTts.speak(it) }
                     }
                 }
             }
@@ -172,8 +227,8 @@ class VoiceFlowController(
             // Screen couldn't be read / nothing configured — speak the note, then fall back to chat.
             finalUi.screenNote != null -> {
                 if (ttsReady) {
-                    tts.speak(finalUi.screenNote)
-                    tts.awaitDone()
+                    activeTts.speak(finalUi.screenNote)
+                    activeTts.awaitDone()
                 }
                 _guidance.value = VoiceGuidance(finalUi.screenNote)
                 _state.value = VoiceFlowState.Idle
@@ -198,13 +253,13 @@ class VoiceFlowController(
             _guidance.value = VoiceGuidanceFactory.ttsUnavailable()
         } else {
             if (timing == SpeakTiming.SENTENCE_BY_SENTENCE) {
-                chunker.finish().forEach { tts.speak(it) }
+                chunker.finish().forEach { activeTts.speak(it) }
             } else {
-                finalUi.lastReply?.let { tts.speak(it) }
+                finalUi.lastReply?.let { activeTts.speak(it) }
             }
             // Wait until Equerry has actually stopped talking before the loop re-arms the mic,
             // otherwise STT captures the TTS output and the assistant answers itself (continuous).
-            tts.awaitDone()
+            activeTts.awaitDone()
         }
         // If the turn staged a benign on-device action, offer a spoken "Start now?" before settling.
         confirmStagedActionByVoice()
@@ -225,12 +280,12 @@ class VoiceFlowController(
         if (!ttsReady) return // can't ask aloud — leave it staged as a tappable card
 
         _state.value = VoiceFlowState.Speaking
-        tts.speak("Start now?")
-        tts.awaitDone()
+        activeTts.speak("Start now?")
+        activeTts.awaitDone()
 
         _state.value = VoiceFlowState.Listening
         var answer: String? = null
-        stt.listen().collect { event -> if (event is SttEvent.Final) answer = event.text }
+        activeStt.listen().collect { event -> if (event is SttEvent.Final) answer = event.text }
 
         when (YesNoGrammar.classify(answer.orEmpty())) {
             YesNoGrammar.Verdict.YES -> chat.confirmAction(index)

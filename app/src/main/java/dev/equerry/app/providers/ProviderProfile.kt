@@ -15,6 +15,12 @@ data class ProviderProfile(
     val systemPrompt: String? = null,
     val temperature: Double? = null,
     val maxTokens: Int? = null,
+    /**
+     * Optional remote-TTS voice for when this profile is mapped to the TTS slot; null/blank = use
+     * the provider's default voice (`provider_config_capability_flags`). Only meaningful for
+     * TTS-capable types ([ProviderType.supportsTts]).
+     */
+    val ttsVoice: String? = null,
 )
 
 /**
@@ -37,4 +43,6 @@ data class ProfileDraft(
     val systemPrompt: String = "",
     val temperature: String = "",
     val maxTokens: String = "",
+    /** Optional remote-TTS voice as raw form input; blank means "use the provider default". */
+    val ttsVoice: String = "",
 )

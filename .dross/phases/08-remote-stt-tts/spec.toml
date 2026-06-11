@@ -1,0 +1,68 @@
+[phase]
+id        = "08-remote-stt-tts"
+title     = "Remote STT/TTS providers (mappable STT & TTS capability slots)"
+milestone = "v0.1"
+
+[[criteria]]
+id   = "c-1"
+text = "A user can configure a remote STT provider and map it to the STT slot from the Capability Slots screen; the mapping survives an app restart."
+
+[[criteria]]
+id   = "c-2"
+text = "A user can configure a remote TTS provider and map it to the TTS slot from the Capability Slots screen; the mapping survives an app restart."
+
+[[criteria]]
+id   = "c-3"
+text = "With a remote STT provider mapped, a spoken utterance in the assist session is transcribed by that remote provider (not system STT) and shown as the user's question."
+
+[[criteria]]
+id   = "c-4"
+text = "With a remote TTS provider mapped, the CHAT reply is spoken aloud using that remote provider's audio (not system TTS)."
+
+[[criteria]]
+id   = "c-5"
+text = "When a slot is unmapped, the voice round-trip uses system STT/TTS as before — no regression to the zero-config path."
+
+[[criteria]]
+id   = "c-6"
+text = "When a mapped remote STT/TTS provider fails (network/auth/unavailable), the session shows clear guidance instead of failing silently or crashing, and no API key appears in any error surface (r-03)."
+
+[[decisions]]
+key    = "provider_config_capability_flags"
+choice = "Remote STT/TTS are exposed via supportsStt/supportsTts flags on ProviderType (mirroring supportsImages); the STT/TTS slot pickers filter to profiles whose type carries the matching flag. Both flags are scoped to OPENAI_COMPATIBLE only in v0.1. The profile's existing model field doubles as the audio model, so a user typically creates one profile per slot (e.g. a whisper model for STT)."
+why    = "Reuses the proven ProviderProfile + slot-mapping machinery (no new config model); OPENAI_COMPATIBLE alone covers OpenAI proper via base URL, self-hosted whisper.cpp, and OpenAI-compatible TTS servers, while Anthropic/Ollama/OpenRouter have no audio API to flag."
+locked = true
+
+[[decisions]]
+key    = "stt_capture_and_contract"
+choice = "Remote STT records via AudioRecord with an on-device energy/amplitude silence detector that auto-stops after a trailing-silence window, then POSTs the captured clip to the provider's transcribe endpoint. The remote SpeechToText impl emits EndOfSpeech when the VAD trips and a single Final when the transcript returns — no Partial events — keeping the existing SttEvent flow contract VoiceFlowController consumes unchanged."
+why    = "Whisper-style endpoints are record-then-POST with no system VAD or interim hypotheses; on-device silence detection preserves phase 05's locked hands-free auto-stop-on-silence (no tap-to-stop) and keeps the seam contract intact."
+locked = true
+
+[[decisions]]
+key    = "tts_playback"
+choice = "Remote TTS audio plays through ExoPlayer/Media3 as a gapless playlist; awaitDone() suspends until the playlist completes. Both phase-05 speak timings are honoured: whole-reply POSTs+plays the finished reply as one clip; sentence-by-sentence reuses SpeakChunker to POST each sentence as it streams and queues the clips in order. TTS voice is an optional per-profile field (free text + presets) shown only for TTS-capable profiles, defaulting to the provider default; requested audio format is a broadly-decodable codec (mp3)."
+why    = "Remote TTS returns audio bytes rather than driving the system engine; Media3 gives gapless queueing and robust mp3/opus decoding, and routing through awaitDone() preserves the mic-regate that stops STT capturing Equerry's own speech."
+locked = true
+
+[[decisions]]
+key    = "failover_consented"
+choice = "On a remote STT/TTS failure mid-session, show the standard single failure-guidance surface AND offer an explicit in-session 'retry with system engine' action; the turn falls back to system STT/TTS only after the user taps to consent. Never silently switch to the system engine."
+why    = "The user deliberately mapped a remote provider for privacy/cost reasons — silently routing their audio/text to the system (Google) engine would be a privacy surprise; an explicit consented retry keeps the turn recoverable without violating that intent."
+locked = true
+
+[[deferred]]
+text = "Byte-streamed remote TTS playback (chunked audio within a single sentence/response)."
+why  = "v0.1 POSTs per-sentence or whole-reply clips; true streaming audio is a later optimisation."
+
+[[deferred]]
+text = "Interim/partial transcript display for remote STT (live hypothesis like system STT's Partial)."
+why  = "Remote transcribe endpoints return only a final transcript; no partials to show."
+
+[[deferred]]
+text = "Live voice/model-list fetch for STT/TTS profiles."
+why  = "Voice and model stay free-text + presets, same as phase 02's deferred /models fetch."
+
+[[deferred]]
+text = "STT/TTS support on non-OpenAI-compatible provider types."
+why  = "Capability flags are scoped to OPENAI_COMPATIBLE in v0.1; other types have no audio API."
