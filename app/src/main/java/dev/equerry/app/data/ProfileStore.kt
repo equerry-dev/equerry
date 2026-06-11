@@ -46,13 +46,14 @@ class ProfileStore(private val dataStore: DataStore<Preferences>) {
         val systemPrompt: String? = null,
         val temperature: Double? = null,
         val maxTokens: Int? = null,
+        val ttsVoice: String? = null,
     )
 
     private fun ProviderProfile.toStored() =
-        StoredProfile(id, label, type.name, baseUrl, model, systemPrompt, temperature, maxTokens)
+        StoredProfile(id, label, type.name, baseUrl, model, systemPrompt, temperature, maxTokens, ttsVoice)
 
     private fun StoredProfile.toDomain() =
-        ProviderProfile(id, label, ProviderType.valueOf(type), baseUrl, model, systemPrompt, temperature, maxTokens)
+        ProviderProfile(id, label, ProviderType.valueOf(type), baseUrl, model, systemPrompt, temperature, maxTokens, ttsVoice)
 
     private companion object {
         val KEY = stringPreferencesKey("profiles_json")
