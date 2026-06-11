@@ -23,3 +23,6 @@ captures/
 
 # Secrets
 *.env
+
+# Tesseract OCR model — multi-MB binary, fetched locally (see app/src/main/assets/tessdata/README.md)
+app/src/main/assets/tessdata/*.traineddata
