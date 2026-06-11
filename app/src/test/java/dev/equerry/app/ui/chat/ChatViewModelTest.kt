@@ -14,11 +14,15 @@ import dev.equerry.app.providers.drivers.AnthropicChatDriver
 import dev.equerry.app.providers.drivers.ChatDriverFactory
 import dev.equerry.app.providers.drivers.ChatError
 import dev.equerry.app.providers.drivers.ChatHttpClient
+import dev.equerry.app.providers.drivers.ChatImage
 import dev.equerry.app.providers.drivers.ChatRole
+import dev.equerry.app.providers.drivers.ChatSession
 import dev.equerry.app.providers.drivers.OllamaChatDriver
 import dev.equerry.app.providers.drivers.OpenAiChatDriver
+import dev.equerry.app.screencontext.ScreenContext
 import dev.equerry.app.tools.actions.ActionRunner
 import dev.equerry.app.tools.actions.PlannedAction
+import dev.equerry.app.tools.ocr.OcrEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -338,5 +342,113 @@ class ChatViewModelTest {
         vm.send("hello")
 
         assertTrue(awaitState { it.toolsUnsupported }.toolsUnsupported)
+    }
+
+    // --- Screen-context: askAboutScreen (t-7) ---
+
+    private class FakeOcr(private val text: String) : OcrEngine {
+        override suspend fun recognise(image: ChatImage): String = text
+    }
+
+    private val imageBytes = byteArrayOf(1, 2, 3)
+    private val imageB64 = java.util.Base64.getEncoder().encodeToString(imageBytes) // "AQID"
+    private fun screenshot() = ChatImage(imageBytes, "image/png")
+
+    /** A vm with an explicit session (so the test can inspect history) and a chosen OCR engine. */
+    private fun newVm(session: ChatSession = ChatSession(), ocr: OcrEngine = FakeOcr("")): ChatViewModel {
+        val client = ChatHttpClient.create()
+        val factory = ChatDriverFactory(OpenAiChatDriver(client), AnthropicChatDriver(client), OllamaChatDriver(client))
+        return ChatViewModel(repository, factory, session, FakeActionRunner(), ocr)
+    }
+
+    private suspend fun configureVisionProvider(): ProviderProfile {
+        val created = repository.addProfile(
+            ProfileDraft("Vision", ProviderType.OPENAI_COMPATIBLE, server.url("/").toString(), key, "m"),
+        )
+        repository.setVisionSlot(created.id)
+        return created
+    }
+
+    @Test
+    fun screen_query_with_an_image_capable_vision_sends_the_screenshot() = runBlocking {
+        configureVisionProvider()
+        server.enqueue(sseReply("It's a settings screen."))
+        val svm = newVm()
+
+        svm.askAboutScreen(ScreenContext(text = "", screenshot = screenshot()))
+
+        withTimeout(5_000) { svm.state.first { !it.streaming && it.error == null && it.lastReply != null } }
+        val body = server.takeRequest().body.readUtf8()
+        assertTrue("image content array sent", body.contains("image_url"))
+        assertTrue("screenshot bytes sent as base64 data URI", body.contains(imageB64))
+    }
+
+    @Test
+    fun a_vision_capability_error_degrades_to_the_assist_text_path() = runBlocking {
+        configureVisionProvider()
+        server.enqueue(MockResponse().setResponseCode(400)) // model can't accept the image
+        server.enqueue(sseReply("A login form."))
+        val svm = newVm()
+
+        svm.askAboutScreen(ScreenContext(text = "Username Password", screenshot = screenshot()))
+
+        val done = withTimeout(5_000) { svm.state.first { !it.streaming && it.lastReply != null } }
+        assertEquals(null, done.error)
+        val first = server.takeRequest().body.readUtf8()
+        val second = server.takeRequest().body.readUtf8()
+        assertTrue("first attempt carried the image", first.contains("image_url"))
+        assertFalse("degrade retry drops the image", second.contains("image_url"))
+        assertTrue("degrade retry carries the Assist text", second.contains("Username Password"))
+    }
+
+    @Test
+    fun no_vision_provider_ocrs_the_screenshot_and_sends_text_to_chat() = runBlocking {
+        configureChatProvider() // CHAT only; no VISION mapping
+        server.enqueue(sseReply("Recognised."))
+        val svm = newVm(ocr = FakeOcr("INVOICE TOTAL 42"))
+
+        svm.askAboutScreen(ScreenContext(text = "", screenshot = screenshot()))
+
+        withTimeout(5_000) { svm.state.first { !it.streaming && it.lastReply != null } }
+        val body = server.takeRequest().body.readUtf8()
+        assertFalse("text path sends no image", body.contains("image_url"))
+        assertTrue("OCR text routed to CHAT", body.contains("INVOICE TOTAL 42"))
+    }
+
+    @Test
+    fun a_screen_query_keeps_text_in_history_never_the_image() = runBlocking {
+        configureVisionProvider()
+        server.enqueue(sseReply("ok"))
+        val session = ChatSession()
+        val svm = newVm(session = session)
+
+        svm.askAboutScreen(ScreenContext(text = "Inbox: 3 unread", screenshot = screenshot()))
+        withTimeout(5_000) { svm.state.first { !it.streaming && it.lastReply != null } }
+
+        assertTrue("the screen's text is retained for follow-ups", session.turns.any { it.content.contains("Inbox: 3 unread") })
+        assertTrue("no retained turn carries image bytes (c-6)", session.turns.none { it.image != null })
+    }
+
+    @Test
+    fun a_blank_capture_posts_the_blank_screen_note_and_calls_no_driver() = runBlocking {
+        configureVisionProvider()
+        val svm = newVm()
+
+        svm.askAboutScreen(ScreenContext(text = "   ", screenshot = null))
+
+        val s = withTimeout(5_000) { svm.state.first { it.screenNote != null } }
+        assertTrue(s.screenNote!!.contains("Couldn't read this screen"))
+        assertEquals(0, server.requestCount)
+    }
+
+    @Test
+    fun nothing_configured_posts_the_unconfigured_note() = runBlocking {
+        val svm = newVm() // no VISION, no CHAT mapped
+
+        svm.askAboutScreen(ScreenContext(text = "hello", screenshot = screenshot()))
+
+        val s = withTimeout(5_000) { svm.state.first { it.screenNote != null } }
+        assertTrue(s.screenNote!!.contains("Settings"))
+        assertEquals(0, server.requestCount)
     }
 }

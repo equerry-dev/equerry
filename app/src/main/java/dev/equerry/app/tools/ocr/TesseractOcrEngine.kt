@@ -1,9 +1,10 @@
 package dev.equerry.app.tools.ocr
 
 import android.content.Context
-import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import com.googlecode.tesseract.android.TessBaseAPI
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.equerry.app.providers.drivers.ChatImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -23,8 +24,11 @@ class TesseractOcrEngine @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : OcrEngine {
 
-    override suspend fun recognise(bitmap: Bitmap): String = withContext(Dispatchers.IO) {
+    override suspend fun recognise(image: ChatImage): String = withContext(Dispatchers.IO) {
+        // No model -> "" without decoding the image or touching native code (keeps the unit path JVM-safe).
         val dataPath = ensureTrainedData() ?: return@withContext ""
+        val bitmap = BitmapFactory.decodeByteArray(image.bytes, 0, image.bytes.size)
+            ?: return@withContext "" // undecodable bytes -> no text, never a crash
         val tess = TessBaseAPI()
         try {
             if (!tess.init(dataPath, LANGUAGE)) return@withContext ""

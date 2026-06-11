@@ -1,8 +1,8 @@
 package dev.equerry.app.tools.ocr
 
 import android.content.Context
-import android.graphics.Bitmap
 import androidx.test.core.app.ApplicationProvider
+import dev.equerry.app.providers.drivers.ChatImage
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -27,8 +27,9 @@ class TesseractOcrEngineTest {
     fun recognise_returns_empty_when_no_trained_model_is_bundled() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val engine = TesseractOcrEngine(context)
-        val bitmap = Bitmap.createBitmap(8, 8, Bitmap.Config.ARGB_8888)
+        // Bytes are never decoded — the no-model branch returns first.
+        val image = ChatImage(byteArrayOf(1, 2, 3), "image/png")
 
-        assertEquals("", engine.recognise(bitmap))
+        assertEquals("", engine.recognise(image))
     }
 }
