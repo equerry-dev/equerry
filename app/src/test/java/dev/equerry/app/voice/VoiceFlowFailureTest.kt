@@ -199,6 +199,40 @@ class VoiceFlowFailureTest {
     }
 
     @Test
+    fun remote_stt_failure_offers_consented_retry_and_uses_system_only_after_invoked() = runBlocking {
+        configureChatProvider()
+        settings.setTurnControl(TurnControl.SINGLE_TURN)
+        // The remote engine errors; the system engine is a spy that errors too (so the retry turn
+        // settles without needing a provider reply). isSttRemote=true marks this turn's engine remote.
+        val remoteStt = CountingStt(listOf(SttEvent.EndOfSpeech, SttEvent.Error(SttError.Unavailable)))
+        val systemSttSpy = CountingStt(listOf(SttEvent.Error(SttError.NoMatch)))
+        val controller = VoiceFlowController(
+            vm, remoteStt, FakeTextToSpeech(), settings, controllerScope,
+            isMicGranted = { true },
+            isChatConfigured = { true },
+            systemStt = systemSttSpy,
+            systemTts = FakeTextToSpeech(),
+            isSttRemote = { true },
+        )
+
+        controller.start()
+
+        // (a) exactly one remote-failure guidance, offering the consented system retry.
+        val guidance = withTimeout(5_000) { controller.guidance.first { it != null } }!!
+        assertEquals(VoiceGuidanceFactory.remoteEngineFailed(RemoteAudioError.Unavailable), guidance)
+        assertTrue("remote failure must offer the consented system retry", guidance.canRetryWithSystem)
+        assertFalse("guidance must never leak the key", guidance.message.contains(key))
+        // (b) the system engine is NOT used until the user consents — no silent fallback.
+        assertEquals("system STT must not run without consent", 0, systemSttSpy.starts)
+
+        // (c) consenting re-runs the turn on the system engine.
+        controller.retryWithSystem()
+        val armed = withTimeout(5_000) { controller.state.first { it == VoiceFlowState.Idle } }
+        assertEquals(VoiceFlowState.Idle, armed)
+        assertEquals("system STT is armed only after the consented retry", 1, systemSttSpy.starts)
+    }
+
+    @Test
     fun tts_failure_renders_the_reply_but_skips_speaking() = runBlocking {
         configureChatProvider()
         settings.setTurnControl(TurnControl.SINGLE_TURN)
