@@ -1,21 +1,11 @@
 {
   "version": "0.1.5.4",
   "current_milestone": "v0.1",
-  "last_activity": "2026-06-11T08:15:32.379166Z",
-  "last_action": "completed 07-screen-context",
+  "current_phase": "08-remote-stt-tts",
+  "current_phase_status": "created",
+  "last_activity": "2026-06-11T09:25:27.556191Z",
+  "last_action": "spec locked: 08-remote-stt-tts",
   "history": [
-    {
-      "at": "2026-06-10T17:35:08.865562Z",
-      "action": "quick: wait for TTS to finish before re-arming the mic"
-    },
-    {
-      "at": "2026-06-10T17:42:20.18661Z",
-      "action": "bump internal 0.1.5.2 → 0.1.5.3"
-    },
-    {
-      "at": "2026-06-10T17:42:20.193996Z",
-      "action": "quick: add mic button to chat for the voice round-trip"
-    },
     {
       "at": "2026-06-10T17:53:45.76256Z",
       "action": "created 06-tools-actions"
@@ -203,6 +193,18 @@
     {
       "at": "2026-06-11T08:15:32.379166Z",
       "action": "completed 07-screen-context"
+    },
+    {
+      "at": "2026-06-11T09:05:34.250792Z",
+      "action": "created 08-remote-stt-tts"
+    },
+    {
+      "at": "2026-06-11T09:25:27.548933Z",
+      "action": "set current_phase=08-remote-stt-tts"
+    },
+    {
+      "at": "2026-06-11T09:25:27.556191Z",
+      "action": "spec locked: 08-remote-stt-tts"
     }
   ]
 }
