@@ -3,13 +3,9 @@
   "current_milestone": "v0.1",
   "current_phase": "08-remote-stt-tts",
   "current_phase_status": "planned",
-  "last_activity": "2026-06-11T09:49:40.483883Z",
-  "last_action": "plan locked (panel): 08-remote-stt-tts (13 tasks across 4 waves)",
+  "last_activity": "2026-06-11T09:52:25.185139Z",
+  "last_action": "plan reviewed: 08-remote-stt-tts (0 blocking, 5 flags)",
   "history": [
-    {
-      "at": "2026-06-10T18:30:55.338217Z",
-      "action": "spec locked: 06-tools-actions"
-    },
     {
       "at": "2026-06-10T18:42:03.639495Z",
       "action": "set current_phase_status=planned"
@@ -205,6 +201,10 @@
     {
       "at": "2026-06-11T09:49:40.483883Z",
       "action": "plan locked (panel): 08-remote-stt-tts (13 tasks across 4 waves)"
+    },
+    {
+      "at": "2026-06-11T09:52:25.185139Z",
+      "action": "plan reviewed: 08-remote-stt-tts (0 blocking, 5 flags)"
     }
   ]
 }
