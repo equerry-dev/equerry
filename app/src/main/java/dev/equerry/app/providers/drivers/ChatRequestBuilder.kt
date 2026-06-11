@@ -2,11 +2,14 @@ package dev.equerry.app.providers.drivers
 
 import dev.equerry.app.providers.ProviderType
 import dev.equerry.app.tools.ToolSpecs
+import kotlinx.serialization.json.JsonObjectBuilder
+import kotlinx.serialization.json.add
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
+import java.util.Base64
 
 /**
  * A built, provider-shaped chat request. The API key lives ONLY in [headers] (Authorization /
@@ -62,7 +65,7 @@ object ChatRequestBuilder {
             putJsonArray("messages") {
                 for (m in messages) addJsonObject {
                     put("role", m.role.wire())
-                    put("content", m.content)
+                    openAiContent(m)
                 }
             }
             // OpenAI/OpenRouter tools: [{ type:"function", function:{ name, description, parameters } }].
@@ -108,7 +111,7 @@ object ChatRequestBuilder {
             putJsonArray("messages") {
                 for (m in turns) addJsonObject {
                     put("role", m.role.wire())
-                    put("content", m.content)
+                    anthropicContent(m)
                 }
             }
             // Anthropic tools: [{ name, description, input_schema }].
@@ -145,6 +148,8 @@ object ChatRequestBuilder {
                 for (m in messages) addJsonObject {
                     put("role", m.role.wire())
                     put("content", m.content)
+                    // Ollama carries images as a sibling base64 array on the message, not in content.
+                    m.image?.let { img -> putJsonArray("images") { add(img.base64()) } }
                 }
             }
             if (temperature != null || maxTokens != null) {
@@ -161,4 +166,58 @@ object ChatRequestBuilder {
             headers = mapOf("Content-Type" to "application/json"),
         )
     }
+
+    /**
+     * OpenAI/OpenRouter content. Text-only stays a plain string; with an image it becomes the
+     * vision content array `[{type:text,...},{type:image_url, image_url:{url:"data:<mime>;base64,..."}}]`.
+     */
+    private fun JsonObjectBuilder.openAiContent(m: ChatMessage) {
+        val image = m.image
+        if (image == null) {
+            put("content", m.content)
+        } else {
+            putJsonArray("content") {
+                addJsonObject {
+                    put("type", "text")
+                    put("text", m.content)
+                }
+                addJsonObject {
+                    put("type", "image_url")
+                    putJsonObject("image_url") { put("url", image.dataUri()) }
+                }
+            }
+        }
+    }
+
+    /**
+     * Anthropic content. Text-only stays a plain string; with an image it becomes the content array
+     * `[{type:text,...},{type:image, source:{type:base64, media_type:<mime>, data:<b64>}}]`.
+     */
+    private fun JsonObjectBuilder.anthropicContent(m: ChatMessage) {
+        val image = m.image
+        if (image == null) {
+            put("content", m.content)
+        } else {
+            putJsonArray("content") {
+                addJsonObject {
+                    put("type", "text")
+                    put("text", m.content)
+                }
+                addJsonObject {
+                    put("type", "image")
+                    putJsonObject("source") {
+                        put("type", "base64")
+                        put("media_type", image.mimeType)
+                        put("data", image.base64())
+                    }
+                }
+            }
+        }
+    }
+
+    /** Raw base64 of the image bytes (no data: prefix) — the form Anthropic/Ollama expect. */
+    private fun ChatImage.base64(): String = Base64.getEncoder().encodeToString(bytes)
+
+    /** A `data:<mime>;base64,<...>` URI — the form OpenAI's image_url expects. */
+    private fun ChatImage.dataUri(): String = "data:$mimeType;base64," + base64()
 }

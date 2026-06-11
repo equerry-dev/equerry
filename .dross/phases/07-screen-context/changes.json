@@ -1,0 +1,86 @@
+{
+  "phase": "07-screen-context",
+  "tasks": {
+    "t-1": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/drivers/ChatMessage.kt",
+        "app/src/main/java/dev/equerry/app/providers/drivers/ChatRequestBuilder.kt",
+        "app/src/test/java/dev/equerry/app/providers/drivers/ChatRequestBuilderTest.kt"
+      ],
+      "commit": "6d4d11d",
+      "completed_at": "2026-06-11T07:13:02.816659Z"
+    },
+    "t-2": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",
+        "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt"
+      ],
+      "commit": "842eaf9",
+      "completed_at": "2026-06-11T07:14:03.37009Z"
+    },
+    "t-3": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt",
+        "app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt"
+      ],
+      "commit": "8e69666",
+      "completed_at": "2026-06-11T07:18:43.727102Z"
+    },
+    "t-4": {
+      "files": [
+        "settings.gradle.kts",
+        "gradle/libs.versions.toml",
+        "app/build.gradle.kts",
+        "app/src/main/java/dev/equerry/app/tools/ocr/OcrEngine.kt",
+        "app/src/main/java/dev/equerry/app/tools/ocr/TesseractOcrEngine.kt",
+        "app/src/main/java/dev/equerry/app/tools/ocr/OcrModule.kt"
+      ],
+      "commit": "02d8a2b",
+      "completed_at": "2026-06-11T07:30:01.797311Z"
+    },
+    "t-5": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/assistant/AssistAnalyzer.kt",
+        "app/src/main/java/dev/equerry/app/screencontext/ScreenContext.kt",
+        "app/src/main/java/dev/equerry/app/screencontext/ScreenContextPlanner.kt"
+      ],
+      "commit": "497f6dc",
+      "completed_at": "2026-06-11T07:32:18.495431Z"
+    },
+    "t-6": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/providers/CapabilitySlot.kt",
+        "app/src/main/java/dev/equerry/app/ui/slots/SlotsViewModel.kt",
+        "app/src/main/java/dev/equerry/app/ui/slots/SlotsScreen.kt"
+      ],
+      "commit": "c37b9d0",
+      "completed_at": "2026-06-11T07:36:30.079351Z"
+    },
+    "t-7": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt",
+        "app/src/main/java/dev/equerry/app/tools/ocr/OcrEngine.kt",
+        "app/src/main/java/dev/equerry/app/tools/ocr/TesseractOcrEngine.kt"
+      ],
+      "commit": "041e2e7",
+      "completed_at": "2026-06-11T07:45:29.168544Z"
+    },
+    "t-8": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/voice/ScreenQueryGrammar.kt",
+        "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+        "app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt"
+      ],
+      "commit": "1162ee8",
+      "completed_at": "2026-06-11T07:51:27.578766Z"
+    },
+    "t-9": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/assistant/AssistSessionContent.kt",
+        "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt"
+      ],
+      "commit": "eed0751",
+      "completed_at": "2026-06-11T08:08:52.104468Z"
+    }
+  }
+}

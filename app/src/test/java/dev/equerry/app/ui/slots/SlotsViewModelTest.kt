@@ -67,10 +67,11 @@ class SlotsViewModelTest {
     }
 
     @Test
-    fun only_chat_slot_is_active() {
+    fun chat_and_vision_slots_are_active_and_the_rest_are_not() {
         val slots = vm.state.value.slots
         assertTrue(slots.first { it == CapabilitySlot.CHAT }.active)
-        assertTrue(slots.filter { it != CapabilitySlot.CHAT }.none { it.active })
+        assertTrue(slots.first { it == CapabilitySlot.VISION }.active)
+        assertTrue(slots.filter { it != CapabilitySlot.CHAT && it != CapabilitySlot.VISION }.none { it.active })
     }
 
     @Test
@@ -83,10 +84,21 @@ class SlotsViewModelTest {
     fun mapping_a_profile_clears_the_unconfigured_state() = runBlocking {
         val profile = repository.addProfile(draft("Home Ollama"))
 
-        vm.mapChatTo(profile.id)
+        vm.map(CapabilitySlot.CHAT, profile.id)
 
         val mapped = vm.state.first { it.chatProfile != null }
         assertEquals(profile.id, mapped.chatProfile?.id)
         assertFalse(mapped.chatUnconfigured)
+    }
+
+    @Test
+    fun mapping_the_vision_slot_sets_the_vision_profile() = runBlocking {
+        val profile = repository.addProfile(draft("Vision Box"))
+
+        vm.map(CapabilitySlot.VISION, profile.id)
+
+        val mapped = vm.state.first { it.visionProfile != null }
+        assertEquals(profile.id, mapped.visionProfile?.id)
+        assertEquals(profile.id, mapped.mappedProfile(CapabilitySlot.VISION)?.id)
     }
 }

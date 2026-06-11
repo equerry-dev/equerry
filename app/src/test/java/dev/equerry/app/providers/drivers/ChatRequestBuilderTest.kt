@@ -135,4 +135,58 @@ class ChatRequestBuilderTest {
         assertFalse(openai.body.contains(key))
         assertFalse(anthropic.body.contains(key))
     }
+
+    // --- Multimodal (VISION) image content (t-1) ---
+
+    private val imageBytes = byteArrayOf(1, 2, 3)
+    private val imageB64 = java.util.Base64.getEncoder().encodeToString(imageBytes) // "AQID"
+
+    private fun imageMessage(text: String = "what's on screen?") =
+        ChatMessage(ChatRole.USER, text, image = ChatImage(imageBytes, "image/png"))
+
+    @Test
+    fun openai_image_message_becomes_a_content_array_with_an_image_url_data_uri() {
+        val req = ChatRequestBuilder.build(ProviderType.OPENAI_COMPATIBLE, "gpt-4o", listOf(imageMessage()), key)
+        val content = body(req)["messages"]!!.jsonArray[0].jsonObject["content"]!!.jsonArray
+
+        val text = content.first { it.jsonObject["type"]!!.jsonPrimitive.content == "text" }
+        assertEquals("what's on screen?", text.jsonObject["text"]!!.jsonPrimitive.content)
+        val img = content.first { it.jsonObject["type"]!!.jsonPrimitive.content == "image_url" }
+        assertEquals(
+            "data:image/png;base64,$imageB64",
+            img.jsonObject["image_url"]!!.jsonObject["url"]!!.jsonPrimitive.content,
+        )
+    }
+
+    @Test
+    fun anthropic_image_message_becomes_a_type_image_block_with_base64_source() {
+        val req = ChatRequestBuilder.build(ProviderType.ANTHROPIC, "claude-sonnet-4-6", listOf(imageMessage()), key)
+        val content = body(req)["messages"]!!.jsonArray[0].jsonObject["content"]!!.jsonArray
+
+        val img = content.first { it.jsonObject["type"]!!.jsonPrimitive.content == "image" }
+        val source = img.jsonObject["source"]!!.jsonObject
+        assertEquals("base64", source["type"]!!.jsonPrimitive.content)
+        assertEquals("image/png", source["media_type"]!!.jsonPrimitive.content)
+        assertEquals(imageB64, source["data"]!!.jsonPrimitive.content)
+    }
+
+    @Test
+    fun ollama_image_message_carries_a_sibling_base64_images_array() {
+        val req = ChatRequestBuilder.build(ProviderType.OLLAMA, "llava", listOf(imageMessage()), key = "")
+        val message = body(req)["messages"]!!.jsonArray[0].jsonObject
+
+        assertEquals("what's on screen?", message["content"]!!.jsonPrimitive.content)
+        assertEquals(listOf(imageB64), message["images"]!!.jsonArray.map { it.jsonPrimitive.content })
+    }
+
+    @Test
+    fun text_only_messages_keep_a_plain_string_content_for_every_builder() {
+        val text = listOf(ChatMessage(ChatRole.USER, "plain"))
+        for (type in listOf(ProviderType.OPENAI_COMPATIBLE, ProviderType.ANTHROPIC, ProviderType.OLLAMA)) {
+            val req = ChatRequestBuilder.build(type, "m", text, key = if (type == ProviderType.OLLAMA) "" else key)
+            val content = body(req)["messages"]!!.jsonArray[0].jsonObject["content"]!!
+            // A plain-string content has no JSON array structure; this throws if it regressed to an array.
+            assertEquals("plain", content.jsonPrimitive.content)
+        }
+    }
 }

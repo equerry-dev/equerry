@@ -47,6 +47,29 @@ object AssistAnalyzer {
     }
 
     /**
+     * Concatenate every non-blank text node across the subtree in pre-order, newline-separated —
+     * the screen's textual content for the screen-context flow (the Assist-text fallback sent to a
+     * VISION/CHAT provider). Null root -> "". Each fragment is trimmed; the result carries no pixels.
+     */
+    fun extractText(root: ViewNodeLike?): String {
+        if (root == null) return ""
+        val out = StringBuilder()
+        collectText(root, out)
+        return out.toString()
+    }
+
+    private fun collectText(node: ViewNodeLike, out: StringBuilder) {
+        val text = node.text
+        if (!text.isNullOrBlank()) {
+            if (out.isNotEmpty()) out.append('\n')
+            out.append(text.trim())
+        }
+        for (i in 0 until node.childCount) {
+            collectText(node.childAt(i), out)
+        }
+    }
+
+    /**
      * Classify a screenshot from its dimensions. Null dimensions (the platform
      * declined to provide a screenshot, or blocked it) -> arrived=false, blocked=true.
      * The signature takes no Bitmap, so pixels cannot leak past this boundary.

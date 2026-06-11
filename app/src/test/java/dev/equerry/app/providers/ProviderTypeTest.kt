@@ -53,9 +53,20 @@ class ProviderTypeTest {
     }
 
     @Test
-    fun only_chat_slot_is_active() {
+    fun image_capability_is_true_for_all_types_except_ollama() {
+        // Mirrors tool capability: best-effort at the type level (vision_capability). Flip any row
+        // and this fails. Ollama's vision support varies by model, so it is treated as incapable.
+        assertTrue(ProviderType.ANTHROPIC.supportsImages)
+        assertTrue(ProviderType.OPENAI_COMPATIBLE.supportsImages)
+        assertTrue(ProviderType.OPENROUTER.supportsImages)
+        assertFalse(ProviderType.OLLAMA.supportsImages)
+    }
+
+    @Test
+    fun chat_and_vision_slots_are_active_and_the_rest_are_not() {
         assertTrue(CapabilitySlot.CHAT.active)
-        val others = CapabilitySlot.entries.filter { it != CapabilitySlot.CHAT }
-        assertTrue(others.none { it.active })
+        assertTrue("VISION is wired by the screen-context phase", CapabilitySlot.VISION.active)
+        val rest = CapabilitySlot.entries.filter { it != CapabilitySlot.CHAT && it != CapabilitySlot.VISION }
+        assertTrue(rest.none { it.active })
     }
 }

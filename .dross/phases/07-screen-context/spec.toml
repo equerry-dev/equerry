@@ -1,0 +1,68 @@
+[phase]
+id        = "07-screen-context"
+title     = "Screen context"
+milestone = "v0.1"
+
+[[criteria]]
+id   = "c-1"
+text = "From the assist session, the user can ask about the current foreground screen via both an on-screen button and a spoken trigger in the voice flow."
+
+[[criteria]]
+id   = "c-2"
+text = "With a VISION provider mapped, the screen is sent to it — the assist screenshot to a multimodal model, falling back to AssistStructure text when no screenshot arrived or the model isn't multimodal — and a useful answer is rendered in the session."
+
+[[criteria]]
+id   = "c-3"
+text = "With no VISION provider mapped, the OCR+CHAT fallback produces a useful answer about the screen using the mapped CHAT provider."
+
+[[criteria]]
+id   = "c-4"
+text = "Screen content is obtained only via the Assist API (AssistStructure / assist screenshot); no AccessibilityService is used (r-01)."
+
+[[criteria]]
+id   = "c-5"
+text = "When neither a VISION provider nor a usable fallback is configured, the user sees clear guidance (mirroring the unconfigured-CHAT pattern), not a silent failure."
+
+[[criteria]]
+id   = "c-6"
+text = "The screenshot sent for a screen-context query is transient and never persisted to disk or log (consistent with screenshot_retention)."
+
+[[decisions]]
+key    = "fallback_engine"
+choice = "When no VISION provider is mapped, OCR the assist screenshot with a bundled FOSS on-device engine (Tesseract-class) and send the recognised text to the mapped CHAT provider."
+why    = "Keeps the milestone's OCR+CHAT fallback working for image-heavy/no-text apps while staying F-Droid-compatible (locked stack promise). A proprietary blob like ML Kit would break F-Droid; Assist-text alone would be empty for text-less apps."
+locked = true
+
+[[decisions]]
+key    = "screen_in_history"
+choice = "The first query sends the screen (image to a multimodal model, else OCR/Assist text). The textual representation of the screen is retained in the session-scoped history so follow-ups work; the screenshot bitmap is not re-sent on later turns."
+why    = "Natural follow-up Q&A ('summarise the third item') without re-sending pixels each turn — cheaper and honours the never-persist posture. Reuses the existing session-scoped in-memory history (session_boundary)."
+locked = true
+
+[[decisions]]
+key    = "vision_capability"
+choice = "Image support is a best-effort flag declared at the driver level (as phase 06 did for tools). Send the screenshot when the driver is image-capable and a screenshot arrived; otherwise use the Assist/OCR text path. On a runtime capability error, degrade to the text path automatically."
+why    = "Consistent with the established best-effort tool-capability pattern; no user burden and graceful degradation when a model's modality isn't knowable in advance."
+locked = true
+
+[[decisions]]
+key    = "blank_screen"
+choice = "When the Assist API yields nothing usable (no AssistStructure text and no screenshot), show one deterministic line ('Couldn't read this screen — it may block assistant capture') and drop into normal chat so the user can still ask the CHAT provider directly."
+why    = "FLAG_SECURE screens block both captures (confirmed by the Phase-0 probe). An honest note plus a chat fallback avoids a dead-end and mirrors phase 06's single-guidance-surface / honest-note patterns."
+locked = true
+
+[[deferred]]
+text = "ML Kit (proprietary) OCR for higher accuracy."
+why  = "Rejected to protect F-Droid distribution; revisit only if a clean variant exists."
+
+[[deferred]]
+text = "Re-sending the screenshot on follow-up turns for full multimodal visual follow-ups."
+why  = "v0.1 retains text context only; re-sending pixels each turn is costly and weakens the never-persist posture."
+
+[[deferred]]
+text = "Remote OCR provider slot."
+why  = "On-device FOSS OCR was chosen for the fallback; a configurable remote OCR backend is a later capability."
+
+[[deferred]]
+text = "Region/element selection ('ask about just this part of the screen')."
+why  = "Out of scope for v0.1 — the whole-screen capture is the baseline capability."

@@ -1,0 +1,103 @@
+{
+  "phase": "07-screen-context",
+  "generated_at": "2026-06-11T08:09:39.170477Z",
+  "languages": null,
+  "skipped": [
+    {
+      "file": "app/build.gradle.kts",
+      "reason": "no mutation adapter for .kts"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/AssistAnalyzer.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/AssistSessionContent.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/CapabilitySlot.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/ChatMessage.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/providers/drivers/ChatRequestBuilder.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/screencontext/ScreenContext.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/screencontext/ScreenContextPlanner.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/tools/ocr/OcrEngine.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/tools/ocr/OcrModule.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/tools/ocr/TesseractOcrEngine.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/slots/SlotsScreen.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/slots/SlotsViewModel.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/voice/ScreenQueryGrammar.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/providers/drivers/ChatRequestBuilderTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "gradle/libs.versions.toml",
+      "reason": "no mutation adapter for .toml"
+    },
+    {
+      "file": "settings.gradle.kts",
+      "reason": "no mutation adapter for .kts"
+    }
+  ]
+}

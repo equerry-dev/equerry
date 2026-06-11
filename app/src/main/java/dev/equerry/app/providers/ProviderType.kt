@@ -58,4 +58,13 @@ enum class ProviderType(
      */
     val supportsTools: Boolean
         get() = this != OLLAMA
+
+    /**
+     * Whether this type is treated as image (VISION) capable — drives the screen-context image path
+     * vs the Assist/OCR text fallback (`vision_capability`). Best-effort at the type level: the
+     * remote types host multimodal models; Ollama's vision support varies by model, so it is treated
+     * as incapable here. A runtime capability error still degrades to the text path at send time.
+     */
+    val supportsImages: Boolean
+        get() = this != OLLAMA
 }

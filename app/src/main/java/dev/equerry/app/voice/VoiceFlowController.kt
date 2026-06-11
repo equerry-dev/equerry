@@ -4,6 +4,7 @@ import dev.equerry.app.data.SpeakTiming
 import dev.equerry.app.data.TurnControl
 import dev.equerry.app.data.VoiceSettingsStore
 import dev.equerry.app.providers.drivers.ChatRole
+import dev.equerry.app.screencontext.ScreenContext
 import dev.equerry.app.tools.actions.PlannedAction
 import dev.equerry.app.ui.chat.ChatViewModel
 import kotlinx.coroutines.CancellationException
@@ -39,6 +40,10 @@ class VoiceFlowController(
     private val scope: CoroutineScope,
     private val isMicGranted: () -> Boolean,
     private val isChatConfigured: suspend () -> Boolean = { true },
+    // Supplies the current screen capture for a spoken screen-context query; null = none available,
+    // so the utterance falls through to a normal chat send. Defaulted so non-session callers/tests
+    // (which never ask about the screen) are unaffected.
+    private val screenContext: () -> ScreenContext? = { null },
 ) {
 
     private val _state = MutableStateFlow(VoiceFlowState.Idle)
@@ -94,7 +99,14 @@ class VoiceFlowController(
                     sttError?.let { _guidance.value = VoiceGuidanceFactory.sttError(it) }
                     val text = finalText
                     if (text.isNullOrBlank()) break
-                    sendAndSpeak(text)
+                    // A spoken screen-context query routes to askAboutScreen when a capture is
+                    // available; everything else is an ordinary chat send.
+                    val screen = screenContext()
+                    if (screen != null && ScreenQueryGrammar.isScreenQuery(text)) {
+                        sendAndSpeak { chat.askAboutScreen(screen) }
+                    } else {
+                        sendAndSpeak { chat.send(text) }
+                    }
                     // Re-arm for a follow-up only once the prior turn has fully settled (above), so
                     // the mic is never armed twice for one turn.
                     val turn = settings.turnControl().first()
@@ -122,14 +134,20 @@ class VoiceFlowController(
         _state.value = VoiceFlowState.Idle
     }
 
-    private suspend fun sendAndSpeak(text: String) {
+    /**
+     * Run one turn: [dispatch] kicks off the round-trip on [ChatViewModel] (a normal send or a
+     * screen-context query), then this waits for it to settle and speaks the reply. A screen query
+     * that can't proceed settles via [ChatUiState.screenNote] (no streaming) — spoken aloud, then the
+     * loop drops back to ordinary chat (blank_screen).
+     */
+    private suspend fun sendAndSpeak(dispatch: () -> Unit) {
         _state.value = VoiceFlowState.Sending
         val timing = settings.speakTiming().first()
         val chunker = SpeakChunker(timing)
         var spokenSoFar = ""
         var sawStreaming = false
 
-        chat.send(text)
+        dispatch()
         chat.state
             .onEach { ui ->
                 if (ui.streaming) sawStreaming = true
@@ -145,11 +163,22 @@ class VoiceFlowController(
                 }
             }
             // A turn settles when streaming stops — whether it produced reply text, an error, an
-            // unmapped state, or only tool calls (which leave lastReply null but stage actions).
-            .first { sawStreaming && !it.streaming }
+            // unmapped state, or only tool calls — OR when a screen query posts a guidance note
+            // without streaming (askAboutScreen clears any stale note synchronously first).
+            .first { (sawStreaming && !it.streaming) || it.screenNote != null }
 
         val finalUi = chat.state.value
         when {
+            // Screen couldn't be read / nothing configured — speak the note, then fall back to chat.
+            finalUi.screenNote != null -> {
+                if (ttsReady) {
+                    tts.speak(finalUi.screenNote)
+                    tts.awaitDone()
+                }
+                _guidance.value = VoiceGuidance(finalUi.screenNote)
+                _state.value = VoiceFlowState.Idle
+                return
+            }
             finalUi.unmapped -> {
                 _guidance.value = VoiceGuidanceFactory.noChatProvider()
                 _state.value = VoiceFlowState.Idle

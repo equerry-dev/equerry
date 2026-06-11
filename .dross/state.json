@@ -1,115 +1,11 @@
 {
-  "version": "0.1.5.3",
+  "version": "0.1.5.4",
   "current_milestone": "v0.1",
-  "current_phase": "06-tools-actions",
+  "current_phase": "07-screen-context",
   "current_phase_status": "verified",
-  "last_activity": "2026-06-11T05:16:52.195349Z",
-  "last_action": "verified 06-tools-actions: pass (6/6 covered; mutation skipped — Kotlin)",
+  "last_activity": "2026-06-11T08:10:43.658104Z",
+  "last_action": "verified 07-screen-context: pass (6/6 covered; mutation skipped — Kotlin)",
   "history": [
-    {
-      "at": "2026-06-10T13:11:20.080714Z",
-      "action": "shipped 04-chat-drivers → https://github.com/equerry-dev/equerry/pull/3 (merged af22e22, preserve-commit merge)"
-    },
-    {
-      "at": "2026-06-10T13:33:51.400991Z",
-      "action": "created 05-voice-roundtrip"
-    },
-    {
-      "at": "2026-06-10T13:46:18.494786Z",
-      "action": "set current_phase=05-voice-roundtrip"
-    },
-    {
-      "at": "2026-06-10T13:46:18.500028Z",
-      "action": "spec locked: 05-voice-roundtrip"
-    },
-    {
-      "at": "2026-06-10T14:23:01.521032Z",
-      "action": "set current_phase_status=planned"
-    },
-    {
-      "at": "2026-06-10T14:23:01.527311Z",
-      "action": "plan locked (panel): 05-voice-roundtrip (11 tasks across 4 waves)"
-    },
-    {
-      "at": "2026-06-10T14:35:55.194839Z",
-      "action": "plan reviewed: 05-voice-roundtrip (0 blocking after amendment, 5 flags in REVIEW.md)"
-    },
-    {
-      "at": "2026-06-10T14:43:48.113806Z",
-      "action": "set version=0.1.5.0"
-    },
-    {
-      "at": "2026-06-10T14:57:03.772341Z",
-      "action": "executed t-1 (Declare RECORD_AUDIO + mic-permission seam)"
-    },
-    {
-      "at": "2026-06-10T15:00:55.58072Z",
-      "action": "executed t-2 (STT capture behind a recognizer seam)"
-    },
-    {
-      "at": "2026-06-10T15:03:31.693558Z",
-      "action": "executed t-3 (TTS playback behind a speaker seam)"
-    },
-    {
-      "at": "2026-06-10T15:05:34.588219Z",
-      "action": "executed t-4 (Voice settings store)"
-    },
-    {
-      "at": "2026-06-10T15:07:50.020185Z",
-      "action": "executed t-5 (Programmatic send(text) on ChatViewModel)"
-    },
-    {
-      "at": "2026-06-10T15:09:24.508488Z",
-      "action": "executed t-6 (SpeakChunker)"
-    },
-    {
-      "at": "2026-06-10T15:15:45.896805Z",
-      "action": "executed t-9 (Voice settings screen + settings-path mic grant)"
-    },
-    {
-      "at": "2026-06-10T15:21:29.331931Z",
-      "action": "executed t-7 (Voice-flow controller)"
-    },
-    {
-      "at": "2026-06-10T15:28:25.887672Z",
-      "action": "executed t-8 (Concurrency: dismiss + continuous re-arm)"
-    },
-    {
-      "at": "2026-06-10T15:33:30.236442Z",
-      "action": "executed t-11 (Failure routing: single guidance surface)"
-    },
-    {
-      "at": "2026-06-10T16:07:09.473318Z",
-      "action": "set current_phase_status=complete"
-    },
-    {
-      "at": "2026-06-10T16:07:09.480906Z",
-      "action": "phase 05-voice-roundtrip executed (11/11 done)"
-    },
-    {
-      "at": "2026-06-10T16:17:26.742103Z",
-      "action": "set current_phase_status=verified"
-    },
-    {
-      "at": "2026-06-10T16:17:26.747549Z",
-      "action": "verified 05-voice-roundtrip: pass (5/5 covered, mutation skipped)"
-    },
-    {
-      "at": "2026-06-10T16:21:59.166696Z",
-      "action": "shipped 05-voice-roundtrip → https://github.com/equerry-dev/equerry/pull/4"
-    },
-    {
-      "at": "2026-06-10T16:43:04.093955Z",
-      "action": "completed 05-voice-roundtrip"
-    },
-    {
-      "at": "2026-06-10T17:28:39.546772Z",
-      "action": "bump internal 0.1.5.0 → 0.1.5.1"
-    },
-    {
-      "at": "2026-06-10T17:28:39.554245Z",
-      "action": "quick: permit cleartext HTTP for user-configured providers"
-    },
     {
       "at": "2026-06-10T17:35:08.858251Z",
       "action": "bump internal 0.1.5.1 → 0.1.5.2"
@@ -205,6 +101,110 @@
     {
       "at": "2026-06-11T05:16:52.195349Z",
       "action": "verified 06-tools-actions: pass (6/6 covered; mutation skipped — Kotlin)"
+    },
+    {
+      "at": "2026-06-11T05:21:37.200244Z",
+      "action": "shipped 06-tools-actions → https://github.com/equerry-dev/equerry/pull/5"
+    },
+    {
+      "at": "2026-06-11T05:23:13.176305Z",
+      "action": "completed 06-tools-actions"
+    },
+    {
+      "at": "2026-06-11T05:33:44.954682Z",
+      "action": "created 07-screen-context"
+    },
+    {
+      "at": "2026-06-11T05:46:31.725964Z",
+      "action": "set current_phase=07-screen-context"
+    },
+    {
+      "at": "2026-06-11T05:46:31.733268Z",
+      "action": "spec locked: 07-screen-context"
+    },
+    {
+      "at": "2026-06-11T05:59:43.557267Z",
+      "action": "set current_phase_status=planned"
+    },
+    {
+      "at": "2026-06-11T05:59:43.564869Z",
+      "action": "plan locked: 07-screen-context (9 tasks across 5 waves)"
+    },
+    {
+      "at": "2026-06-11T06:01:53.634614Z",
+      "action": "plan reviewed: 07-screen-context (0 blocking, 3 flags)"
+    },
+    {
+      "at": "2026-06-11T07:13:02.830579Z",
+      "action": "executed t-1 (Image-bearing ChatMessage + multimodal bodies)"
+    },
+    {
+      "at": "2026-06-11T07:14:03.386766Z",
+      "action": "executed t-2 (supportsImages flag on ProviderType)"
+    },
+    {
+      "at": "2026-06-11T07:18:43.74109Z",
+      "action": "executed t-3 (VISION slot mapping in repo; activation moved to t-6)"
+    },
+    {
+      "at": "2026-06-11T07:30:01.809863Z",
+      "action": "executed t-4 (FOSS OCR engine seam + Tesseract impl)"
+    },
+    {
+      "at": "2026-06-11T07:32:18.507858Z",
+      "action": "executed t-5 (Screen-context core: extraction + planner)"
+    },
+    {
+      "at": "2026-06-11T07:36:30.093949Z",
+      "action": "executed t-6 (VISION slot UI + activation)"
+    },
+    {
+      "at": "2026-06-11T07:45:29.182618Z",
+      "action": "executed t-7 (ChatViewModel.askAboutScreen)"
+    },
+    {
+      "at": "2026-06-11T07:51:27.596562Z",
+      "action": "executed t-8 (Spoken screen-query trigger + voice routing)"
+    },
+    {
+      "at": "2026-06-11T07:55:33.641879Z",
+      "action": "executed t-9 (Session capture wiring + button)"
+    },
+    {
+      "at": "2026-06-11T07:55:45.053976Z",
+      "action": "set current_phase_status=complete"
+    },
+    {
+      "at": "2026-06-11T07:55:45.060096Z",
+      "action": "phase 07-screen-context executed (9/9 done)"
+    },
+    {
+      "at": "2026-06-11T07:59:19.029855Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-11T07:59:19.035864Z",
+      "action": "verified 07-screen-context: partial (5/6 covered, 1 weak; mutation skipped — Kotlin)"
+    },
+    {
+      "at": "2026-06-11T08:06:25.9244Z",
+      "action": "set version=0.1.5.4"
+    },
+    {
+      "at": "2026-06-11T08:06:25.93149Z",
+      "action": "bump internal 0.1.5.3 → 0.1.5.4 (amend t-9: testable assist-session button)"
+    },
+    {
+      "at": "2026-06-11T08:08:52.120685Z",
+      "action": "amended t-9: extracted testable AssistSessionContent (c-1 button now covered)"
+    },
+    {
+      "at": "2026-06-11T08:10:43.650929Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-11T08:10:43.658104Z",
+      "action": "verified 07-screen-context: pass (6/6 covered; mutation skipped — Kotlin)"
     }
   ]
 }

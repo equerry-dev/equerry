@@ -7,18 +7,9 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.service.voice.VoiceInteractionSession
 import android.view.View
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -38,9 +29,11 @@ import dev.equerry.app.data.ProbeStore
 import dev.equerry.app.data.VoiceSettingsStore
 import dev.equerry.app.providers.ProviderRepository
 import dev.equerry.app.providers.drivers.ChatDriverFactory
+import dev.equerry.app.providers.drivers.ChatImage
 import dev.equerry.app.providers.drivers.ChatSession
+import dev.equerry.app.screencontext.ScreenContext
 import dev.equerry.app.tools.actions.ActionRunner
-import dev.equerry.app.ui.chat.ChatScreen
+import dev.equerry.app.tools.ocr.OcrEngine
 import dev.equerry.app.ui.chat.ChatViewModel
 import dev.equerry.app.ui.theme.EquerryTheme
 import dev.equerry.app.voice.MicPermission
@@ -53,6 +46,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 
 /**
  * The session's lifecycle wiring, extracted from the framework-bound session so it is unit-testable
@@ -105,6 +99,7 @@ class EquerryVoiceInteractionSession(context: Context) :
         fun chatSession(): ChatSession
         fun voiceSettingsStore(): VoiceSettingsStore
         fun actionRunner(): ActionRunner
+        fun ocrEngine(): OcrEngine
     }
 
     private val lifecycleRegistry = LifecycleRegistry(this)
@@ -129,6 +124,7 @@ class EquerryVoiceInteractionSession(context: Context) :
         entry.chatDriverFactory(),
         entry.chatSession(),
         entry.actionRunner(),
+        entry.ocrEngine(),
     )
 
     private val controller: VoiceFlowController = VoiceFlowController(
@@ -139,6 +135,7 @@ class EquerryVoiceInteractionSession(context: Context) :
         scope = scope,
         isMicGranted = { MicPermission.isGranted(context.applicationContext) },
         isChatConfigured = { entry.providerRepository().observeChatMapping().first() != null },
+        screenContext = { currentScreenContext() },
     )
 
     private val coordinator = VoiceSessionCoordinator(
@@ -153,8 +150,35 @@ class EquerryVoiceInteractionSession(context: Context) :
     /** Latest screenshot classification; reset to "blocked" after each capture. */
     private var pendingShot: ScreenshotMeta = AssistAnalyzer.screenshotMeta(null, null)
 
+    /**
+     * The current invocation's screen capture, held ONLY in memory to answer a screen-context query
+     * (c-6, screenshot_retention): the latest assist screenshot and the extracted Assist text. Never
+     * written to ProbeStore/DataStore — the probe log still records dimensions only. Both are replaced
+     * on the next invocation and dropped on destroy.
+     */
+    private var pendingBitmap: Bitmap? = null
+    private var pendingScreenText: String = ""
+
     private val capture = ProbeCapture { record ->
         scope.launch { probeStore.append(record) }
+    }
+
+    /**
+     * Build the [ScreenContext] for a screen-context query from the current in-memory capture: the
+     * Assist-extracted text and the screenshot encoded as PNG bytes (transient request payload). Null
+     * when nothing was captured this invocation, so a spoken query falls through to normal chat.
+     */
+    private fun currentScreenContext(): ScreenContext? {
+        val bitmap = pendingBitmap
+        val image = bitmap?.let {
+            val bytes = ByteArrayOutputStream().use { out ->
+                it.compress(Bitmap.CompressFormat.PNG, 100, out)
+                out.toByteArray()
+            }
+            ChatImage(bytes, "image/png")
+        }
+        if (pendingScreenText.isBlank() && image == null) return null
+        return ScreenContext(text = pendingScreenText, screenshot = image)
     }
 
     override fun onCreate() {
@@ -172,26 +196,18 @@ class EquerryVoiceInteractionSession(context: Context) :
                 EquerryTheme {
                     val state by chatViewModel.state.collectAsState()
                     val guidance by controller.guidance.collectAsState()
-                    Column(Modifier.fillMaxSize()) {
-                        guidance?.let { g ->
-                            Surface(
-                                color = MaterialTheme.colorScheme.errorContainer,
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(
-                                    g.message,
-                                    color = MaterialTheme.colorScheme.onErrorContainer,
-                                    modifier = Modifier.padding(16.dp),
-                                )
-                            }
-                        }
-                        ChatScreen(
-                            state = state,
-                            onInput = chatViewModel::onInputChange,
-                            onSend = chatViewModel::send,
-                            onNewChat = chatViewModel::newChat,
-                        )
-                    }
+                    AssistSessionContent(
+                        state = state,
+                        guidance = guidance,
+                        // A null capture sends an empty context so the user still gets the
+                        // blank-screen note rather than nothing (c-1).
+                        onAskScreen = {
+                            chatViewModel.askAboutScreen(currentScreenContext() ?: ScreenContext("", null))
+                        },
+                        onInput = chatViewModel::onInputChange,
+                        onSend = chatViewModel::send,
+                        onNewChat = chatViewModel::newChat,
+                    )
                 }
             }
         }
@@ -210,8 +226,10 @@ class EquerryVoiceInteractionSession(context: Context) :
 
     override fun onHandleScreenshot(screenshot: Bitmap?) {
         super.onHandleScreenshot(screenshot)
-        // Record dimensions only — never the bitmap (screenshot_retention).
+        // Probe log records dimensions only — never the bitmap (screenshot_retention).
         pendingShot = AssistAnalyzer.screenshotMeta(screenshot?.width, screenshot?.height)
+        // Retain the bitmap transiently (in-memory only) to answer a screen-context query (c-6).
+        pendingBitmap = screenshot
     }
 
     @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
@@ -226,11 +244,16 @@ class EquerryVoiceInteractionSession(context: Context) :
                 AssistAdapter.adapt(node, { it.text }, { it.childCount }, { n, i -> n.getChildAt(i) })
             }
         capture.capture(root, pendingShot.width, pendingShot.height, pkg, System.currentTimeMillis())
+        // Retain the screen's text (in-memory only) for a screen-context query (c-2/c-3 text path).
+        pendingScreenText = AssistAnalyzer.extractText(root)
         pendingShot = AssistAnalyzer.screenshotMeta(null, null)
     }
 
     override fun onDestroy() {
         coordinator.onDestroy()
+        // Drop the transient capture so the screenshot isn't held past the session (c-6).
+        pendingBitmap = null
+        pendingScreenText = ""
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         scope.cancel()
         super.onDestroy()
