@@ -21,6 +21,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -115,6 +116,25 @@ class ProviderEditViewModelTest {
         assertEquals("be brief", profile.systemPrompt)
         assertEquals(0.7, profile.temperature!!, 0.0001)
         assertEquals(256, profile.maxTokens)
+    }
+
+    @Test
+    fun tts_voice_field_is_visible_only_for_tts_capable_types_and_persists_on_save() = runBlocking {
+        // Visibility tracks the type's TTS capability (only OPENAI_COMPATIBLE in v0.1).
+        vm.selectType(ProviderType.OLLAMA)
+        assertFalse(vm.state.value.ttsVoiceFieldVisible)
+        vm.selectType(ProviderType.OPENAI_COMPATIBLE)
+        assertTrue(vm.state.value.ttsVoiceFieldVisible)
+
+        vm.onLabelChange("OpenAI TTS")
+        vm.onBaseUrlChange("https://api.openai.com/v1")
+        vm.onKeyChange("sk-o")
+        vm.onModelChange("tts-1")
+        vm.onTtsVoiceChange("alloy")
+        vm.save()
+
+        val profile = repository.observeProfiles().first { it.isNotEmpty() }.first()
+        assertEquals("alloy", profile.ttsVoice)
     }
 
     @Test
