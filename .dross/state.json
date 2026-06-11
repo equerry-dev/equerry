@@ -2,18 +2,10 @@
   "version": "0.1.5.6",
   "current_milestone": "v0.1",
   "current_phase": "09-release-polish",
-  "current_phase_status": "complete",
-  "last_activity": "2026-06-11T19:32:55.474122Z",
-  "last_action": "phase 09-release-polish executed (9/9 done \u0026 green)",
+  "current_phase_status": "verified",
+  "last_activity": "2026-06-11T19:46:12.478197Z",
+  "last_action": "verified 09-release-polish: partial (6/6 covered, 2 flags; mutation skipped — Kotlin)",
   "history": [
-    {
-      "at": "2026-06-11T08:10:43.650929Z",
-      "action": "set current_phase_status=verified"
-    },
-    {
-      "at": "2026-06-11T08:10:43.658104Z",
-      "action": "verified 07-screen-context: pass (6/6 covered; mutation skipped — Kotlin)"
-    },
     {
       "at": "2026-06-11T08:15:32.379166Z",
       "action": "completed 07-screen-context"
@@ -205,6 +197,14 @@
     {
       "at": "2026-06-11T19:32:55.474122Z",
       "action": "phase 09-release-polish executed (9/9 done \u0026 green)"
+    },
+    {
+      "at": "2026-06-11T19:46:12.472163Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-11T19:46:12.478197Z",
+      "action": "verified 09-release-polish: partial (6/6 covered, 2 flags; mutation skipped — Kotlin)"
     }
   ]
 }

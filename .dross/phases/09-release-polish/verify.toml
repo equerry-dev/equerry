@@ -1,0 +1,101 @@
+[verify]
+  phase = "09-release-polish"
+  generated_at = 2026-06-11T19:43:06.067313Z
+  verdict = "partial"
+
+[summary]
+  mutation_status = "skipped"
+  mutation_score = 0.0
+  mutants_killed = 0
+  mutants_survived = 0
+  mutants_not_covered = 0
+  criteria_total = 6
+  criteria_covered = 6
+  criteria_uncovered = 0
+
+[[criterion]]
+  id = "c-1"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/assistant/DefaultAssistantDetectorTest.kt:is default when stored component is Equerry's own service",
+    "app/src/test/java/dev/equerry/app/assistant/DefaultAssistantDetectorTest.kt:unknown when the setting is blank (never a false IS_DEFAULT)",
+    "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingViewModelTest.kt:set_default_step_is_deferrable_when_not_default_or_unknown",
+    "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingViewModelTest.kt:on_resume_refresh_clears_a_stale_not_default",
+    "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingViewModelTest.kt:set_default_launches_the_voice_input_settings_intent",
+  ]
+  notes = "Tri-state detection (IS_DEFAULT/NOT_DEFAULT/UNKNOWN, never a false positive), the deferrable set-default step, ON_RESUME re-query (reflects state on return), and the ACTION_VOICE_INPUT_SETTINGS launch are each asserted. Also confirmed live on a Fairphone 5."
+
+[[criterion]]
+  id = "c-2"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingViewModelTest.kt:completion_does_not_flip_before_chat_is_mapped",
+    "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingViewModelTest.kt:completion_flips_once_chat_is_mapped",
+    "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingNavTest.kt:setup_banner_shows_while_chat_is_unmapped",
+  ]
+  notes = "The soft gate is the breaking surface: completed never flips without a non-null CHAT mapping and flips once one exists. Banner tracks the same signal."
+
+[[criterion]]
+  id = "c-3"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/data/OnboardingStoreTest.kt:fresh_store_is_not_completed",
+    "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingNavTest.kt:an_unonboarded_user_starts_on_onboarding",
+    "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingNavTest.kt:a_completed_user_never_lands_on_onboarding",
+    "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingNavTest.kt:onboarding_is_re_enterable_from_home",
+    "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingViewModelTest.kt:dismiss_leaves_setup_pending_and_not_completed",
+  ]
+  notes = "First-run (fresh store false), never-blocks-configured-user (completed user starts on HOME), and re-entry from HOME are each asserted; the missing-key=false default is the key guard against suppressing onboarding for new installs."
+
+[[criterion]]
+  id = "c-4"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/metadata/FastlaneMetadataTest.kt:title_is_within_the_play_cap",
+    "app/src/test/java/dev/equerry/app/metadata/FastlaneMetadataTest.kt:changelog_for_version_code_1_is_present",
+    "app/src/test/java/dev/equerry/app/metadata/FastlaneMetadataTest.kt:full_description_carries_the_funding_donate_links",
+    "app/src/test/java/dev/equerry/app/metadata/FastlaneMetadataTest.kt:at_least_one_phone_screenshot_is_present",
+  ]
+  notes = "Fastlane tree (title/short/full/changelog/donate links/screenshots) validated structurally. Caveat: graphics are placeholders (see FLAG)."
+
+[[criterion]]
+  id = "c-5"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/metadata/FastlaneMetadataTest.kt:short_description_is_within_the_play_cap",
+    "app/src/test/java/dev/equerry/app/metadata/FastlaneMetadataTest.kt:full_description_is_within_the_play_cap",
+    "app/src/test/java/dev/equerry/app/metadata/FastlaneMetadataTest.kt:icon_and_feature_graphic_are_present",
+  ]
+  notes = "Single canonical tree feeds Play too; Play caps (title<=30, short<=80, full<=4000) are the binding limits and are asserted, plus icon + feature graphic presence. Caveat: graphics are placeholders (see FLAG)."
+
+[[criterion]]
+  id = "c-6"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/release/ReleaseBuildConfigTest.kt:release_is_not_debuggable",
+    "app/src/test/java/dev/equerry/app/release/ReleaseBuildConfigTest.kt:release_enables_minify_and_shrink",
+    "app/src/test/java/dev/equerry/app/release/ReleaseBuildConfigTest.kt:version_and_application_id_are_pinned",
+    "app/src/test/java/dev/equerry/app/release/ReleaseBuildConfigTest.kt:proguard_keeps_the_voice_interaction_service",
+    "app/src/test/java/dev/equerry/app/release/NoCommittedSecretTest.kt:keystore_properties_is_gitignored",
+  ]
+  notes = "Structural guards over debuggable/minify/version/proguard-keeps and the no-secret-in-repo signing config. Substantiated by a live `assembleRelease` (BUILD SUCCESSFUL, 35M unsigned APK; R8 + keep-rules intact). Caveat: no automated regression test runs assembleRelease (see FLAG)."
+
+[[finding]]
+  severity = "FLAG"
+  text = "c-4/c-5: store graphics (icon, featureGraphic, 2 screenshots) are generated PLACEHOLDERS — they satisfy the file-presence lint but must be replaced with real hand-captured assets before any F-Droid/Play submission."
+
+[[finding]]
+  severity = "FLAG"
+  text = "c-6: release-build hardening is covered by structural source-text tests and a one-time manual assembleRelease, but no automated test runs assembleRelease, so an R8/packaging regression would not be caught by the unit suite."
+
+[[finding]]
+  severity = "NOTE"
+  text = "Mutation testing skipped — Kotlin has no mutation adapter in dross (all 27 changed files skipped). Verdict is based on criterion coverage alone."
+
+[[finding]]
+  severity = "NOTE"
+  text = "assembleRelease manually verified during this run: BUILD SUCCESSFUL, produced app-release-unsigned.apk (35M); confirms minify + the assistant/Hilt proguard keep-rules do not break R8. Unsigned is expected (no keystore configured locally)."
+
+[[finding]]
+  severity = "NOTE"
+  text = "Full onboarding flow (welcome -> set-default -> map-CHAT -> done -> HOME, no banner once chat mapped) verified live on a Fairphone 5 (Android 15); the detector reported IS_DEFAULT on-device."

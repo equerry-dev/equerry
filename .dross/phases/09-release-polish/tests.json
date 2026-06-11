@@ -1,0 +1,111 @@
+{
+  "phase": "09-release-polish",
+  "generated_at": "2026-06-11T19:43:06.067313Z",
+  "languages": null,
+  "skipped": [
+    {
+      "file": ".gitignore",
+      "reason": "no mutation adapter for .gitignore"
+    },
+    {
+      "file": "app/build.gradle.kts",
+      "reason": "no mutation adapter for .kts"
+    },
+    {
+      "file": "app/proguard-rules.pro",
+      "reason": "no mutation adapter for .pro"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/MainActivity.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/assistant/DefaultAssistantDetector.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/data/OnboardingStore.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/di/PersistenceModule.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/di/RepositoryModule.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/onboarding/OnboardingScreen.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/onboarding/OnboardingViewModel.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/assistant/DefaultAssistantDetectorTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/data/OnboardingStoreTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/metadata/FastlaneMetadataTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/release/NoCommittedSecretTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/release/ReleaseBuildConfigTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingNavTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingViewModelTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "fastlane/metadata/android/en-US/changelogs/1.txt",
+      "reason": "no mutation adapter for .txt"
+    },
+    {
+      "file": "fastlane/metadata/android/en-US/full_description.txt",
+      "reason": "no mutation adapter for .txt"
+    },
+    {
+      "file": "fastlane/metadata/android/en-US/images/featureGraphic.png",
+      "reason": "no mutation adapter for .png"
+    },
+    {
+      "file": "fastlane/metadata/android/en-US/images/icon.png",
+      "reason": "no mutation adapter for .png"
+    },
+    {
+      "file": "fastlane/metadata/android/en-US/images/phoneScreenshots/1.png",
+      "reason": "no mutation adapter for .png"
+    },
+    {
+      "file": "fastlane/metadata/android/en-US/images/phoneScreenshots/2.png",
+      "reason": "no mutation adapter for .png"
+    },
+    {
+      "file": "fastlane/metadata/android/en-US/short_description.txt",
+      "reason": "no mutation adapter for .txt"
+    },
+    {
+      "file": "fastlane/metadata/android/en-US/title.txt",
+      "reason": "no mutation adapter for .txt"
+    },
+    {
+      "file": "keystore.properties.example",
+      "reason": "no mutation adapter for .example"
+    }
+  ]
+}
