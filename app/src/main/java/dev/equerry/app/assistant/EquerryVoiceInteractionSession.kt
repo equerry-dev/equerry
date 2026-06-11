@@ -7,19 +7,9 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.service.voice.VoiceInteractionSession
 import android.view.View
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -44,7 +34,6 @@ import dev.equerry.app.providers.drivers.ChatSession
 import dev.equerry.app.screencontext.ScreenContext
 import dev.equerry.app.tools.actions.ActionRunner
 import dev.equerry.app.tools.ocr.OcrEngine
-import dev.equerry.app.ui.chat.ChatScreen
 import dev.equerry.app.ui.chat.ChatViewModel
 import dev.equerry.app.ui.theme.EquerryTheme
 import dev.equerry.app.voice.MicPermission
@@ -207,51 +196,18 @@ class EquerryVoiceInteractionSession(context: Context) :
                 EquerryTheme {
                     val state by chatViewModel.state.collectAsState()
                     val guidance by controller.guidance.collectAsState()
-                    Column(Modifier.fillMaxSize()) {
-                        guidance?.let { g ->
-                            Surface(
-                                color = MaterialTheme.colorScheme.errorContainer,
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(
-                                    g.message,
-                                    color = MaterialTheme.colorScheme.onErrorContainer,
-                                    modifier = Modifier.padding(16.dp),
-                                )
-                            }
-                        }
-                        // Screen-context note (couldn't read the screen / nothing configured), then drop to chat.
-                        state.screenNote?.let { note ->
-                            Surface(
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(
-                                    note,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    modifier = Modifier.padding(16.dp),
-                                )
-                            }
-                        }
-                        // Ask about the current screen: routes the capture to VISION (or the OCR/CHAT
-                        // fallback). A null capture sends an empty context so the user still gets the
+                    AssistSessionContent(
+                        state = state,
+                        guidance = guidance,
+                        // A null capture sends an empty context so the user still gets the
                         // blank-screen note rather than nothing (c-1).
-                        Button(
-                            onClick = {
-                                chatViewModel.askAboutScreen(currentScreenContext() ?: ScreenContext("", null))
-                            },
-                            enabled = !state.streaming,
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                        ) {
-                            Text("Ask about this screen")
-                        }
-                        ChatScreen(
-                            state = state,
-                            onInput = chatViewModel::onInputChange,
-                            onSend = chatViewModel::send,
-                            onNewChat = chatViewModel::newChat,
-                        )
-                    }
+                        onAskScreen = {
+                            chatViewModel.askAboutScreen(currentScreenContext() ?: ScreenContext("", null))
+                        },
+                        onInput = chatViewModel::onInputChange,
+                        onSend = chatViewModel::send,
+                        onNewChat = chatViewModel::newChat,
+                    )
                 }
             }
         }
