@@ -3,13 +3,9 @@
   "current_milestone": "v0.1",
   "current_phase": "09-release-polish",
   "current_phase_status": "planned",
-  "last_activity": "2026-06-11T14:38:05.481582Z",
-  "last_action": "plan locked (panel): 09-release-polish (9 tasks across 3 waves)",
+  "last_activity": "2026-06-11T14:40:35.660112Z",
+  "last_action": "plan reviewed: 09-release-polish (0 blocking, 4 flags)",
   "history": [
-    {
-      "at": "2026-06-11T07:32:18.507858Z",
-      "action": "executed t-5 (Screen-context core: extraction + planner)"
-    },
     {
       "at": "2026-06-11T07:36:30.093949Z",
       "action": "executed t-6 (VISION slot UI + activation)"
@@ -205,6 +201,10 @@
     {
       "at": "2026-06-11T14:38:05.481582Z",
       "action": "plan locked (panel): 09-release-polish (9 tasks across 3 waves)"
+    },
+    {
+      "at": "2026-06-11T14:40:35.660112Z",
+      "action": "plan reviewed: 09-release-polish (0 blocking, 4 flags)"
     }
   ]
 }
