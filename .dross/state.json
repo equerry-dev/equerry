@@ -2,54 +2,10 @@
   "version": "0.1.5.3",
   "current_milestone": "v0.1",
   "current_phase": "07-screen-context",
-  "current_phase_status": "planned",
-  "last_activity": "2026-06-11T06:01:53.634614Z",
-  "last_action": "plan reviewed: 07-screen-context (0 blocking, 3 flags)",
+  "current_phase_status": "complete",
+  "last_activity": "2026-06-11T07:55:45.060096Z",
+  "last_action": "phase 07-screen-context executed (9/9 done)",
   "history": [
-    {
-      "at": "2026-06-10T14:57:03.772341Z",
-      "action": "executed t-1 (Declare RECORD_AUDIO + mic-permission seam)"
-    },
-    {
-      "at": "2026-06-10T15:00:55.58072Z",
-      "action": "executed t-2 (STT capture behind a recognizer seam)"
-    },
-    {
-      "at": "2026-06-10T15:03:31.693558Z",
-      "action": "executed t-3 (TTS playback behind a speaker seam)"
-    },
-    {
-      "at": "2026-06-10T15:05:34.588219Z",
-      "action": "executed t-4 (Voice settings store)"
-    },
-    {
-      "at": "2026-06-10T15:07:50.020185Z",
-      "action": "executed t-5 (Programmatic send(text) on ChatViewModel)"
-    },
-    {
-      "at": "2026-06-10T15:09:24.508488Z",
-      "action": "executed t-6 (SpeakChunker)"
-    },
-    {
-      "at": "2026-06-10T15:15:45.896805Z",
-      "action": "executed t-9 (Voice settings screen + settings-path mic grant)"
-    },
-    {
-      "at": "2026-06-10T15:21:29.331931Z",
-      "action": "executed t-7 (Voice-flow controller)"
-    },
-    {
-      "at": "2026-06-10T15:28:25.887672Z",
-      "action": "executed t-8 (Concurrency: dismiss + continuous re-arm)"
-    },
-    {
-      "at": "2026-06-10T15:33:30.236442Z",
-      "action": "executed t-11 (Failure routing: single guidance surface)"
-    },
-    {
-      "at": "2026-06-10T16:07:09.473318Z",
-      "action": "set current_phase_status=complete"
-    },
     {
       "at": "2026-06-10T16:07:09.480906Z",
       "action": "phase 05-voice-roundtrip executed (11/11 done)"
@@ -205,6 +161,50 @@
     {
       "at": "2026-06-11T06:01:53.634614Z",
       "action": "plan reviewed: 07-screen-context (0 blocking, 3 flags)"
+    },
+    {
+      "at": "2026-06-11T07:13:02.830579Z",
+      "action": "executed t-1 (Image-bearing ChatMessage + multimodal bodies)"
+    },
+    {
+      "at": "2026-06-11T07:14:03.386766Z",
+      "action": "executed t-2 (supportsImages flag on ProviderType)"
+    },
+    {
+      "at": "2026-06-11T07:18:43.74109Z",
+      "action": "executed t-3 (VISION slot mapping in repo; activation moved to t-6)"
+    },
+    {
+      "at": "2026-06-11T07:30:01.809863Z",
+      "action": "executed t-4 (FOSS OCR engine seam + Tesseract impl)"
+    },
+    {
+      "at": "2026-06-11T07:32:18.507858Z",
+      "action": "executed t-5 (Screen-context core: extraction + planner)"
+    },
+    {
+      "at": "2026-06-11T07:36:30.093949Z",
+      "action": "executed t-6 (VISION slot UI + activation)"
+    },
+    {
+      "at": "2026-06-11T07:45:29.182618Z",
+      "action": "executed t-7 (ChatViewModel.askAboutScreen)"
+    },
+    {
+      "at": "2026-06-11T07:51:27.596562Z",
+      "action": "executed t-8 (Spoken screen-query trigger + voice routing)"
+    },
+    {
+      "at": "2026-06-11T07:55:33.641879Z",
+      "action": "executed t-9 (Session capture wiring + button)"
+    },
+    {
+      "at": "2026-06-11T07:55:45.053976Z",
+      "action": "set current_phase_status=complete"
+    },
+    {
+      "at": "2026-06-11T07:55:45.060096Z",
+      "action": "phase 07-screen-context executed (9/9 done)"
     }
   ]
 }
