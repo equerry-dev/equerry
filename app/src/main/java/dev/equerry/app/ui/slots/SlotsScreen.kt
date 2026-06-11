@@ -55,7 +55,7 @@ fun SlotsRoute(
     viewModel: SlotsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    SlotsScreen(state = state, onMapChat = viewModel::mapChatTo, onAddProvider = onAddProvider)
+    SlotsScreen(state = state, onMap = viewModel::map, onAddProvider = onAddProvider)
 }
 
 private fun iconFor(slot: CapabilitySlot): ImageVector = when (slot) {
@@ -77,19 +77,21 @@ private fun subtitleFor(slot: CapabilitySlot): String = when (slot) {
 }
 
 /**
- * Capability slots. CHAT is the only live slot; the rest render disabled ("SOON").
- * When CHAT is unmapped, a guidance banner points the user to map a provider. Tapping
- * CHAT opens a bottom-sheet picker keyed by profile label.
+ * Capability slots. The active slots (CHAT, VISION) each render a tappable row that opens a
+ * bottom-sheet picker; an active-but-unmapped slot shows its own "No provider mapped" guidance.
+ * When CHAT is unmapped, a top banner points the user to map a provider. The remaining slots
+ * render disabled ("SOON").
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SlotsScreen(
     state: SlotsUiState,
-    onMapChat: (String) -> Unit,
+    onMap: (CapabilitySlot, String) -> Unit,
     onAddProvider: () -> Unit,
 ) {
-    var showPicker by remember { mutableStateOf(false) }
-    val chat = state.chatProfile
+    var pickerSlot by remember { mutableStateOf<CapabilitySlot?>(null) }
+    val activeSlots = state.slots.filter { it.active }
+    val soonSlots = state.slots.filter { !it.active }
 
     Scaffold(
         topBar = {
@@ -110,16 +112,17 @@ fun SlotsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.padding(pad).padding(horizontal = 16.dp),
         ) {
-            if (chat == null) item { UnmappedBanner(onAddProvider) }
+            if (state.chatUnconfigured) item { UnmappedBanner(onAddProvider) }
 
-            item {
+            items(activeSlots) { slot ->
+                val mapped = state.mappedProfile(slot)
                 SlotRow(
-                    slot = CapabilitySlot.CHAT,
-                    icon = iconFor(CapabilitySlot.CHAT),
-                    mappedLabel = chat?.let { "${it.label}  ·  ${it.model}" },
-                    subtitle = subtitleFor(CapabilitySlot.CHAT),
-                    onClick = { showPicker = true },
-                    modifier = Modifier.testTag("chatSlot"),
+                    slot = slot,
+                    icon = iconFor(slot),
+                    mappedLabel = mapped?.let { "${it.label}  ·  ${it.model}" },
+                    subtitle = subtitleFor(slot),
+                    onClick = { pickerSlot = slot },
+                    modifier = Modifier.testTag("${slot.name.lowercase()}Slot"),
                 )
             }
             item {
@@ -130,7 +133,7 @@ fun SlotsScreen(
                     modifier = Modifier.padding(top = 6.dp),
                 )
             }
-            items(CapabilitySlot.entries.filter { !it.active }) { slot ->
+            items(soonSlots) { slot ->
                 SlotRow(
                     slot = slot,
                     icon = iconFor(slot),
@@ -142,14 +145,15 @@ fun SlotsScreen(
         }
     }
 
-    if (showPicker) {
-        ModalBottomSheet(onDismissRequest = { showPicker = false }) {
+    pickerSlot?.let { slot ->
+        ModalBottomSheet(onDismissRequest = { pickerSlot = null }) {
             ProfilePickerSheet(
+                slotName = slot.name,
                 profiles = state.profiles,
-                selectedId = chat?.id,
-                onPick = { onMapChat(it); showPicker = false },
-                onAddProvider = { showPicker = false; onAddProvider() },
-                onCancel = { showPicker = false },
+                selectedId = state.mappedProfile(slot)?.id,
+                onPick = { onMap(slot, it); pickerSlot = null },
+                onAddProvider = { pickerSlot = null; onAddProvider() },
+                onCancel = { pickerSlot = null },
             )
         }
     }
@@ -180,6 +184,7 @@ private fun UnmappedBanner(onAddProvider: () -> Unit) {
 
 @Composable
 private fun ProfilePickerSheet(
+    slotName: String,
     profiles: List<ProviderProfile>,
     selectedId: String?,
     onPick: (String) -> Unit,
@@ -191,7 +196,7 @@ private fun ProfilePickerSheet(
 
     Column(Modifier.padding(horizontal = 8.dp).padding(bottom = 20.dp)) {
         Column(Modifier.padding(start = 14.dp, end = 14.dp, bottom = 12.dp)) {
-            Text("Map the CHAT slot", style = MaterialTheme.typography.titleMedium)
+            Text("Map the $slotName slot", style = MaterialTheme.typography.titleMedium)
             Text("Choose a saved provider profile", style = MaterialTheme.typography.bodyMedium, color = cs.onSurfaceVariant)
         }
 

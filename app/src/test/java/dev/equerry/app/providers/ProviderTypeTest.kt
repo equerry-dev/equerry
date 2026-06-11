@@ -63,9 +63,10 @@ class ProviderTypeTest {
     }
 
     @Test
-    fun only_chat_slot_is_active() {
+    fun chat_and_vision_slots_are_active_and_the_rest_are_not() {
         assertTrue(CapabilitySlot.CHAT.active)
-        val others = CapabilitySlot.entries.filter { it != CapabilitySlot.CHAT }
-        assertTrue(others.none { it.active })
+        assertTrue("VISION is wired by the screen-context phase", CapabilitySlot.VISION.active)
+        val rest = CapabilitySlot.entries.filter { it != CapabilitySlot.CHAT && it != CapabilitySlot.VISION }
+        assertTrue(rest.none { it.active })
     }
 }
