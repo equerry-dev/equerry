@@ -89,6 +89,9 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.security.crypto)
 
+    // OCR (FOSS on-device Tesseract — screen-context fallback engine, via JitPack)
+    implementation(libs.tesseract4android)
+
     // Testing (JVM / Robolectric — run under testDebugUnitTest)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

@@ -16,6 +16,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // JitPack hosts the FOSS Tesseract4Android OCR engine (not on Maven Central). Scoped to
+        // that one group so it can't shadow other dependencies (screen-context fallback_engine).
+        maven {
+            url = uri("https://jitpack.io")
+            content { includeGroup("com.github.adaptech-cz.Tesseract4Android") }
+        }
     }
 }
 
