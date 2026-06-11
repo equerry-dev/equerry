@@ -9,6 +9,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dev.equerry.app.data.OnboardingStore
 import dev.equerry.app.data.ProbeStore
 import dev.equerry.app.data.ProfileStore
 import dev.equerry.app.data.SlotMappingStore
@@ -43,4 +44,9 @@ object PersistenceModule {
     @Singleton
     fun provideVoiceSettingsStore(dataStore: DataStore<Preferences>): VoiceSettingsStore =
         VoiceSettingsStore(dataStore)
+
+    @Provides
+    @Singleton
+    fun provideOnboardingStore(dataStore: DataStore<Preferences>): OnboardingStore =
+        OnboardingStore(dataStore)
 }
