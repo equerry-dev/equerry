@@ -78,10 +78,14 @@ class ProviderTypeTest {
     }
 
     @Test
-    fun chat_and_vision_slots_are_active_and_the_rest_are_not() {
+    fun wired_slots_are_active_and_only_ocr_and_embeddings_are_not() {
         assertTrue(CapabilitySlot.CHAT.active)
         assertTrue("VISION is wired by the screen-context phase", CapabilitySlot.VISION.active)
-        val rest = CapabilitySlot.entries.filter { it != CapabilitySlot.CHAT && it != CapabilitySlot.VISION }
-        assertTrue(rest.none { it.active })
+        assertTrue("STT is wired by the remote-stt-tts phase", CapabilitySlot.STT.active)
+        assertTrue("TTS is wired by the remote-stt-tts phase", CapabilitySlot.TTS.active)
+        // Only OCR and EMBEDDINGS remain coming-soon; if either is activated this fails,
+        // and if STT/TTS regress to inactive the asserts above fail.
+        val inactive = CapabilitySlot.entries.filter { !it.active }
+        assertEquals(listOf(CapabilitySlot.OCR, CapabilitySlot.EMBEDDINGS), inactive)
     }
 }
