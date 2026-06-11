@@ -34,6 +34,18 @@ class ProviderRepository(
             mappedId?.let { id -> profiles.firstOrNull { it.id == id } }
         }
 
+    /** The profile currently mapped to STT, or null if unmapped (or its profile is gone). */
+    fun observeSttMapping(): Flow<ProviderProfile?> =
+        combine(slotMappingStore.mapping(CapabilitySlot.STT), profileStore.profiles()) { mappedId, profiles ->
+            mappedId?.let { id -> profiles.firstOrNull { it.id == id } }
+        }
+
+    /** The profile currently mapped to TTS, or null if unmapped (or its profile is gone). */
+    fun observeTtsMapping(): Flow<ProviderProfile?> =
+        combine(slotMappingStore.mapping(CapabilitySlot.TTS), profileStore.profiles()) { mappedId, profiles ->
+            mappedId?.let { id -> profiles.firstOrNull { it.id == id } }
+        }
+
     suspend fun addProfile(draft: ProfileDraft): ProviderProfile {
         val profile = ProviderProfile(
             id = UUID.randomUUID().toString(),
@@ -45,6 +57,7 @@ class ProviderRepository(
             systemPrompt = draft.systemPrompt.takeIf { it.isNotBlank() },
             temperature = draft.temperature.toDoubleOrNull(),
             maxTokens = draft.maxTokens.toIntOrNull(),
+            ttsVoice = draft.ttsVoice.takeIf { it.isNotBlank() },
         )
         profileStore.save(profileStore.profiles().first() + profile)
         if (draft.key.isNotBlank()) {
@@ -81,6 +94,12 @@ class ProviderRepository(
 
     suspend fun setVisionSlot(profileId: String?) =
         slotMappingStore.setMapping(CapabilitySlot.VISION, profileId)
+
+    suspend fun setSttSlot(profileId: String?) =
+        slotMappingStore.setMapping(CapabilitySlot.STT, profileId)
+
+    suspend fun setTtsSlot(profileId: String?) =
+        slotMappingStore.setMapping(CapabilitySlot.TTS, profileId)
 
     fun keyFor(profileId: String): String? = secretStore.getKey(profileId)
 }

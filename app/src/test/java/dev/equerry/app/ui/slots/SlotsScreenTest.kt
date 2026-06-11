@@ -6,8 +6,10 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import dev.equerry.app.providers.ProviderProfile
 import dev.equerry.app.providers.ProviderType
 import dev.equerry.app.ui.theme.EquerryTheme
@@ -44,9 +46,16 @@ class SlotsScreenTest {
 
         // CHAT active + unmapped, guidance banner present
         compose.onNodeWithText("Map a provider to CHAT").assertIsDisplayed()
-        // VISION is now an active, interactive slot (tagged) — not a "SOON" row.
-        compose.onNodeWithTag("visionSlot").assertExists()
-        // The still-inactive slots render with a SOON pill.
+        // VISION / STT / TTS are now active, interactive slots (tagged) — not "SOON" rows. They sit
+        // below the fold in the test viewport, so scroll the lazy list to each before asserting.
+        val list = compose.onNodeWithTag("slotsList")
+        list.performScrollToNode(hasTestTag("sttSlot"))
+        compose.onNodeWithTag("sttSlot").assertExists()
+        list.performScrollToNode(hasTestTag("ttsSlot"))
+        compose.onNodeWithTag("ttsSlot").assertExists()
+        // OCR/EMBEDDINGS remain coming-soon; scroll to one and assert its SOON pill.
+        list.performScrollToNode(hasTestTag("ocrSlot"))
+        compose.onNodeWithTag("ocrSlot").assertExists()
         compose.onAllNodesWithText("SOON").onFirst().assertExists()
     }
 
