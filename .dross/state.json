@@ -1,19 +1,9 @@
 {
   "version": "0.1.5.3",
   "current_milestone": "v0.1",
-  "current_phase": "06-tools-actions",
-  "current_phase_status": "verified",
-  "last_activity": "2026-06-11T05:16:52.195349Z",
-  "last_action": "verified 06-tools-actions: pass (6/6 covered; mutation skipped — Kotlin)",
+  "last_activity": "2026-06-11T05:23:13.176305Z",
+  "last_action": "completed 06-tools-actions",
   "history": [
-    {
-      "at": "2026-06-10T13:11:20.080714Z",
-      "action": "shipped 04-chat-drivers → https://github.com/equerry-dev/equerry/pull/3 (merged af22e22, preserve-commit merge)"
-    },
-    {
-      "at": "2026-06-10T13:33:51.400991Z",
-      "action": "created 05-voice-roundtrip"
-    },
     {
       "at": "2026-06-10T13:46:18.494786Z",
       "action": "set current_phase=05-voice-roundtrip"
@@ -205,6 +195,14 @@
     {
       "at": "2026-06-11T05:16:52.195349Z",
       "action": "verified 06-tools-actions: pass (6/6 covered; mutation skipped — Kotlin)"
+    },
+    {
+      "at": "2026-06-11T05:21:37.200244Z",
+      "action": "shipped 06-tools-actions → https://github.com/equerry-dev/equerry/pull/5"
+    },
+    {
+      "at": "2026-06-11T05:23:13.176305Z",
+      "action": "completed 06-tools-actions"
     }
   ]
 }
