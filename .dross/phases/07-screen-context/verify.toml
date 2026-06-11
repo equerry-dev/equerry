@@ -1,0 +1,175 @@
+[verify]
+  phase = "07-screen-context"
+  generated_at = 2026-06-11T07:56:53.233969Z
+  verdict = "partial"
+
+[summary]
+  mutation_status = "skipped"
+  mutation_score = 0.0
+  mutants_killed = 0
+  mutants_survived = 0
+  mutants_not_covered = 0
+  criteria_total = 6
+  criteria_covered = 5
+  criteria_uncovered = 1
+
+[[criterion]]
+  id = "c-1"
+  status = "weak"
+  tests = [
+    "app/src/test/java/dev/equerry/app/voice/ScreenQueryGrammarTest.kt:recognises_screen_referencing_utterances",
+    "app/src/test/java/dev/equerry/app/voice/ScreenQueryGrammarTest.kt:ignores_ordinary_questions",
+    "app/src/test/java/dev/equerry/app/voice/VoiceFlowControllerTest.kt:a_spoken_screen_query_routes_to_ask_about_screen",
+  ]
+  notes = "Spoken-trigger half fully covered (grammar + voice routing). The on-screen 'Ask about this screen' button lives in EquerryVoiceInteractionSession (Compose, framework-bound) — manually verified only; no automated test fails if the button wiring breaks. askAboutScreen itself is covered by c-2/c-3 tests."
+
+[[criterion]]
+  id = "c-2"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:screen_query_with_an_image_capable_vision_sends_the_screenshot",
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:a_vision_capability_error_degrades_to_the_assist_text_path",
+    "app/src/test/java/dev/equerry/app/providers/drivers/ChatRequestBuilderTest.kt:openai_image_message_becomes_a_content_array_with_an_image_url_data_uri",
+    "app/src/test/java/dev/equerry/app/screencontext/ScreenContextPlannerTest.kt:vision_image_capable_with_a_screenshot_sends_the_image",
+  ]
+  notes = "Image-to-multimodal send, capability-error degrade to the Assist-text path, multimodal request body shape, and route selection all tested."
+
+[[criterion]]
+  id = "c-3"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:no_vision_provider_ocrs_the_screenshot_and_sends_text_to_chat",
+    "app/src/test/java/dev/equerry/app/screencontext/ScreenContextPlannerTest.kt:no_vision_but_chat_mapped_routes_through_ocr_then_chat",
+    "app/src/test/java/dev/equerry/app/tools/ocr/TesseractOcrEngineTest.kt:recognise_returns_empty_when_no_trained_model_is_bundled",
+  ]
+  notes = "OCR-text -> CHAT routing and the OCR seam (via a fake) are covered. Real on-device OCR pixel accuracy is native — verified instrumented/manual; the eng.traineddata model is not bundled (see assets/tessdata/README.md)."
+
+[[criterion]]
+  id = "c-4"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/NoAccessibilityServiceTest.kt:no_declared_service_is_an_accessibility_service",
+  ]
+  notes = "Manifest guard asserts no service is guarded by BIND_ACCESSIBILITY_SERVICE (r-01). Screen capture flows only from onHandleAssist/onHandleScreenshot in the VoiceInteractionSession."
+
+[[criterion]]
+  id = "c-5"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:a_blank_capture_posts_the_blank_screen_note_and_calls_no_driver",
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:nothing_configured_posts_the_unconfigured_note",
+    "app/src/test/java/dev/equerry/app/ui/slots/SlotsScreenTest.kt:active_slots_show_guidance_when_unmapped_others_are_coming_soon",
+  ]
+  notes = "Blank-capture note, nothing-configured note (both call no driver), and the VISION-unmapped slot guidance are tested."
+
+[[criterion]]
+  id = "c-6"
+  status = "covered"
+  tests = [
+    "app/src/test/java/dev/equerry/app/ui/chat/ChatViewModelTest.kt:a_screen_query_keeps_text_in_history_never_the_image",
+  ]
+  notes = "Session history retains only the screen TEXT — no retained turn carries image bytes. The session-level transient-only bitmap retention (never written to ProbeStore/DataStore, cleared on destroy) is framework-bound and verified by inspection; ProbeCapture still records dimensions only."
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/build.gradle.kts: no mutation adapter for .kts"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/assistant/AssistAnalyzer.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/CapabilitySlot.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/ProviderType.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/ChatMessage.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/providers/drivers/ChatRequestBuilder.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/screencontext/ScreenContext.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/screencontext/ScreenContextPlanner.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/tools/ocr/OcrEngine.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/tools/ocr/OcrModule.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/tools/ocr/TesseractOcrEngine.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/ui/slots/SlotsScreen.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/ui/slots/SlotsViewModel.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/voice/ScreenQueryGrammar.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/providers/ProviderTypeTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/providers/drivers/ChatRequestBuilderTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped gradle/libs.versions.toml: no mutation adapter for .toml"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped settings.gradle.kts: no mutation adapter for .kts"
+
+[[finding]]
+  severity = "FLAG"
+  text = "c-1: the on-screen 'Ask about this screen' button (EquerryVoiceInteractionSession, Compose) is framework-bound and manually verified only — no automated test fails if its wiring to askAboutScreen breaks. The spoken-trigger half is fully covered."
+
+[[finding]]
+  severity = "NOTE"
+  text = "c-3: real on-device OCR accuracy (TesseractOcrEngine over screen pixels) and the end-to-end screenshot->VISION round-trip are instrumented/manual; the eng.traineddata model is not committed (assets/tessdata/README.md documents adding it). The OCR seam, routing, and no-model degradation are unit-tested."
+
+[[finding]]
+  severity = "NOTE"
+  text = "Mutation efficacy unmeasured: Kotlin has no mutation adapter (status=skipped). Verdict is based on criterion coverage alone, per /dross-verify."
