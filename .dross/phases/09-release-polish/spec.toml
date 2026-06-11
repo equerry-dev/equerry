@@ -1,0 +1,68 @@
+[phase]
+id        = "09-release-polish"
+title     = "release-polish"
+milestone = "v0.1"
+
+[[criteria]]
+id   = "c-1"
+text = "On first launch, onboarding detects whether Equerry is the default assistant; if not, it routes the user to the system assistant-selection screen and reflects the changed state when they return."
+
+[[criteria]]
+id   = "c-2"
+text = "Onboarding guides the user to create a provider profile and map it to the CHAT slot, and is not marked complete until a working CHAT mapping exists."
+
+[[criteria]]
+id   = "c-3"
+text = "Onboarding runs on first run until completed, never blocks an already-configured user, and is re-enterable from settings later."
+
+[[criteria]]
+id   = "c-4"
+text = "The repo ships F-Droid (fastlane-structured) metadata — title, summary, description, changelog, screenshots, donate links — that validates."
+
+[[criteria]]
+id   = "c-5"
+text = "The app ships Google Play store-listing metadata (title, short/full description, graphics) as versioned assets."
+
+[[criteria]]
+id   = "c-6"
+text = "A signed-configurable release build (assembleRelease) produces a shippable artifact with release icon/version naming and no debug-only leftovers."
+
+[[decisions]]
+key    = "onboarding_shape"
+choice = "Multi-step first-run wizard: welcome -> set as default -> add + map a CHAT provider -> done. The set-as-default step is deferrable (system selection can be declined/unavailable); the provider step drives completion."
+why    = "A wizard matches the first-run mental model and isolates each concern; default selection can't be forced, so it must be skippable without dead-ending."
+locked = true
+
+[[decisions]]
+key    = "completion_gate"
+choice = "Soft gate: onboarding is dismissible at any step, but complete status is set only once a working CHAT mapping exists. If dismissed early, a persistent setup entry/banner remains until CHAT is mapped; onboarding is always re-enterable from Settings."
+why    = "A hard gate that traps the user is hostile and hard to test in isolation; tying completion to the CHAT mapping makes c-2/c-3 objective."
+locked = true
+
+[[decisions]]
+key    = "metadata_source"
+choice = "Single canonical tree in fastlane layout (fastlane/metadata/android/). F-Droid consumes it natively; the Play listing derives from the same tree. Screenshots hand-captured for v0.1."
+why    = "One source avoids drift between the two stores; automated screenshotting is premature for a first release."
+locked = true
+
+[[decisions]]
+key    = "release_signing"
+choice = "Release signing key referenced via environment variables / Gradle properties outside the repo (never committed). The release build sets debuggable=false, strips/redacts logging, and stays reproducible-friendly so F-Droid can build and sign independently."
+why    = "Honors r-03 (no secrets in the repo) and F-Droid's independent-signing model."
+locked = true
+
+[[deferred]]
+text = "Automated screenshot / metadata generation pipeline."
+why  = "Hand-capture is sufficient for v0.1."
+
+[[deferred]]
+text = "CI / Play Console publishing automation."
+why  = "Manual upload for the first release."
+
+[[deferred]]
+text = "Localization / translated store listings."
+why  = "English-only for v0.1."
+
+[[deferred]]
+text = "In-app update checks."
+why  = "F-Droid / Play handle app updates."

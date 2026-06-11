@@ -1,21 +1,11 @@
 {
   "version": "0.1.5.6",
   "current_milestone": "v0.1",
-  "last_activity": "2026-06-11T12:46:54.418715Z",
-  "last_action": "completed 08-remote-stt-tts",
+  "current_phase": "09-release-polish",
+  "current_phase_status": "created",
+  "last_activity": "2026-06-11T13:19:40.354062Z",
+  "last_action": "spec locked: 09-release-polish",
   "history": [
-    {
-      "at": "2026-06-11T06:01:53.634614Z",
-      "action": "plan reviewed: 07-screen-context (0 blocking, 3 flags)"
-    },
-    {
-      "at": "2026-06-11T07:13:02.830579Z",
-      "action": "executed t-1 (Image-bearing ChatMessage + multimodal bodies)"
-    },
-    {
-      "at": "2026-06-11T07:14:03.386766Z",
-      "action": "executed t-2 (supportsImages flag on ProviderType)"
-    },
     {
       "at": "2026-06-11T07:18:43.74109Z",
       "action": "executed t-3 (VISION slot mapping in repo; activation moved to t-6)"
@@ -203,6 +193,18 @@
     {
       "at": "2026-06-11T12:46:54.418715Z",
       "action": "completed 08-remote-stt-tts"
+    },
+    {
+      "at": "2026-06-11T13:02:02.333786Z",
+      "action": "created 09-release-polish"
+    },
+    {
+      "at": "2026-06-11T13:19:40.347177Z",
+      "action": "set current_phase=09-release-polish"
+    },
+    {
+      "at": "2026-06-11T13:19:40.354062Z",
+      "action": "spec locked: 09-release-polish"
     }
   ]
 }
