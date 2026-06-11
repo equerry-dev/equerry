@@ -23,6 +23,8 @@ android {
 
     buildTypes {
         release {
+            // Explicit: no debug leftovers in a shippable build (c-6). Guarded by ReleaseBuildConfigTest.
+            isDebuggable = false
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
