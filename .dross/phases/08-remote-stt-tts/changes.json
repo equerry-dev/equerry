@@ -12,6 +12,15 @@
       "completed_at": "2026-06-11T12:33:54.402669Z",
       "notes": "quick: wire consented system-engine fallback into production"
     },
+    "quick-6": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt",
+        "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditViewModelTest.kt"
+      ],
+      "commit": "d4c9064",
+      "completed_at": "2026-06-11T12:39:05.441173Z",
+      "notes": "quick: add TTS voice field to the provider edit form"
+    },
     "t-1": {
       "files": [
         "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",

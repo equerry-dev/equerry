@@ -1,19 +1,11 @@
 {
-  "version": "0.1.5.5",
+  "version": "0.1.5.6",
   "current_milestone": "v0.1",
   "current_phase": "08-remote-stt-tts",
   "current_phase_status": "verified",
-  "last_activity": "2026-06-11T12:33:54.409318Z",
-  "last_action": "quick: wire consented system-engine fallback into production",
+  "last_activity": "2026-06-11T12:39:05.447953Z",
+  "last_action": "quick: add TTS voice field to the provider edit form",
   "history": [
-    {
-      "at": "2026-06-11T05:33:44.954682Z",
-      "action": "created 07-screen-context"
-    },
-    {
-      "at": "2026-06-11T05:46:31.725964Z",
-      "action": "set current_phase=07-screen-context"
-    },
     {
       "at": "2026-06-11T05:46:31.733268Z",
       "action": "spec locked: 07-screen-context"
@@ -205,6 +197,14 @@
     {
       "at": "2026-06-11T12:33:54.409318Z",
       "action": "quick: wire consented system-engine fallback into production"
+    },
+    {
+      "at": "2026-06-11T12:39:05.433217Z",
+      "action": "bump internal 0.1.5.5 → 0.1.5.6"
+    },
+    {
+      "at": "2026-06-11T12:39:05.447953Z",
+      "action": "quick: add TTS voice field to the provider edit form"
     }
   ]
 }
