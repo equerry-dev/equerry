@@ -92,6 +92,10 @@ dependencies {
     // OCR (FOSS on-device Tesseract — screen-context fallback engine, via JitPack)
     implementation(libs.tesseract4android)
 
+    // Audio playback (remote TTS clip playback — phase 08)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.common)
+
     // Testing (JVM / Robolectric — run under testDebugUnitTest)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

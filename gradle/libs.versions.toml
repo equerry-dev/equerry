@@ -21,6 +21,8 @@ securityCrypto = "1.1.0-alpha06"
 
 tesseract4android = "4.8.0"
 
+media3 = "1.5.1"
+
 navigationCompose = "2.8.5"
 coroutines = "1.9.0"
 
@@ -68,6 +70,10 @@ androidx-security-crypto = { group = "androidx.security", name = "security-crypt
 
 # OCR (FOSS on-device Tesseract — screen-context fallback engine, via JitPack)
 tesseract4android = { group = "com.github.adaptech-cz.Tesseract4Android", name = "tesseract4android", version.ref = "tesseract4android" }
+
+# Audio playback (remote TTS clip playback — phase 08)
+androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+androidx-media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
