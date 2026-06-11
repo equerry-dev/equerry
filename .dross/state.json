@@ -2,54 +2,10 @@
   "version": "0.1.5.6",
   "current_milestone": "v0.1",
   "current_phase": "09-release-polish",
-  "current_phase_status": "planned",
-  "last_activity": "2026-06-11T14:40:35.660112Z",
-  "last_action": "plan reviewed: 09-release-polish (0 blocking, 4 flags)",
+  "current_phase_status": "complete",
+  "last_activity": "2026-06-11T19:32:55.474122Z",
+  "last_action": "phase 09-release-polish executed (9/9 done \u0026 green)",
   "history": [
-    {
-      "at": "2026-06-11T07:36:30.093949Z",
-      "action": "executed t-6 (VISION slot UI + activation)"
-    },
-    {
-      "at": "2026-06-11T07:45:29.182618Z",
-      "action": "executed t-7 (ChatViewModel.askAboutScreen)"
-    },
-    {
-      "at": "2026-06-11T07:51:27.596562Z",
-      "action": "executed t-8 (Spoken screen-query trigger + voice routing)"
-    },
-    {
-      "at": "2026-06-11T07:55:33.641879Z",
-      "action": "executed t-9 (Session capture wiring + button)"
-    },
-    {
-      "at": "2026-06-11T07:55:45.053976Z",
-      "action": "set current_phase_status=complete"
-    },
-    {
-      "at": "2026-06-11T07:55:45.060096Z",
-      "action": "phase 07-screen-context executed (9/9 done)"
-    },
-    {
-      "at": "2026-06-11T07:59:19.029855Z",
-      "action": "set current_phase_status=verified"
-    },
-    {
-      "at": "2026-06-11T07:59:19.035864Z",
-      "action": "verified 07-screen-context: partial (5/6 covered, 1 weak; mutation skipped — Kotlin)"
-    },
-    {
-      "at": "2026-06-11T08:06:25.9244Z",
-      "action": "set version=0.1.5.4"
-    },
-    {
-      "at": "2026-06-11T08:06:25.93149Z",
-      "action": "bump internal 0.1.5.3 → 0.1.5.4 (amend t-9: testable assist-session button)"
-    },
-    {
-      "at": "2026-06-11T08:08:52.120685Z",
-      "action": "amended t-9: extracted testable AssistSessionContent (c-1 button now covered)"
-    },
     {
       "at": "2026-06-11T08:10:43.650929Z",
       "action": "set current_phase_status=verified"
@@ -205,6 +161,50 @@
     {
       "at": "2026-06-11T14:40:35.660112Z",
       "action": "plan reviewed: 09-release-polish (0 blocking, 4 flags)"
+    },
+    {
+      "at": "2026-06-11T15:10:52.825208Z",
+      "action": "executed t-1 (Default-assistant detector with tri-state)"
+    },
+    {
+      "at": "2026-06-11T15:12:06.417474Z",
+      "action": "executed t-2 (First-run onboarding-complete store)"
+    },
+    {
+      "at": "2026-06-11T15:14:02.482797Z",
+      "action": "executed t-3 (Hardened release build type + proguard keeps)"
+    },
+    {
+      "at": "2026-06-11T15:15:33.470031Z",
+      "action": "executed t-5 (Fastlane metadata text tree with lint)"
+    },
+    {
+      "at": "2026-06-11T16:26:37.369394Z",
+      "action": "executed t-4 (Release signing from env, never committed)"
+    },
+    {
+      "at": "2026-06-11T16:30:09.255282Z",
+      "action": "executed t-6 (Onboarding state machine + soft gate)"
+    },
+    {
+      "at": "2026-06-11T16:32:04.807068Z",
+      "action": "executed t-7 (Fastlane screenshots + Play graphics; PLACEHOLDER assets)"
+    },
+    {
+      "at": "2026-06-11T19:11:06.698988Z",
+      "action": "executed t-8 (Onboarding UI into nav + re-entry + banner)"
+    },
+    {
+      "at": "2026-06-11T19:13:23.040769Z",
+      "action": "executed t-9 (Default-step intent + return-state refresh)"
+    },
+    {
+      "at": "2026-06-11T19:32:55.466843Z",
+      "action": "set current_phase_status=complete"
+    },
+    {
+      "at": "2026-06-11T19:32:55.474122Z",
+      "action": "phase 09-release-polish executed (9/9 done \u0026 green)"
     }
   ]
 }

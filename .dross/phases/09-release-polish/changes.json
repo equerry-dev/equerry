@@ -1,0 +1,89 @@
+{
+  "phase": "09-release-polish",
+  "tasks": {
+    "t-1": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/assistant/DefaultAssistantDetector.kt",
+        "app/src/main/java/dev/equerry/app/di/RepositoryModule.kt",
+        "app/src/test/java/dev/equerry/app/assistant/DefaultAssistantDetectorTest.kt"
+      ],
+      "commit": "33a2abb",
+      "completed_at": "2026-06-11T15:10:52.807525Z"
+    },
+    "t-2": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/data/OnboardingStore.kt",
+        "app/src/main/java/dev/equerry/app/di/PersistenceModule.kt",
+        "app/src/test/java/dev/equerry/app/data/OnboardingStoreTest.kt"
+      ],
+      "commit": "c9ac449",
+      "completed_at": "2026-06-11T15:12:06.403108Z"
+    },
+    "t-3": {
+      "files": [
+        "app/build.gradle.kts",
+        "app/proguard-rules.pro",
+        "app/src/test/java/dev/equerry/app/release/ReleaseBuildConfigTest.kt"
+      ],
+      "commit": "7668107",
+      "completed_at": "2026-06-11T15:14:02.468632Z"
+    },
+    "t-4": {
+      "files": [
+        "app/build.gradle.kts",
+        ".gitignore",
+        "keystore.properties.example",
+        "app/src/test/java/dev/equerry/app/release/NoCommittedSecretTest.kt"
+      ],
+      "commit": "db99f9c",
+      "completed_at": "2026-06-11T16:26:37.357516Z"
+    },
+    "t-5": {
+      "files": [
+        "fastlane/metadata/android/en-US/title.txt",
+        "fastlane/metadata/android/en-US/short_description.txt",
+        "fastlane/metadata/android/en-US/full_description.txt",
+        "fastlane/metadata/android/en-US/changelogs/1.txt",
+        "app/src/test/java/dev/equerry/app/metadata/FastlaneMetadataTest.kt"
+      ],
+      "commit": "2928b0e",
+      "completed_at": "2026-06-11T15:15:33.455962Z"
+    },
+    "t-6": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/onboarding/OnboardingViewModel.kt",
+        "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingViewModelTest.kt"
+      ],
+      "commit": "4946334",
+      "completed_at": "2026-06-11T16:30:09.239806Z"
+    },
+    "t-7": {
+      "files": [
+        "fastlane/metadata/android/en-US/images/phoneScreenshots/1.png",
+        "fastlane/metadata/android/en-US/images/phoneScreenshots/2.png",
+        "fastlane/metadata/android/en-US/images/icon.png",
+        "fastlane/metadata/android/en-US/images/featureGraphic.png",
+        "app/src/test/java/dev/equerry/app/metadata/FastlaneMetadataTest.kt"
+      ],
+      "commit": "f5784d6",
+      "completed_at": "2026-06-11T16:32:04.794328Z"
+    },
+    "t-8": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/MainActivity.kt",
+        "app/src/main/java/dev/equerry/app/ui/onboarding/OnboardingScreen.kt",
+        "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingNavTest.kt"
+      ],
+      "commit": "e4938f3",
+      "completed_at": "2026-06-11T19:11:06.685142Z"
+    },
+    "t-9": {
+      "files": [
+        "app/src/main/java/dev/equerry/app/ui/onboarding/OnboardingScreen.kt",
+        "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingViewModelTest.kt"
+      ],
+      "commit": "422cce4",
+      "completed_at": "2026-06-11T19:13:23.024752Z"
+    }
+  }
+}
