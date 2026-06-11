@@ -2,22 +2,10 @@
   "version": "0.1.5.3",
   "current_milestone": "v0.1",
   "current_phase": "07-screen-context",
-  "current_phase_status": "created",
-  "last_activity": "2026-06-11T05:46:31.733268Z",
-  "last_action": "spec locked: 07-screen-context",
+  "current_phase_status": "planned",
+  "last_activity": "2026-06-11T06:01:53.634614Z",
+  "last_action": "plan reviewed: 07-screen-context (0 blocking, 3 flags)",
   "history": [
-    {
-      "at": "2026-06-10T14:23:01.527311Z",
-      "action": "plan locked (panel): 05-voice-roundtrip (11 tasks across 4 waves)"
-    },
-    {
-      "at": "2026-06-10T14:35:55.194839Z",
-      "action": "plan reviewed: 05-voice-roundtrip (0 blocking after amendment, 5 flags in REVIEW.md)"
-    },
-    {
-      "at": "2026-06-10T14:43:48.113806Z",
-      "action": "set version=0.1.5.0"
-    },
     {
       "at": "2026-06-10T14:57:03.772341Z",
       "action": "executed t-1 (Declare RECORD_AUDIO + mic-permission seam)"
@@ -205,6 +193,18 @@
     {
       "at": "2026-06-11T05:46:31.733268Z",
       "action": "spec locked: 07-screen-context"
+    },
+    {
+      "at": "2026-06-11T05:59:43.557267Z",
+      "action": "set current_phase_status=planned"
+    },
+    {
+      "at": "2026-06-11T05:59:43.564869Z",
+      "action": "plan locked: 07-screen-context (9 tasks across 5 waves)"
+    },
+    {
+      "at": "2026-06-11T06:01:53.634614Z",
+      "action": "plan reviewed: 07-screen-context (0 blocking, 3 flags)"
     }
   ]
 }

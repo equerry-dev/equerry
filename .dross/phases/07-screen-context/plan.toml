@@ -1,0 +1,190 @@
+[phase]
+id = "07-screen-context"
+
+[[task]]
+id            = "t-1"
+wave          = 1
+title         = "Image-bearing ChatMessage + multimodal bodies"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/drivers/ChatMessage.kt",
+  "app/src/main/java/dev/equerry/app/providers/drivers/ChatRequestBuilder.kt",
+]
+description   = """
+Extend ChatMessage to optionally carry an image part (bytes + mime). Extend
+ChatRequestBuilder to emit the multimodal content array per type; text-only
+messages keep the current plain-string content.
+"""
+covers        = ["c-2"]
+test_contract = [
+  "if the OpenAI builder drops image support, the content for an image message is no longer an array containing an image_url base64 data URI and the test fails",
+  "if the Anthropic builder drops image support, the image message no longer produces a type:image block with source.data and the test fails",
+  "if a text-only message is wrongly wrapped in a content array (regression), the plain-string-content assertion fails for all three builders",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-2"
+wave          = 1
+title         = "supportsImages flag on ProviderType"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/ProviderType.kt",
+]
+description   = """
+Add a best-effort supportsImages flag per provider type, mirroring supportsTools.
+"""
+covers        = ["c-2"]
+test_contract = [
+  "if supportsImages is mis-set, the test asserting ANTHROPIC/OPENAI_COMPATIBLE/OPENROUTER=true and OLLAMA=false fails",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-3"
+wave          = 1
+title         = "VISION slot mapping in repo + activate slot"
+files         = [
+  "app/src/main/java/dev/equerry/app/providers/ProviderRepository.kt",
+  "app/src/main/java/dev/equerry/app/providers/CapabilitySlot.kt",
+]
+description   = """
+Add observeVisionMapping/setVisionSlot to ProviderRepository and flip
+CapabilitySlot.VISION.active to true. Delete-cascade already covers all slots.
+"""
+covers        = ["c-2", "c-5"]
+test_contract = [
+  "if setVisionSlot/observeVisionMapping wiring breaks, the round-trip test (set id -> observe that profile; set null -> clear) fails",
+  "if the VISION mapping is not cleared when its profile is deleted, the cascade test fails",
+  "if CapabilitySlot.VISION.active stays false, the activation assertion fails",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-4"
+wave          = 1
+title         = "FOSS OCR engine seam + Tesseract impl"
+files         = [
+  "gradle/libs.versions.toml",
+  "app/build.gradle.kts",
+  "app/src/main/java/dev/equerry/app/tools/ocr/OcrEngine.kt",
+  "app/src/main/java/dev/equerry/app/tools/ocr/TesseractOcrEngine.kt",
+  "app/src/main/java/dev/equerry/app/tools/ocr/OcrModule.kt",
+]
+description   = """
+Add a FOSS on-device OCR dependency (Tesseract-class) + bundled traineddata asset.
+Define an OcrEngine interface (the only OCR entry point) with a Tesseract-backed
+impl, Hilt-bound so the orchestration in t-7 can substitute a fake.
+"""
+covers        = ["c-3"]
+test_contract = [
+  "if the OcrEngine Hilt binding is removed, the DI graph no longer provides an OcrEngine to screen-context orchestration and the graph/binding test fails",
+  "if the bundled traineddata asset is missing, the instrumented TesseractOcrEngine.recognise test over a known fixture bitmap returns empty and fails (on-device; native engine not JVM-unit-testable)",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-5"
+wave          = 2
+depends_on    = ["t-2"]
+title         = "Screen-context core: Assist text extraction + planner"
+files         = [
+  "app/src/main/java/dev/equerry/app/assistant/AssistAnalyzer.kt",
+  "app/src/main/java/dev/equerry/app/screencontext/ScreenContext.kt",
+  "app/src/main/java/dev/equerry/app/screencontext/ScreenContextPlanner.kt",
+]
+description   = """
+Add extractText(root) to AssistAnalyzer (join non-blank text nodes in order).
+Define ScreenContext (text + optional image bytes, never persisted) and a pure
+ScreenContextPlanner that picks the path from the captured context + mappings.
+"""
+covers        = ["c-2", "c-3", "c-5"]
+test_contract = [
+  "if extractText mis-walks the tree, the 3-non-blank-node join-in-order test (and null/empty -> empty) fails",
+  "if the planner mis-routes, the cases fail: VISION+image-capable+screenshot -> ImageToVision; VISION+(no screenshot OR text-only) -> TextToVision; no VISION but CHAT -> OcrThenChat; no text AND no screenshot -> BlankScreen; neither mapped -> Unconfigured",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-6"
+wave          = 2
+depends_on    = ["t-3"]
+title         = "VISION slot UI - picker + unconfigured guidance"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/slots/SlotsViewModel.kt",
+  "app/src/main/java/dev/equerry/app/ui/slots/SlotsScreen.kt",
+]
+description   = """
+Generalise SlotsViewModel/SlotsScreen to observe and map the VISION slot. Show the
+VISION picker when active and a "not configured" guidance state when unmapped.
+"""
+covers        = ["c-5"]
+test_contract = [
+  "if VISION mapping is not wired, the test asserting a VISION picker selection calls setVisionSlot(id) fails",
+  "if the unmapped-VISION guidance regresses to the disabled 'SOON' state, the unconfigured-state test fails",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-7"
+wave          = 3
+depends_on    = ["t-1", "t-3", "t-4", "t-5"]
+title         = "ChatViewModel.askAboutScreen - send, retain text, degrade"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/chat/ChatViewModel.kt",
+]
+description   = """
+Add askAboutScreen(screenContext): run the planner, send the chosen image/text
+message through the driver, retain ONLY the screen's text representation in
+ChatSession, degrade to the text path on a VISION capability error, and surface the
+blank-screen note / unconfigured guidance.
+"""
+covers        = ["c-2", "c-3", "c-5", "c-6"]
+test_contract = [
+  "if the image path breaks, the test asserting an image-capable VISION mapping + screenshot sends a driver message carrying the image bytes fails",
+  "if degrade-on-error breaks, the test where a VISION capability error retries once with Assist text and no image fails",
+  "if the fallback breaks, the test where no VISION mapping routes through the OcrEngine and sends recognised text to CHAT fails",
+  "if the bitmap leaks into history, the assertion that ChatSession.turns holds the screen TEXT and never the image bytes fails (c-6)",
+  "if guidance breaks, the blank-capture-posts-note and nothing-configured-posts-guidance tests fail",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-8"
+wave          = 4
+depends_on    = ["t-7"]
+title         = "Spoken screen-query trigger + voice routing"
+files         = [
+  "app/src/main/java/dev/equerry/app/voice/ScreenQueryGrammar.kt",
+  "app/src/main/java/dev/equerry/app/voice/VoiceFlowController.kt",
+]
+description   = """
+Add a narrow ScreenQueryGrammar and route it in VoiceFlowController: a recognised
+screen-query utterance calls askAboutScreen(screenContext) (via an injected
+provider) instead of chat.send. Ordinary questions keep the normal path.
+"""
+covers        = ["c-1"]
+test_contract = [
+  "if the grammar widens/narrows wrongly, the test asserting 'what's on my screen'/'what am I looking at' -> ScreenQuery and an ordinary question -> not-a-screen-query fails",
+  "if routing breaks, the voice-flow test where a recognised screen-query calls askAboutScreen instead of chat.send fails",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-9"
+wave          = 5
+depends_on    = ["t-7", "t-8"]
+title         = "Session capture wiring + Ask-about-this-screen button"
+files         = [
+  "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt",
+]
+description   = """
+Retain the assist screenshot bitmap + extracted Assist text transiently into a
+ScreenContext, add an "Ask about this screen" button that calls askAboutScreen, and
+supply the screenContext provider to VoiceFlowController. Bitmap never persisted.
+"""
+covers        = ["c-1", "c-4", "c-6"]
+test_contract = [
+  "if the bitmap is persisted, the assertion that the session writes the screenshot to no ProbeStore/DataStore (only transient field) fails (c-6)",
+  "if an AccessibilityService is introduced, the manifest test asserting none is declared and screen content comes only from onHandleAssist/onHandleScreenshot fails (c-4)",
+  "if the button is mis-wired, manual verification (assist gesture -> tap 'Ask about this screen' -> answer renders) fails; the askAboutScreen call it makes is covered by t-7",
+]
+status        = "pending"
