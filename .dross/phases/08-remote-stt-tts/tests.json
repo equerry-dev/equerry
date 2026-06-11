@@ -1,6 +1,6 @@
 {
   "phase": "08-remote-stt-tts",
-  "generated_at": "2026-06-11T12:28:03.69921Z",
+  "generated_at": "2026-06-11T12:40:27.533666Z",
   "languages": null,
   "skipped": [
     {
@@ -41,6 +41,10 @@
     },
     {
       "file": "app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt",
       "reason": "no mutation adapter for .kt"
     },
     {
@@ -105,6 +109,10 @@
     },
     {
       "file": "app/src/test/java/dev/equerry/app/providers/drivers/TranscribeRequestBuilderTest.kt",
+      "reason": "no mutation adapter for .kt"
+    },
+    {
+      "file": "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditViewModelTest.kt",
       "reason": "no mutation adapter for .kt"
     },
     {

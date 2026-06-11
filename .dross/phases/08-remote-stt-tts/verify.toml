@@ -1,7 +1,7 @@
 [verify]
   phase = "08-remote-stt-tts"
-  generated_at = 2026-06-11T12:28:03.69921Z
-  verdict = "partial"
+  generated_at = 2026-06-11T12:40:27.533666Z
+  verdict = "pass"
 
 [summary]
   mutation_status = "skipped"
@@ -30,8 +30,9 @@
     "app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt:setTtsSlot_round_trips_through_observeTtsMapping",
     "app/src/test/java/dev/equerry/app/providers/ProviderRepositoryTest.kt:addProfile_carries_the_tts_voice",
     "app/src/test/java/dev/equerry/app/data/ProfileStoreTest.kt:tts_voice_round_trips_across_a_reload",
+    "app/src/test/java/dev/equerry/app/ui/providers/ProviderEditViewModelTest.kt:tts_voice_field_is_visible_only_for_tts_capable_types_and_persists_on_save",
   ]
-  notes = "TTS-slot restart reuses the same SlotMappingStore path proven fresh-repo for STT (c-1); ttsVoice config restart is directly tested over a fresh DataStore plus legacy-decode back-compat."
+  notes = "TTS-slot restart reuses the SlotMappingStore path proven fresh-repo for STT (c-1); the edit form now exposes + persists ttsVoice, and config restart is directly tested over a fresh DataStore plus legacy-decode back-compat."
 
 [[criterion]]
   id = "c-3"
@@ -51,7 +52,7 @@
     "app/src/test/java/dev/equerry/app/voice/RemoteTextToSpeechTest.kt:speak_sentences_posts_per_sentence_and_enqueues_clips_in_order",
     "app/src/test/java/dev/equerry/app/voice/RemoteTextToSpeechTest.kt:production_synth_posts_to_audio_speech_and_omits_a_blank_voice",
   ]
-  notes = "Mapped TTS resolves to the remote engine; remote TTS POSTs per utterance and plays clips in order via the production audio/speech transport."
+  notes = "Mapped TTS resolves to the remote engine; remote TTS POSTs per utterance and plays clips in order via the production audio/speech transport (voice omitted when blank)."
 
 [[criterion]]
   id = "c-5"
@@ -70,18 +71,15 @@
     "app/src/test/java/dev/equerry/app/voice/RemoteSpeechToTextTest.kt:transport_401_yields_terminal_unavailable_error_and_completes",
     "app/src/test/java/dev/equerry/app/voice/RemoteTextToSpeechTest.kt:a_transport_500_surfaces_remote_audio_error_without_throwing",
     "app/src/test/java/dev/equerry/app/voice/VoiceFlowFailureTest.kt:remote_stt_failure_offers_consented_retry_and_uses_system_only_after_invoked",
+    "app/src/test/java/dev/equerry/app/voice/VoiceEngineSelectorTest.kt:is_mapped_predicates_reflect_the_slot_mapping",
     "app/src/test/java/dev/equerry/app/providers/drivers/TranscribeRequestBuilderTest.kt:key_lives_in_the_authorization_header_only_never_in_path_or_form",
     "app/src/test/java/dev/equerry/app/providers/drivers/SpeechRequestBuilderTest.kt:key_lives_in_the_authorization_header_only_never_in_body_or_path",
   ]
-  notes = "Failures surface key-free guidance without crashing/hanging; r-03 enforced at every request surface and in the error-mapping (status/type only, never response body)."
+  notes = "Failures surface key-free guidance without crashing/hanging; the consented system-engine retry is now wired into production (gated by the isSttMapped/isTtsMapped predicates) and never auto-switches. r-03 enforced at every request surface and in error-mapping (status/type only, never response body)."
 
 [[finding]]
-  severity = "FLAG"
-  text = "Consented system-engine retry (locked failover_consented) is implemented and unit-tested in VoiceFlowController, but its fallback params (systemStt/systemTts/isSttRemote) are not passed by ChatScreen or EquerryVoiceInteractionSession — so the 'retry with system engine' affordance is inert in production. c-6 still holds via the base key-free sttError guidance (no crash, no leak); wiring the fallback into the two construction sites is a follow-up quick task."
-
-[[finding]]
-  severity = "FLAG"
-  text = "The ttsVoice profile field is plumbed through the edit ViewModel -> draft -> store -> profile and tested, but no TextField was added to ProviderEditScreen, so a user cannot enter a custom TTS voice via the UI (it defaults to the provider voice). Does not block c-2; follow-up quick task to add the gated form field."
+  severity = "NOTE"
+  text = "mutation skipped: no Kotlin mutation adapter — verdict is based on criterion coverage alone (all 6 covered). Both prior FLAGs (consented-fallback wiring, ttsVoice form field) were resolved by quick tasks 0.1.5.5 and 0.1.5.6."
 
 [[finding]]
   severity = "NOTE"
@@ -122,6 +120,10 @@
 [[finding]]
   severity = "NOTE"
   text = "skipped app/src/main/java/dev/equerry/app/ui/chat/ChatScreen.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/main/java/dev/equerry/app/ui/providers/ProviderEditScreen.kt: no mutation adapter for .kt"
 
 [[finding]]
   severity = "NOTE"
@@ -186,6 +188,10 @@
 [[finding]]
   severity = "NOTE"
   text = "skipped app/src/test/java/dev/equerry/app/providers/drivers/TranscribeRequestBuilderTest.kt: no mutation adapter for .kt"
+
+[[finding]]
+  severity = "NOTE"
+  text = "skipped app/src/test/java/dev/equerry/app/ui/providers/ProviderEditViewModelTest.kt: no mutation adapter for .kt"
 
 [[finding]]
   severity = "NOTE"

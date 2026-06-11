@@ -3,17 +3,9 @@
   "current_milestone": "v0.1",
   "current_phase": "08-remote-stt-tts",
   "current_phase_status": "verified",
-  "last_activity": "2026-06-11T12:39:05.447953Z",
-  "last_action": "quick: add TTS voice field to the provider edit form",
+  "last_activity": "2026-06-11T12:41:32.653846Z",
+  "last_action": "verified 08-remote-stt-tts: pass (6/6 covered; mutation skipped — Kotlin; both flags resolved)",
   "history": [
-    {
-      "at": "2026-06-11T05:46:31.733268Z",
-      "action": "spec locked: 07-screen-context"
-    },
-    {
-      "at": "2026-06-11T05:59:43.557267Z",
-      "action": "set current_phase_status=planned"
-    },
     {
       "at": "2026-06-11T05:59:43.564869Z",
       "action": "plan locked: 07-screen-context (9 tasks across 5 waves)"
@@ -205,6 +197,14 @@
     {
       "at": "2026-06-11T12:39:05.447953Z",
       "action": "quick: add TTS voice field to the provider edit form"
+    },
+    {
+      "at": "2026-06-11T12:41:32.646668Z",
+      "action": "set current_phase_status=verified"
+    },
+    {
+      "at": "2026-06-11T12:41:32.653846Z",
+      "action": "verified 08-remote-stt-tts: pass (6/6 covered; mutation skipped — Kotlin; both flags resolved)"
     }
   ]
 }
