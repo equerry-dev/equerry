@@ -3,9 +3,15 @@ package dev.equerry.app.voice
 /**
  * A single user-facing guidance message for a voice-flow failure. Always key-free (r-03):
  * [message] is built here or copied from an already-redacted ChatError message, never from a raw
- * exception/response. [canOpenSettings] signals the UI may offer a path to app settings.
+ * exception/response. [canOpenSettings] signals the UI may offer a path to app settings;
+ * [canRetryWithSystem] signals a remote-engine failure where the UI may offer a consented retry on
+ * the system STT/TTS engine (locked `failover_consented` — never an automatic switch).
  */
-data class VoiceGuidance(val message: String, val canOpenSettings: Boolean = false)
+data class VoiceGuidance(
+    val message: String,
+    val canOpenSettings: Boolean = false,
+    val canRetryWithSystem: Boolean = false,
+)
 
 /**
  * Builds the one guidance surface for every voice failure mode (c-5), so the wording stays
@@ -36,4 +42,21 @@ object VoiceGuidanceFactory {
 
     /** The provider reply failed mid-stream. [message] is the already-redacted ChatError message. */
     fun replyError(message: String): VoiceGuidance = VoiceGuidance(message)
+
+    /**
+     * A mapped remote STT/TTS provider failed. Message is a fixed template chosen by error TYPE
+     * (never copying a response body — r-03), distinct per [RemoteAudioError]. Flags
+     * [VoiceGuidance.canRetryWithSystem] so the UI can offer a consented retry on the system engine.
+     */
+    fun remoteEngineFailed(error: RemoteAudioError): VoiceGuidance {
+        val message = when (error) {
+            RemoteAudioError.Auth ->
+                "The remote speech provider rejected the request — check its API key, or retry with the system engine."
+            RemoteAudioError.Network ->
+                "Couldn't reach the remote speech provider — check your connection, or retry with the system engine."
+            RemoteAudioError.Unavailable ->
+                "The remote speech provider is unavailable right now — retry with the system engine, or try again later."
+        }
+        return VoiceGuidance(message, canRetryWithSystem = true)
+    }
 }
