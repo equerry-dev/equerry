@@ -76,10 +76,11 @@
     },
     "t-9": {
       "files": [
+        "app/src/main/java/dev/equerry/app/assistant/AssistSessionContent.kt",
         "app/src/main/java/dev/equerry/app/assistant/EquerryVoiceInteractionSession.kt"
       ],
-      "commit": "452fbb6",
-      "completed_at": "2026-06-11T07:55:33.62935Z"
+      "commit": "eed0751",
+      "completed_at": "2026-06-11T08:08:52.104468Z"
     }
   }
 }

@@ -1,23 +1,11 @@
 {
-  "version": "0.1.5.3",
+  "version": "0.1.5.4",
   "current_milestone": "v0.1",
   "current_phase": "07-screen-context",
   "current_phase_status": "verified",
-  "last_activity": "2026-06-11T07:59:19.035864Z",
-  "last_action": "verified 07-screen-context: partial (5/6 covered, 1 weak; mutation skipped — Kotlin)",
+  "last_activity": "2026-06-11T08:08:52.120685Z",
+  "last_action": "amended t-9: extracted testable AssistSessionContent (c-1 button now covered)",
   "history": [
-    {
-      "at": "2026-06-10T16:17:26.747549Z",
-      "action": "verified 05-voice-roundtrip: pass (5/5 covered, mutation skipped)"
-    },
-    {
-      "at": "2026-06-10T16:21:59.166696Z",
-      "action": "shipped 05-voice-roundtrip → https://github.com/equerry-dev/equerry/pull/4"
-    },
-    {
-      "at": "2026-06-10T16:43:04.093955Z",
-      "action": "completed 05-voice-roundtrip"
-    },
     {
       "at": "2026-06-10T17:28:39.546772Z",
       "action": "bump internal 0.1.5.0 → 0.1.5.1"
@@ -205,6 +193,18 @@
     {
       "at": "2026-06-11T07:59:19.035864Z",
       "action": "verified 07-screen-context: partial (5/6 covered, 1 weak; mutation skipped — Kotlin)"
+    },
+    {
+      "at": "2026-06-11T08:06:25.9244Z",
+      "action": "set version=0.1.5.4"
+    },
+    {
+      "at": "2026-06-11T08:06:25.93149Z",
+      "action": "bump internal 0.1.5.3 → 0.1.5.4 (amend t-9: testable assist-session button)"
+    },
+    {
+      "at": "2026-06-11T08:08:52.120685Z",
+      "action": "amended t-9: extracted testable AssistSessionContent (c-1 button now covered)"
     }
   ]
 }
