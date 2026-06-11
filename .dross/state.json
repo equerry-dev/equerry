@@ -2,18 +2,10 @@
   "version": "0.1.5.6",
   "current_milestone": "v0.1",
   "current_phase": "09-release-polish",
-  "current_phase_status": "created",
-  "last_activity": "2026-06-11T13:19:40.354062Z",
-  "last_action": "spec locked: 09-release-polish",
+  "current_phase_status": "planned",
+  "last_activity": "2026-06-11T14:38:05.481582Z",
+  "last_action": "plan locked (panel): 09-release-polish (9 tasks across 3 waves)",
   "history": [
-    {
-      "at": "2026-06-11T07:18:43.74109Z",
-      "action": "executed t-3 (VISION slot mapping in repo; activation moved to t-6)"
-    },
-    {
-      "at": "2026-06-11T07:30:01.809863Z",
-      "action": "executed t-4 (FOSS OCR engine seam + Tesseract impl)"
-    },
     {
       "at": "2026-06-11T07:32:18.507858Z",
       "action": "executed t-5 (Screen-context core: extraction + planner)"
@@ -205,6 +197,14 @@
     {
       "at": "2026-06-11T13:19:40.354062Z",
       "action": "spec locked: 09-release-polish"
+    },
+    {
+      "at": "2026-06-11T14:38:05.473218Z",
+      "action": "set current_phase_status=planned"
+    },
+    {
+      "at": "2026-06-11T14:38:05.481582Z",
+      "action": "plan locked (panel): 09-release-polish (9 tasks across 3 waves)"
     }
   ]
 }

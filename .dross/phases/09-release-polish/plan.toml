@@ -1,0 +1,199 @@
+[phase]
+id = "09-release-polish"
+
+[[task]]
+id            = "t-1"
+wave          = 1
+title         = "Default-assistant detector with tri-state"
+files         = [
+  "app/src/main/java/dev/equerry/app/assistant/DefaultAssistantDetector.kt",
+  "app/src/main/java/dev/equerry/app/di/RepositoryModule.kt",
+  "app/src/test/java/dev/equerry/app/assistant/DefaultAssistantDetectorTest.kt",
+]
+description   = """
+Fakeable detector (interface or open class) that reads Settings.Secure to tell
+whether Equerry is the default assistant. Exposes the ACTION_VOICE_INPUT_SETTINGS
+intent for the set-default step. Bound in RepositoryModule.
+"""
+covers        = ["c-1"]
+test_contract = [
+  "Robolectric test seeds Settings.Secure voice_interaction_service: isDefault() returns TRUE only when the stored component equals dev.equerry.app's EquerryVoiceInteractionService",
+  "if the stored key holds a different OEM component, isDefault() returns FALSE",
+  "if the key is absent/empty, isDefault() returns UNKNOWN — the test fails if detection ever reports a default without a component match",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-2"
+wave          = 1
+title         = "First-run onboarding-complete store"
+files         = [
+  "app/src/main/java/dev/equerry/app/data/OnboardingStore.kt",
+  "app/src/main/java/dev/equerry/app/di/PersistenceModule.kt",
+  "app/src/test/java/dev/equerry/app/data/OnboardingStoreTest.kt",
+]
+description   = """
+Persist the onboarding-completed flag on the existing equerry_settings DataStore,
+following the VoiceSettingsStore pattern. Provide it via PersistenceModule.
+"""
+covers        = ["c-3"]
+test_contract = [
+  "completed defaults FALSE on a fresh DataStore — the test fails if the missing-key fallback ever reads as completed (which would suppress onboarding for a new user)",
+  "completed round-trips TRUE after setCompleted(true)",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-3"
+wave          = 1
+title         = "Hardened release build type + proguard keeps"
+files         = [
+  "app/build.gradle.kts",
+  "app/proguard-rules.pro",
+  "app/src/test/java/dev/equerry/app/release/ReleaseBuildConfigTest.kt",
+]
+description   = """
+Harden the release buildType (debuggable=false, minify+shrink on) and lock
+version/appId. Add proguard keep-rules so minify cannot strip Hilt, kotlinx
+serialization, or the VoiceInteractionService assistant entry points.
+"""
+covers        = ["c-6"]
+test_contract = [
+  "a JVM assertion over the release buildType fails if isDebuggable is true, isMinifyEnabled is false, or versionName/applicationId drift from 0.1.0/dev.equerry.app (versionCode=1)",
+  "the test fails if proguard-rules.pro lacks keep-rules for the EquerryVoiceInteractionService / Hilt / serialization entry points (minify would otherwise strip the assistant)",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-4"
+wave          = 1
+title         = "Release signing from env, never committed"
+files         = [
+  "app/build.gradle.kts",
+  ".gitignore",
+  "keystore.properties.example",
+]
+description   = """
+Add a release signingConfig that reads storeFile/storePassword/keyAlias/keyPassword
+from env vars or a gitignored keystore.properties, null-safe when absent so an
+unsigned build still assembles for F-Droid. Ship an example file; gitignore the real one.
+"""
+covers        = ["c-6"]
+test_contract = [
+  "signingConfigs.release resolves from System.getenv / gitignored keystore.properties and the build still assembles when they are absent (unsigned)",
+  "a grep/test asserts no literal store password or .jks path appears in build.gradle.kts or any git-tracked file — committing a secret fails the no-secret-in-repo check (r-03)",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-5"
+wave          = 1
+title         = "Fastlane metadata text tree with lint"
+files         = [
+  "fastlane/metadata/android/en-US/title.txt",
+  "fastlane/metadata/android/en-US/short_description.txt",
+  "fastlane/metadata/android/en-US/full_description.txt",
+  "fastlane/metadata/android/en-US/changelogs/1.txt",
+  "app/src/test/java/dev/equerry/app/metadata/FastlaneMetadataTest.kt",
+]
+description   = """
+One canonical fastlane text tree (metadata_source lock) feeding both F-Droid and
+Play. A lint test enforces the store caps and required donate links.
+"""
+covers        = ["c-4", "c-5"]
+test_contract = [
+  "FastlaneMetadataTest fails if title > 30 (Play cap, the binding limit since one tree feeds both stores), short_description > 80, or full_description > 4000",
+  "the test fails if changelogs/1.txt (versionCode=1) is missing or empty",
+  "the test fails if a required donate link (Liberapay / GitHub Sponsors, per .github/FUNDING.yml) is absent from the description",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-6"
+wave          = 2
+depends_on    = ["t-1", "t-2"]
+title         = "Onboarding state machine + soft gate"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/onboarding/OnboardingViewModel.kt",
+  "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingViewModelTest.kt",
+]
+description   = """
+ViewModel driving the wizard (welcome -> set-default -> map-CHAT -> done) with a
+soft completion gate. Uses a fake DefaultAssistantDetector + in-memory stores;
+completion is tied to the CHAT mapping being non-null.
+"""
+covers        = ["c-1", "c-2", "c-3"]
+test_contract = [
+  "the test fails if step order deviates from welcome -> set-default -> map-CHAT -> done",
+  "the test fails if the set-default step is non-deferrable / dead-ends when the detector reports not-default or UNKNOWN (deferrable lock, c-1)",
+  "default flips to true after refresh()/onReturn once the fake detector returns true (return-from-system reflection, c-1)",
+  "completed must not flip before the CHAT mapping emits non-null, and must flip once it does (premature-complete regression, c-2)",
+  "dismiss at any step leaves completed=false and pendingSetup=true (c-3)",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-7"
+wave          = 2
+depends_on    = ["t-5"]
+title         = "Fastlane screenshots + Play graphics"
+files         = [
+  "fastlane/metadata/android/en-US/images/phoneScreenshots/1.png",
+  "fastlane/metadata/android/en-US/images/phoneScreenshots/2.png",
+  "fastlane/metadata/android/en-US/images/icon.png",
+  "fastlane/metadata/android/en-US/images/featureGraphic.png",
+  "app/src/test/java/dev/equerry/app/metadata/FastlaneMetadataTest.kt",
+]
+description   = """
+Hand-captured screenshots plus the icon and feature graphic in the same canonical
+tree. Extends the metadata-lint test with a file-presence check.
+"""
+covers        = ["c-4", "c-5"]
+test_contract = [
+  "the metadata-lint test fails if no phoneScreenshots/*.png exists, or if icon.png or featureGraphic.png is missing or zero-byte (both stores reject these) — a structural file-presence proxy, bitmaps are not JVM-unit-testable",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-8"
+wave          = 3
+depends_on    = ["t-6"]
+title         = "Onboarding UI into nav + re-entry + banner"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/onboarding/OnboardingScreen.kt",
+  "app/src/main/java/dev/equerry/app/MainActivity.kt",
+  "app/src/main/res/values/strings.xml",
+]
+description   = """
+Onboarding screen wired into the nav graph: startDestination switches on the
+completed flag, a settings entry re-opens it, and HOME shows a persistent setup
+banner while CHAT is unmapped.
+"""
+covers        = ["c-1", "c-2", "c-3"]
+test_contract = [
+  "startDestination resolves to Route.ONBOARDING when OnboardingStore.completed is false and Route.HOME when true — the NavHost test fails if a completed user lands on onboarding",
+  "a settings/home entry navigates back to Route.ONBOARDING after completion — the test fails if a configured user cannot re-open it",
+  "the HOME setup banner shows while CHAT is unmapped and is absent once mapped",
+]
+status        = "pending"
+
+[[task]]
+id            = "t-9"
+wave          = 3
+depends_on    = ["t-6"]
+title         = "Default-step intent + return-state refresh"
+files         = [
+  "app/src/main/java/dev/equerry/app/ui/onboarding/OnboardingScreen.kt",
+  "app/src/test/java/dev/equerry/app/ui/onboarding/OnboardingViewModelTest.kt",
+]
+description   = """
+Wire the set-default action to launch the system assistant-selection screen and
+re-query the detector on ON_RESUME so the displayed state reflects a change the
+user made in system Settings.
+"""
+covers        = ["c-1"]
+test_contract = [
+  "the set-as-default action launches ACTION_VOICE_INPUT_SETTINGS — asserted via the captured Intent action; the test fails if a non-VOICE_INPUT intent is launched",
+  "an ON_RESUME refresh re-queries the detector — the test fails if the step shows a stale not-default after the detector reports a match",
+]
+status        = "pending"
