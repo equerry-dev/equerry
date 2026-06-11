@@ -15,11 +15,13 @@ import dev.equerry.app.providers.ProviderType
 import dev.equerry.app.providers.drivers.AnthropicChatDriver
 import dev.equerry.app.providers.drivers.ChatDriverFactory
 import dev.equerry.app.providers.drivers.ChatHttpClient
+import dev.equerry.app.providers.drivers.ChatImage
 import dev.equerry.app.providers.drivers.ChatSession
 import dev.equerry.app.tools.actions.ActionRunner
 import dev.equerry.app.tools.actions.PlannedAction
 import dev.equerry.app.providers.drivers.OllamaChatDriver
 import dev.equerry.app.providers.drivers.OpenAiChatDriver
+import dev.equerry.app.screencontext.ScreenContext
 import dev.equerry.app.ui.chat.ChatViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -157,6 +159,37 @@ class VoiceFlowControllerTest {
             scope = controllerScope,
             isMicGranted = { true },
         )
+
+    private suspend fun configureVisionProvider() {
+        val created = repository.addProfile(
+            ProfileDraft("Vision", ProviderType.OPENAI_COMPATIBLE, server.url("/").toString(), key, "m"),
+        )
+        repository.setVisionSlot(created.id)
+    }
+
+    @Test
+    fun a_spoken_screen_query_routes_to_ask_about_screen() = runBlocking {
+        configureVisionProvider()
+        settings.setTurnControl(TurnControl.SINGLE_TURN)
+        server.enqueue(sseReply("A map."))
+        val shot = ChatImage(byteArrayOf(7, 8, 9), "image/png")
+        val controller = VoiceFlowController(
+            chat = vm,
+            stt = FakeSpeechToText(listOf(SttEvent.Final("what's on my screen"))),
+            tts = FakeTextToSpeech(),
+            settings = settings,
+            scope = controllerScope,
+            isMicGranted = { true },
+            screenContext = { ScreenContext(text = "", screenshot = shot) },
+        )
+
+        controller.start()
+
+        withTimeout(5_000) { vm.state.first { !it.streaming && it.lastReply != null } }
+        // Only askAboutScreen sends an image — its presence proves the screen path was taken.
+        val body = server.takeRequest().body.readUtf8()
+        assertTrue("recognised screen query must route to askAboutScreen (image sent)", body.contains("image_url"))
+    }
 
     @Test
     fun end_of_speech_auto_sends_and_speaks_the_whole_reply_once() = runBlocking {

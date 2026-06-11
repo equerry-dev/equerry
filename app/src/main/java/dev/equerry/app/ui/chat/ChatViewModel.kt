@@ -96,6 +96,9 @@ class ChatViewModel @Inject constructor(
     fun send(text: String) {
         val trimmed = text.trim()
         if (trimmed.isEmpty() || _state.value.streaming) return
+        // Clear any prior screen-context note synchronously so a watcher (the voice flow) never
+        // settles this turn on a stale note before the async send runs.
+        if (_state.value.screenNote != null) _state.update { it.copy(screenNote = null) }
         viewModelScope.launch {
             val profile = repository.observeChatMapping().first()
             if (profile == null) {
@@ -209,6 +212,8 @@ class ChatViewModel @Inject constructor(
      */
     fun askAboutScreen(context: ScreenContext) {
         if (_state.value.streaming) return
+        // Clear any prior note synchronously so a watcher settles only on THIS turn's outcome.
+        _state.update { it.copy(screenNote = null, error = null) }
         viewModelScope.launch {
             val vision = repository.observeVisionMapping().first()
             val chat = repository.observeChatMapping().first()
