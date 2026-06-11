@@ -2,70 +2,10 @@
   "version": "0.1.5.4",
   "current_milestone": "v0.1",
   "current_phase": "08-remote-stt-tts",
-  "current_phase_status": "planned",
-  "last_activity": "2026-06-11T09:52:25.185139Z",
-  "last_action": "plan reviewed: 08-remote-stt-tts (0 blocking, 5 flags)",
+  "current_phase_status": "complete",
+  "last_activity": "2026-06-11T11:00:21.960057Z",
+  "last_action": "phase 08-remote-stt-tts executed (13/13 done \u0026 green)",
   "history": [
-    {
-      "at": "2026-06-10T18:42:03.639495Z",
-      "action": "set current_phase_status=planned"
-    },
-    {
-      "at": "2026-06-10T18:42:03.64754Z",
-      "action": "plan locked (panel): 06-tools-actions (9 tasks across 3 waves)"
-    },
-    {
-      "at": "2026-06-10T18:43:59.225052Z",
-      "action": "plan reviewed: 06-tools-actions (0 blocking, 3 flags)"
-    },
-    {
-      "at": "2026-06-10T18:45:01.195958Z",
-      "action": "plan amended post-review: 06-tools-actions (t-1 +ChatDriver.kt seam; t-9 -\u003e wave 2; now 2 waves)"
-    },
-    {
-      "at": "2026-06-10T18:52:26.382193Z",
-      "action": "executed t-1 (Add ToolCall token + tool-call parsers)"
-    },
-    {
-      "at": "2026-06-10T18:54:44.152167Z",
-      "action": "executed t-2 (Register five tool specs in request body)"
-    },
-    {
-      "at": "2026-06-10T18:55:28.608632Z",
-      "action": "executed t-3 (Add per-type tool-capability flag)"
-    },
-    {
-      "at": "2026-06-10T18:57:51.354078Z",
-      "action": "executed t-4 (Pure intent-builders for the five actions)"
-    },
-    {
-      "at": "2026-06-10T18:59:33.744115Z",
-      "action": "executed t-5 (Pure ToolCall to ActionPlan mapper)"
-    },
-    {
-      "at": "2026-06-10T19:00:23.459772Z",
-      "action": "executed t-6 (Pure yes/no grammar recogniser)"
-    },
-    {
-      "at": "2026-06-10T19:07:40.803483Z",
-      "action": "executed t-7 (Dispatch tool calls + staging + guidance in ChatViewModel)"
-    },
-    {
-      "at": "2026-06-10T19:10:38.363206Z",
-      "action": "executed t-8 (Action cards, pending list, banner in ChatScreen)"
-    },
-    {
-      "at": "2026-06-10T19:16:54.150435Z",
-      "action": "executed t-9 (Spoken Start-now + yes/no confirm in voice flow)"
-    },
-    {
-      "at": "2026-06-10T19:17:25.514213Z",
-      "action": "set current_phase_status=complete"
-    },
-    {
-      "at": "2026-06-10T19:17:25.520716Z",
-      "action": "phase 06-tools-actions executed (9/9 done \u0026 green)"
-    },
     {
       "at": "2026-06-11T05:16:52.189718Z",
       "action": "set current_phase_status=verified"
@@ -205,6 +145,66 @@
     {
       "at": "2026-06-11T09:52:25.185139Z",
       "action": "plan reviewed: 08-remote-stt-tts (0 blocking, 5 flags)"
+    },
+    {
+      "at": "2026-06-11T09:56:20.867633Z",
+      "action": "executed t-1 (Add supportsStt/supportsTts flags to ProviderType)"
+    },
+    {
+      "at": "2026-06-11T09:57:02.626101Z",
+      "action": "executed t-2 (Activate STT and TTS capability slots)"
+    },
+    {
+      "at": "2026-06-11T09:58:20.873507Z",
+      "action": "executed t-3 (Build transcribe HTTP request)"
+    },
+    {
+      "at": "2026-06-11T09:59:03.034201Z",
+      "action": "executed t-4 (Build speech HTTP request)"
+    },
+    {
+      "at": "2026-06-11T10:00:15.345384Z",
+      "action": "executed t-5 (Silence VAD auto-stop)"
+    },
+    {
+      "at": "2026-06-11T10:01:46.502354Z",
+      "action": "executed t-6 (Map audio errors to key-free guidance)"
+    },
+    {
+      "at": "2026-06-11T10:03:09.86593Z",
+      "action": "executed t-10 (Voice field on profile + back-compat store)"
+    },
+    {
+      "at": "2026-06-11T10:06:45.469679Z",
+      "action": "executed t-7 (RemoteSpeechToText over recorder + transport)"
+    },
+    {
+      "at": "2026-06-11T10:08:14.890008Z",
+      "action": "executed t-9 (Add Media3 dependency for audio playback)"
+    },
+    {
+      "at": "2026-06-11T10:13:49.495858Z",
+      "action": "executed t-8 (RemoteTextToSpeech over transport + player)"
+    },
+    {
+      "at": "2026-06-11T10:49:46.275377Z",
+      "action": "executed t-11 (STT/TTS mappings + filtered pickers + voice UI)"
+    },
+    {
+      "at": "2026-06-11T10:54:39.700393Z",
+      "action": "executed t-12 (Resolve remote-vs-system engine per mapping)"
+    },
+    {
+      "at": "2026-06-11T10:59:53.50725Z",
+      "action": "executed t-13 (Consented system-engine fallback in controller)"
+    },
+    {
+      "at": "2026-06-11T11:00:21.950669Z",
+      "action": "set current_phase_status=complete"
+    },
+    {
+      "at": "2026-06-11T11:00:21.960057Z",
+      "action": "phase 08-remote-stt-tts executed (13/13 done \u0026 green)"
     }
   ]
 }
