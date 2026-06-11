@@ -1,19 +1,11 @@
 {
-  "version": "0.1.5.4",
+  "version": "0.1.5.5",
   "current_milestone": "v0.1",
   "current_phase": "08-remote-stt-tts",
   "current_phase_status": "verified",
-  "last_activity": "2026-06-11T12:30:05.126588Z",
-  "last_action": "verified 08-remote-stt-tts: partial (6/6 covered, 2 flags; mutation skipped — Kotlin)",
+  "last_activity": "2026-06-11T12:33:54.409318Z",
+  "last_action": "quick: wire consented system-engine fallback into production",
   "history": [
-    {
-      "at": "2026-06-11T05:21:37.200244Z",
-      "action": "shipped 06-tools-actions → https://github.com/equerry-dev/equerry/pull/5"
-    },
-    {
-      "at": "2026-06-11T05:23:13.176305Z",
-      "action": "completed 06-tools-actions"
-    },
     {
       "at": "2026-06-11T05:33:44.954682Z",
       "action": "created 07-screen-context"
@@ -205,6 +197,14 @@
     {
       "at": "2026-06-11T12:30:05.126588Z",
       "action": "verified 08-remote-stt-tts: partial (6/6 covered, 2 flags; mutation skipped — Kotlin)"
+    },
+    {
+      "at": "2026-06-11T12:33:54.394345Z",
+      "action": "bump internal 0.1.5.4 → 0.1.5.5"
+    },
+    {
+      "at": "2026-06-11T12:33:54.409318Z",
+      "action": "quick: wire consented system-engine fallback into production"
     }
   ]
 }
