@@ -1,6 +1,7 @@
 package dev.equerry.app.ui.onboarding
 
 import android.content.Context
+import android.provider.Settings
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
@@ -152,5 +153,26 @@ class OnboardingViewModelTest {
 
         assertFalse(vm.state.value.completed)
         assertTrue(vm.state.value.pendingSetup)
+    }
+
+    // ---- t-9: set-default intent + return-state refresh ----
+
+    @Test
+    fun set_default_launches_the_voice_input_settings_intent() {
+        // The onboarding screen's set-default action launches exactly this intent (c-1).
+        assertEquals(Settings.ACTION_VOICE_INPUT_SETTINGS, voiceInputSettingsIntent().action)
+    }
+
+    @Test
+    fun on_resume_refresh_clears_a_stale_not_default() {
+        detector.current = DefaultAssistantState.NOT_DEFAULT
+        val vm = viewModel()
+        assertFalse(vm.state.value.isDefaultAssistant)
+
+        // User sets Equerry as default in system Settings; ON_RESUME triggers refresh() on return.
+        detector.current = DefaultAssistantState.IS_DEFAULT
+        vm.refresh()
+
+        assertTrue("a stale not-default must not persist after return", vm.state.value.isDefaultAssistant)
     }
 }

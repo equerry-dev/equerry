@@ -1,5 +1,7 @@
 package dev.equerry.app.ui.onboarding
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,8 +20,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.equerry.app.assistant.DefaultAssistantState
 
@@ -28,6 +33,9 @@ import dev.equerry.app.assistant.DefaultAssistantState
  * away via [onFinished] once completion is persisted (the soft gate in [OnboardingViewModel]).
  * The set-default intent + return refresh are wired in t-9.
  */
+/** The system assistant / voice-input selection screen the set-default step launches (c-1). */
+internal fun voiceInputSettingsIntent(): Intent = Intent(Settings.ACTION_VOICE_INPUT_SETTINGS)
+
 @Composable
 fun OnboardingRoute(
     onFinished: () -> Unit,
@@ -35,11 +43,16 @@ fun OnboardingRoute(
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    // On return from the system selection screen, re-query so a stale "not default" can't persist.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refresh() }
+
     OnboardingScreen(
         state = state,
         onAdvance = viewModel::advance,
         onBack = viewModel::back,
-        onSetDefault = { /* t-9: launch ACTION_VOICE_INPUT_SETTINGS + refresh on return */ },
+        onSetDefault = { context.startActivity(voiceInputSettingsIntent()) },
         onAddProvider = onAddProvider,
         onFinish = {
             viewModel.finish()
