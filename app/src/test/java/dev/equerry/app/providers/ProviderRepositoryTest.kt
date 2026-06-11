@@ -99,6 +99,29 @@ class ProviderRepositoryTest {
     }
 
     @Test
+    fun setVisionSlot_round_trips_through_observeVisionMapping() = withRepo { repo, _, _ ->
+        val created = repo.addProfile(draft(label = "Vision Model"))
+        assertNull("VISION starts unmapped", repo.observeVisionMapping().first())
+
+        repo.setVisionSlot(created.id)
+        assertEquals(created.id, repo.observeVisionMapping().first()?.id)
+
+        repo.setVisionSlot(null)
+        assertNull(repo.observeVisionMapping().first())
+    }
+
+    @Test
+    fun deleteProfile_clears_vision_mapping_too() = withRepo { repo, _, _ ->
+        val created = repo.addProfile(draft())
+        repo.setVisionSlot(created.id)
+        assertEquals(created.id, repo.observeVisionMapping().first()?.id)
+
+        repo.deleteProfile(created.id)
+
+        assertNull("deleting the mapped profile cascades to the VISION slot", repo.observeVisionMapping().first())
+    }
+
+    @Test
     fun observeProfiles_reflects_add_update_delete() = withRepo { repo, _, _ ->
         val created = repo.addProfile(draft(label = "First"))
         assertTrue(repo.observeProfiles().first().any { it.id == created.id })

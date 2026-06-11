@@ -28,6 +28,12 @@ class ProviderRepository(
             mappedId?.let { id -> profiles.firstOrNull { it.id == id } }
         }
 
+    /** The profile currently mapped to VISION, or null if unmapped (or its profile is gone). */
+    fun observeVisionMapping(): Flow<ProviderProfile?> =
+        combine(slotMappingStore.mapping(CapabilitySlot.VISION), profileStore.profiles()) { mappedId, profiles ->
+            mappedId?.let { id -> profiles.firstOrNull { it.id == id } }
+        }
+
     suspend fun addProfile(draft: ProfileDraft): ProviderProfile {
         val profile = ProviderProfile(
             id = UUID.randomUUID().toString(),
@@ -72,6 +78,9 @@ class ProviderRepository(
 
     suspend fun setChatSlot(profileId: String?) =
         slotMappingStore.setMapping(CapabilitySlot.CHAT, profileId)
+
+    suspend fun setVisionSlot(profileId: String?) =
+        slotMappingStore.setMapping(CapabilitySlot.VISION, profileId)
 
     fun keyFor(profileId: String): String? = secretStore.getKey(profileId)
 }
