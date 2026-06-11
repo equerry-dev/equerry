@@ -75,4 +75,31 @@ class FastlaneMetadataTest {
             full.contains("github.com/sponsors/equerry-dev"),
         )
     }
+
+    // ---- graphics presence (t-7, c-4 + c-5) ----
+    //
+    // Structural file-presence proxy only — bitmap content is not JVM-unit-testable, so this
+    // asserts the required store assets exist and are non-empty (both F-Droid and Play reject a
+    // missing or zero-byte screenshot / icon / feature graphic).
+
+    private val images = File(metadata, "images")
+
+    private fun assertNonEmpty(file: File) {
+        assertTrue("${file.path} must exist", file.isFile)
+        assertTrue("${file.path} must not be empty", file.length() > 0L)
+    }
+
+    @Test
+    fun at_least_one_phone_screenshot_is_present() {
+        val screenshots = File(images, "phoneScreenshots")
+            .listFiles { f -> f.isFile && f.name.endsWith(".png") && f.length() > 0L }
+            ?: emptyArray()
+        assertTrue("at least one non-empty phoneScreenshots/*.png is required", screenshots.isNotEmpty())
+    }
+
+    @Test
+    fun icon_and_feature_graphic_are_present() {
+        assertNonEmpty(File(images, "icon.png"))
+        assertNonEmpty(File(images, "featureGraphic.png"))
+    }
 }
