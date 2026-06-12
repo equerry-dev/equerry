@@ -100,7 +100,11 @@ fun ChatRoute(viewModel: ChatViewModel = hiltViewModel()) {
         onConfirmAction = viewModel::confirmAction,
         onCancelAction = viewModel::cancelAction,
         onMic = {
-            if (MicPermission.isGranted(context.applicationContext)) {
+            // Toggle: a tap while a turn is running stops listening/speaking; otherwise it starts one
+            // (requesting the mic permission first if needed).
+            if (voiceState != VoiceFlowState.Idle) {
+                controller.stop()
+            } else if (MicPermission.isGranted(context.applicationContext)) {
                 controller.start()
             } else {
                 micLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -321,11 +325,12 @@ private fun InputBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        // Speak instead of type: starts the voice round-trip. Disabled while one is already running.
-        IconButton(onClick = onMic, enabled = enabled && !listening) {
+        // Speak instead of type: a tap starts the voice round-trip; a tap while it runs stops it.
+        // Stays tappable while listening so the second tap can cancel the turn.
+        IconButton(onClick = onMic, enabled = listening || enabled) {
             Icon(
                 Icons.Rounded.Mic,
-                contentDescription = "Speak",
+                contentDescription = if (listening) "Stop listening" else "Speak",
                 tint = if (listening) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
