@@ -147,6 +147,9 @@ class VoiceFlowController(
                 throw c // dismissal — let stop()'s cancellation propagate
             } catch (e: Exception) {
                 // Never throw to the framework session; surface a generic guidance instead (c-5).
+                // Log the cause to stderr (→ logcat System.err) so the otherwise-invisible failure is
+                // diagnosable; this keeps the controller Android-free (no android.util.Log).
+                e.printStackTrace()
                 _guidance.value = VoiceGuidance("Something went wrong with the voice session.")
                 _state.value = VoiceFlowState.Idle
             }

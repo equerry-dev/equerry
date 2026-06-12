@@ -57,7 +57,18 @@ class RemoteSpeechToText(
 
     override fun listen(): Flow<SttEvent> = flow {
         val vad = vadFactory()
-        val clip = recorder.record { amplitude -> vad.onFrame(amplitude) }
+        // Guard the capture itself, not just the upload: an AudioRecord that can't acquire the mic
+        // (e.g. briefly contended right after TTS playback releases the audio device) throws from
+        // startRecording/read. Unguarded, that escapes listen() into the controller and kills the whole
+        // voice session with a generic "something went wrong". Surface it as a recoverable Busy instead.
+        val clip = try {
+            recorder.record { amplitude -> vad.onFrame(amplitude) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Throwable) {
+            emit(SttEvent.Error(SttError.Busy))
+            return@flow
+        }
         emit(SttEvent.EndOfSpeech)
         val transcript = try {
             transport.transcribe(clip)

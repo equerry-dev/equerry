@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import dev.equerry.app.providers.ProviderProfile
@@ -211,7 +212,14 @@ private class ExoClipPlayer(private val context: Context) : ClipPlayer {
         synchronized(tempFiles) { tempFiles.add(file) }
         handler.post {
             val p = player ?: return@post
+            // Once the queue has drained the player sits at STATE_ENDED on the last item; appending a
+            // new item does NOT make ExoPlayer advance to it, so a continuous session would only ever
+            // play its first utterance. Seek to the freshly-appended item before (re)preparing so each
+            // turn's clip actually plays (and awaitDone then waits on real playback, not a stale ENDED).
+            val drained = p.playbackState == Player.STATE_ENDED || p.playbackState == Player.STATE_IDLE
             p.addMediaItem(MediaItem.fromUri(Uri.fromFile(file)))
+            if (drained) p.seekTo(p.mediaItemCount - 1, 0L)
+            p.playWhenReady = true
             p.prepare()
         }
     }
@@ -231,6 +239,14 @@ private class ExoClipPlayer(private val context: Context) : ClipPlayer {
                             p.removeListener(this)
                             if (cont.isActive) cont.resume(Unit)
                         }
+                    }
+
+                    override fun onPlayerError(error: PlaybackException) {
+                        // A decode/playback failure transitions to STATE_IDLE, never STATE_ENDED — so
+                        // without this the turn would hang forever in Speaking and the mic never re-arms
+                        // (the "freeze"). Treat an error as done so the loop settles and re-arms.
+                        p.removeListener(this)
+                        if (cont.isActive) cont.resume(Unit)
                     }
                 }
                 cont.invokeOnCancellation { handler.post { p.removeListener(listener) } }
