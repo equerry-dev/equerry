@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -59,12 +58,15 @@ class CameraCaptureActivity : ComponentActivity() {
     // never hangs and never double-completes.
     private val settled = AtomicBoolean(false)
 
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { granted -> if (granted) startCamera() else finishWith(null) }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Permission is granted up front from Voice settings (never requested here): a runtime dialog
+        // launched over the active voice session sits behind the mic privacy indicator and can't be
+        // tapped. If somehow not granted, settle gracefully — the voice flow speaks the guidance.
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            finishWith(null)
+            return
+        }
         previewView = PreviewView(this)
         setContent {
             Box(Modifier.fillMaxSize().background(Color.Black)) {
@@ -76,11 +78,7 @@ class CameraCaptureActivity : ComponentActivity() {
                 )
             }
         }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            startCamera()
-        } else {
-            permissionLauncher.launch(Manifest.permission.CAMERA)
-        }
+        startCamera()
     }
 
     private fun startCamera() {

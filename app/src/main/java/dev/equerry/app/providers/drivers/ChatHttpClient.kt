@@ -2,6 +2,7 @@ package dev.equerry.app.providers.drivers
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import java.util.concurrent.TimeUnit
 
 /**
  * The single shared OkHttpClient for every chat driver. Logging is installed and LIVE — the
@@ -17,6 +18,12 @@ object ChatHttpClient {
     ): OkHttpClient =
         OkHttpClient.Builder()
             .addInterceptor(redactingLogger(logger))
+            // Bound every request so a stalled backend (a self-hosted model mid-swap or OOM) fails in
+            // finite time instead of hanging a voice turn. readTimeout is generous so a cold model load
+            // (e.g. swapping the vision model in) still completes; connect fails fast when the box is down.
+            // No callTimeout: a long streamed reply is legitimate and must not be cut off.
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
             .build()
 
     /**

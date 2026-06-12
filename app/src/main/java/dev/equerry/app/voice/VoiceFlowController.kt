@@ -154,7 +154,14 @@ class VoiceFlowController(
                         if (camera != null) {
                             sendAndSpeak { chat.askAboutCamera(camera) }
                         } else {
-                            _guidance.value = VoiceGuidance("Couldn't open the camera — check the camera permission.")
+                            // Null capture = camera access not granted (or the capture failed). Speak the
+                            // guidance when we can, so a hands-free user hears why nothing happened.
+                            val note = "Couldn't use the camera — turn on camera access in Voice settings."
+                            if (ttsReady) {
+                                activeTts.speak(note)
+                                activeTts.awaitDone()
+                            }
+                            _guidance.value = VoiceGuidance(note)
                             _state.value = VoiceFlowState.Idle
                         }
                     } else if (screen != null && ScreenQueryGrammar.isScreenQuery(text)) {
@@ -266,8 +273,14 @@ class VoiceFlowController(
                 _state.value = VoiceFlowState.Idle
                 return
             }
-            // Stream failed mid-reply: show the key-free error, keep the partial reply, never speak it.
+            // Stream failed/timed out (e.g. the remote model is busy, mid-swap, or OOM): show the
+            // key-free error, and speak a brief friendly note so a hands-free user isn't left in silence.
+            // The partial reply itself is never spoken — only this fixed retry prompt.
             finalUi.error != null -> {
+                if (ttsReady) {
+                    activeTts.speak("Sorry, I couldn't get a reply just now. The model may be busy — please try again.")
+                    activeTts.awaitDone()
+                }
                 _guidance.value = VoiceGuidanceFactory.replyError(finalUi.error)
                 _state.value = VoiceFlowState.Idle
                 return

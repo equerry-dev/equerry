@@ -34,6 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.equerry.app.data.SpeakTiming
 import dev.equerry.app.data.TurnControl
+import dev.equerry.app.voice.CameraPermission
 import dev.equerry.app.voice.MicPermission
 import dev.equerry.app.voice.MicPermissionState
 
@@ -50,12 +51,19 @@ fun VoiceSettingsRoute(viewModel: VoiceSettingsViewModel = hiltViewModel()) {
         ActivityResultContracts.RequestPermission(),
     ) { granted -> micState = viewModel.micState(granted) }
 
+    var cameraGranted by remember { mutableStateOf(CameraPermission.isGranted(context)) }
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted -> cameraGranted = granted }
+
     VoiceSettingsScreen(
         state = state,
         micState = micState,
+        cameraGranted = cameraGranted,
         onTurnControl = viewModel::setTurnControl,
         onSpeakTiming = viewModel::setSpeakTiming,
         onRequestMic = { launcher.launch(Manifest.permission.RECORD_AUDIO) },
+        onRequestCamera = { cameraLauncher.launch(Manifest.permission.CAMERA) },
         onOpenSettings = {
             context.startActivity(
                 Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -72,9 +80,11 @@ fun VoiceSettingsRoute(viewModel: VoiceSettingsViewModel = hiltViewModel()) {
 fun VoiceSettingsScreen(
     state: VoiceSettingsUiState,
     micState: MicPermissionState,
+    cameraGranted: Boolean,
     onTurnControl: (TurnControl) -> Unit,
     onSpeakTiming: (SpeakTiming) -> Unit,
     onRequestMic: () -> Unit,
+    onRequestCamera: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     Scaffold(topBar = { TopAppBar(title = { Text("Voice") }) }) { pad ->
@@ -97,6 +107,32 @@ fun VoiceSettingsScreen(
                 onSelect = onSpeakTiming,
             )
             MicSection(micState = micState, onRequestMic = onRequestMic, onOpenSettings = onOpenSettings)
+            CameraSection(granted = cameraGranted, onRequestCamera = onRequestCamera, onOpenSettings = onOpenSettings)
+        }
+    }
+}
+
+@Composable
+private fun CameraSection(granted: Boolean, onRequestCamera: () -> Unit, onOpenSettings: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Camera", style = MaterialTheme.typography.titleMedium)
+        if (granted) {
+            Text("Camera access is on.", style = MaterialTheme.typography.bodyMedium)
+        } else {
+            Surface(color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    // Granting here (a calm screen) avoids the dialog appearing behind the mic indicator
+                    // when a camera query is spoken mid-session.
+                    "Camera access is off. Turn it on to use \"look through the camera\".",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.padding(16.dp),
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = onRequestCamera) { Text("Grant") }
+                Button(onClick = onOpenSettings) { Text("Open settings") }
+            }
         }
     }
 }

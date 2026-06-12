@@ -37,6 +37,7 @@ import dev.equerry.app.tools.actions.ActionRunner
 import dev.equerry.app.tools.ocr.OcrEngine
 import dev.equerry.app.ui.chat.ChatViewModel
 import dev.equerry.app.ui.theme.EquerryTheme
+import dev.equerry.app.voice.CameraPermission
 import dev.equerry.app.voice.MicPermission
 import dev.equerry.app.voice.VoiceEngineSelector
 import dev.equerry.app.voice.VoiceFlowController
@@ -141,8 +142,16 @@ class EquerryVoiceInteractionSession(context: Context) :
         isMicGranted = { MicPermission.isGranted(context.applicationContext) },
         isChatConfigured = { entry.providerRepository().observeChatMapping().first() != null },
         screenContext = { currentScreenContext() },
-        // Spoken camera query: launch the capture activity and await the frame (image + OCR text).
-        cameraContext = { entry.cameraCaptureCoordinator().capture(context.applicationContext) },
+        // Spoken camera query: launch the capture activity and await the frame (image + OCR text), but
+        // only when camera access is already granted (up front in Voice settings) — else null so the
+        // controller speaks guidance rather than opening a dialog behind the session mic indicator.
+        cameraContext = {
+            if (CameraPermission.isGranted(context.applicationContext)) {
+                entry.cameraCaptureCoordinator().capture(context.applicationContext)
+            } else {
+                null
+            }
+        },
         // Consented fallback: on a remote-engine failure, offer a one-tap retry on the system engine.
         systemStt = engineSelector.systemSttEngine(),
         systemTts = engineSelector.systemTtsEngine(),

@@ -43,6 +43,7 @@ import dagger.hilt.android.EntryPointAccessors
 import dev.equerry.app.providers.drivers.ChatMessage
 import dev.equerry.app.providers.drivers.ChatRole
 import dev.equerry.app.tools.actions.PlannedAction
+import dev.equerry.app.voice.CameraPermission
 import dev.equerry.app.voice.MicPermission
 import dev.equerry.app.voice.VoiceComponentsEntryPoint
 import dev.equerry.app.voice.VoiceEngineSelector
@@ -77,7 +78,15 @@ fun ChatRoute(viewModel: ChatViewModel = hiltViewModel()) {
             isMicGranted = { MicPermission.isGranted(context.applicationContext) },
             isChatConfigured = { entry.providerRepository().observeChatMapping().first() != null },
             // Spoken camera query: launch the capture activity and await the frame (image + OCR text).
-            cameraContext = { entry.cameraCaptureCoordinator().capture(context.applicationContext) },
+            // Only when camera access is already granted (requested up front in Voice settings) — else
+            // null, so the controller speaks guidance instead of opening a doomed capture.
+            cameraContext = {
+                if (CameraPermission.isGranted(context.applicationContext)) {
+                    entry.cameraCaptureCoordinator().capture(context.applicationContext)
+                } else {
+                    null
+                }
+            },
             // Consented fallback: on a remote-engine failure, offer a one-tap retry on the system engine.
             systemStt = selector.systemSttEngine(),
             systemTts = selector.systemTtsEngine(),

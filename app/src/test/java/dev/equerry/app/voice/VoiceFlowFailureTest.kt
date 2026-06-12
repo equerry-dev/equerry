@@ -181,7 +181,7 @@ class VoiceFlowFailureTest {
     }
 
     @Test
-    fun reply_error_shows_keyfree_guidance_and_does_not_speak() = runBlocking {
+    fun reply_error_shows_keyfree_guidance_and_speaks_a_retry_note() = runBlocking {
         configureChatProvider()
         settings.setTurnControl(TurnControl.SINGLE_TURN)
         server.enqueue(MockResponse().setResponseCode(401).setHeader("Content-Type", "text/event-stream"))
@@ -193,7 +193,9 @@ class VoiceFlowFailureTest {
         val guidance = withTimeout(5_000) { controller.guidance.first { it != null } }!!
         assertEquals(ChatError.Auth.message, guidance.message)
         assertFalse("guidance must never leak the key", guidance.message.contains(key))
-        assertTrue("a failed reply must not be spoken", tts.spoken.isEmpty())
+        // A hands-free user hears a brief retry note (not the failed reply, and never the key).
+        assertTrue("a failed turn speaks a retry note", tts.spoken.any { it.contains("try again", ignoreCase = true) })
+        assertFalse("the spoken note must never leak the key", tts.spoken.any { it.contains(key) })
         // The partial reply (user turn + empty assistant bubble) is retained, not discarded.
         assertEquals(2, vm.state.value.transcript.size)
     }
