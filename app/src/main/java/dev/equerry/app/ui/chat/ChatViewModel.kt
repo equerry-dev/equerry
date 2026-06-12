@@ -107,7 +107,7 @@ class ChatViewModel @Inject constructor(
                 return@launch
             }
             val key = repository.keyFor(profile.id).orEmpty()
-            val requestMessages = session.messagesForRequest(trimmed, profile.systemPrompt)
+            val requestMessages = session.messagesForRequest(trimmed, effectiveSystemPrompt(profile))
             session.append(ChatMessage(ChatRole.USER, trimmed))
             _state.update {
                 it.copy(
@@ -313,7 +313,7 @@ class ChatViewModel @Inject constructor(
     /** The request for a screen attempt: optional system prompt, prior turns, then this screen turn. */
     private fun buildScreenRequest(profile: ProviderProfile, text: String, image: ChatImage?): List<ChatMessage> =
         buildList {
-            profile.systemPrompt?.takeIf { it.isNotBlank() }?.let { add(ChatMessage(ChatRole.SYSTEM, it)) }
+            add(ChatMessage(ChatRole.SYSTEM, effectiveSystemPrompt(profile)))
             addAll(session.turns)
             add(ChatMessage(ChatRole.USER, text, image = image))
         }
@@ -399,6 +399,22 @@ private const val BLANK_SCREEN_NOTE = "Couldn't read this screen — it may bloc
 private const val SCREEN_UNCONFIGURED_NOTE = "Map a Vision or Chat provider in Settings to ask about your screen."
 
 private const val GENERIC_PROVIDER_ERROR = "Something went wrong talking to the provider."
+
+/**
+ * System message applied when a CHAT profile leaves its own prompt blank. Equerry is a voice-first
+ * assistant whose host app handles speech I/O, so a bare model otherwise disclaims voice/audio
+ * ability ("I can't do text-to-speech") and replies in markdown that reads poorly aloud. A profile's
+ * own system prompt (when set) overrides this entirely.
+ */
+private const val DEFAULT_SYSTEM_PROMPT =
+    "You are Equerry, a helpful hands-free voice assistant. The host app transcribes the user's " +
+        "speech into your input and reads your replies aloud, so you effectively listen and speak — " +
+        "never say you lack voice, audio, or text-to-speech ability. Reply in short, natural, " +
+        "spoken-style sentences; avoid markdown, code blocks, and bullet lists unless asked."
+
+/** A profile's own system prompt when set, otherwise the built-in [DEFAULT_SYSTEM_PROMPT]. */
+private fun effectiveSystemPrompt(profile: ProviderProfile): String =
+    profile.systemPrompt?.takeIf { it.isNotBlank() } ?: DEFAULT_SYSTEM_PROMPT
 
 /** Builds the text turn for a screen query: the instruction, plus the screen's text when we have it. */
 private fun textPrompt(screenText: String): String =
