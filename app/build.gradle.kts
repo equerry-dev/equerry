@@ -126,6 +126,12 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.common)
 
+    // Camera (camera-context vision capture — point-and-describe)
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
     // Testing (JVM / Robolectric — run under testDebugUnitTest)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

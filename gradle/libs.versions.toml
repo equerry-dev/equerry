@@ -23,6 +23,8 @@ tesseract4android = "4.8.0"
 
 media3 = "1.5.1"
 
+camerax = "1.4.1"
+
 navigationCompose = "2.8.5"
 coroutines = "1.9.0"
 
@@ -74,6 +76,12 @@ tesseract4android = { group = "com.github.adaptech-cz.Tesseract4Android", name =
 # Audio playback (remote TTS clip playback — phase 08)
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 androidx-media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3" }
+
+# Camera (camera-context vision capture — point-and-describe)
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

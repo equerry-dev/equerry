@@ -13,6 +13,13 @@
       settings; every denied state shows the same guidance (locked mic_permission decision).
     -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!--
+      Camera for the "look through the camera and tell me what I'm looking at" capability: a single
+      frame is captured, OCR'd, and sent to the VISION provider, then described aloud. Requested at
+      first use; never recorded to storage (the frame is a transient request payload).
+    -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
 
     <application
         android:name=".EquerryApplication"
