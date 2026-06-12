@@ -130,6 +130,15 @@ class VoiceFlowController(
                     }
                     val text = finalText
                     if (text.isNullOrBlank()) break
+                    // A spoken end-session command ("Equerry off") ends the auto-listening loop: briefly
+                    // acknowledge aloud (when TTS is usable), then break so the controller settles to Idle.
+                    if (StopGrammar.isStop(text)) {
+                        if (ttsReady) {
+                            activeTts.speak("Goodbye.")
+                            activeTts.awaitDone()
+                        }
+                        break
+                    }
                     // A spoken screen-context query routes to askAboutScreen when a capture is
                     // available; everything else is an ordinary chat send.
                     val screen = screenContext()
