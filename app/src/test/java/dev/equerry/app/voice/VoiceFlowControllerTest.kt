@@ -192,6 +192,32 @@ class VoiceFlowControllerTest {
     }
 
     @Test
+    fun a_spoken_camera_query_routes_to_ask_about_camera() = runBlocking {
+        configureVisionProvider()
+        settings.setTurnControl(TurnControl.SINGLE_TURN)
+        server.enqueue(sseReply("A mug."))
+        val frame = ChatImage(byteArrayOf(1, 2, 3), "image/jpeg")
+        val controller = VoiceFlowController(
+            chat = vm,
+            stt = FakeSpeechToText(listOf(SttEvent.Final("what am I looking at through the camera"))),
+            tts = FakeTextToSpeech(),
+            settings = settings,
+            scope = controllerScope,
+            isMicGranted = { true },
+            // Camera grammar wins over screen even when a screen capture is also available.
+            screenContext = { ScreenContext(text = "", screenshot = ChatImage(byteArrayOf(0), "image/png")) },
+            cameraContext = { ScreenContext(text = "", screenshot = frame) },
+        )
+
+        controller.start()
+
+        withTimeout(5_000) { vm.state.first { !it.streaming && it.lastReply != null } }
+        // The camera prompt (unique to askAboutCamera) proves the camera path was taken, not the screen one.
+        val body = server.takeRequest().body.readUtf8()
+        assertTrue("recognised camera query must route to askAboutCamera", body.contains("from the user's camera"))
+    }
+
+    @Test
     fun end_of_speech_auto_sends_and_speaks_the_whole_reply_once() = runBlocking {
         configureChatProvider()
         settings.setTurnControl(TurnControl.SINGLE_TURN) // one turn — continuous re-arm is t-8's concern

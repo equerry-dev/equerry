@@ -44,6 +44,11 @@ class VoiceFlowController(
     // so the utterance falls through to a normal chat send. Defaulted so non-session callers/tests
     // (which never ask about the screen) are unaffected.
     private val screenContext: () -> ScreenContext? = { null },
+    // Captures one camera frame for a spoken "look through the camera" query: opens the capture UI,
+    // returns the frame (image + OCR text) or null on denial/failure/cancel. Suspends while the user
+    // aims, so the loop naturally pauses (no mic re-arm) until the capture settles. Defaulted inert so
+    // non-camera callers/tests are unaffected.
+    private val cameraContext: suspend () -> ScreenContext? = { null },
     // Consented system-engine fallback (locked `failover_consented`): when the active engine is a
     // remote one and it fails, the user is offered a one-tap retry on these system engines — never an
     // automatic switch. Defaulted to inert (no fallback) so callers that don't wire it are unaffected.
@@ -139,10 +144,20 @@ class VoiceFlowController(
                         }
                         break
                     }
-                    // A spoken screen-context query routes to askAboutScreen when a capture is
-                    // available; everything else is an ordinary chat send.
+                    // Routing, most specific first: a spoken camera query opens the camera and
+                    // describes the captured frame; a screen query routes to the screen capture when one
+                    // is available; everything else is an ordinary chat send. Camera is checked before
+                    // screen so an explicit "camera" mention wins over the screen path.
                     val screen = screenContext()
-                    if (screen != null && ScreenQueryGrammar.isScreenQuery(text)) {
+                    if (CameraQueryGrammar.isCameraQuery(text)) {
+                        val camera = cameraContext()
+                        if (camera != null) {
+                            sendAndSpeak { chat.askAboutCamera(camera) }
+                        } else {
+                            _guidance.value = VoiceGuidance("Couldn't open the camera — check the camera permission.")
+                            _state.value = VoiceFlowState.Idle
+                        }
+                    } else if (screen != null && ScreenQueryGrammar.isScreenQuery(text)) {
                         sendAndSpeak { chat.askAboutScreen(screen) }
                     } else {
                         sendAndSpeak { chat.send(text) }

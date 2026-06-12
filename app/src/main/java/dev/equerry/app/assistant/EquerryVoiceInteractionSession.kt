@@ -25,6 +25,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import dev.equerry.app.camera.CameraCaptureCoordinator
 import dev.equerry.app.data.ProbeStore
 import dev.equerry.app.data.VoiceSettingsStore
 import dev.equerry.app.providers.ProviderRepository
@@ -99,6 +100,7 @@ class EquerryVoiceInteractionSession(context: Context) :
         fun voiceSettingsStore(): VoiceSettingsStore
         fun actionRunner(): ActionRunner
         fun ocrEngine(): OcrEngine
+        fun cameraCaptureCoordinator(): CameraCaptureCoordinator
     }
 
     private val lifecycleRegistry = LifecycleRegistry(this)
@@ -139,6 +141,8 @@ class EquerryVoiceInteractionSession(context: Context) :
         isMicGranted = { MicPermission.isGranted(context.applicationContext) },
         isChatConfigured = { entry.providerRepository().observeChatMapping().first() != null },
         screenContext = { currentScreenContext() },
+        // Spoken camera query: launch the capture activity and await the frame (image + OCR text).
+        cameraContext = { entry.cameraCaptureCoordinator().capture(context.applicationContext) },
         // Consented fallback: on a remote-engine failure, offer a one-tap retry on the system engine.
         systemStt = engineSelector.systemSttEngine(),
         systemTts = engineSelector.systemTtsEngine(),

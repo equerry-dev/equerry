@@ -210,7 +210,28 @@ class ChatViewModel @Inject constructor(
      * can't be read / nothing is configured. Only the screen's TEXT joins the session history — the
      * image bytes are request-only and never retained (screen_in_history, c-6).
      */
-    fun askAboutScreen(context: ScreenContext) {
+    fun askAboutScreen(context: ScreenContext) =
+        runCaptureQuery(context, SCREEN_QUERY_LABEL, SCREEN_PROMPT, ::textPrompt)
+
+    /**
+     * Answer a "look through the camera" query: the same VISION/OCR machinery as [askAboutScreen],
+     * with camera-appropriate prompts and a user-bubble label. The captured frame's OCR text joins
+     * the session history; the image bytes are request-only and never retained (same as the screen).
+     */
+    fun askAboutCamera(context: ScreenContext) =
+        runCaptureQuery(context, CAMERA_QUERY_LABEL, CAMERA_PROMPT, ::cameraTextPrompt)
+
+    /**
+     * Shared core for an image-or-text "describe this capture" query (screen or camera). [imagePrompt]
+     * accompanies the image on the VISION path; [textPromptOf] builds the prompt for the OCR/text path;
+     * [label] is the visible user bubble. Routes via [ScreenContextPlanner] exactly as the screen flow.
+     */
+    private fun runCaptureQuery(
+        context: ScreenContext,
+        label: String,
+        imagePrompt: String,
+        textPromptOf: (String) -> String,
+    ) {
         if (_state.value.streaming) return
         // Clear any prior note synchronously so a watcher settles only on THIS turn's outcome.
         _state.update { it.copy(screenNote = null, error = null) }
@@ -232,13 +253,13 @@ class ChatViewModel @Inject constructor(
                     _state.update { it.copy(screenNote = BLANK_SCREEN_NOTE, error = null) }
 
                 ScreenQueryPlan.ImageToVision -> {
-                    beginScreenTurn()
+                    beginCaptureTurn(label)
                     // Try the image; degrade to the text path on the same VISION provider on a capability error.
-                    val first = streamScreen(vision!!, image = context.screenshot, text = SCREEN_PROMPT, historyText = context.text)
+                    val first = streamScreen(vision!!, image = context.screenshot, text = imagePrompt, historyText = context.text)
                     if (first is StreamOutcome.Failed) {
                         if (isCapabilityError(first.error)) {
                             val text = resolveText(context)
-                            val second = streamScreen(vision, image = null, text = textPrompt(text), historyText = text)
+                            val second = streamScreen(vision, image = null, text = textPromptOf(text), historyText = text)
                             if (second is StreamOutcome.Failed) failScreen(second.message)
                         } else {
                             failScreen(first.message)
@@ -247,28 +268,28 @@ class ChatViewModel @Inject constructor(
                 }
 
                 ScreenQueryPlan.TextToVision -> {
-                    beginScreenTurn()
+                    beginCaptureTurn(label)
                     val text = resolveText(context)
-                    val outcome = streamScreen(vision!!, image = null, text = textPrompt(text), historyText = text)
+                    val outcome = streamScreen(vision!!, image = null, text = textPromptOf(text), historyText = text)
                     if (outcome is StreamOutcome.Failed) failScreen(outcome.message)
                 }
 
                 ScreenQueryPlan.OcrThenChat -> {
-                    beginScreenTurn()
+                    beginCaptureTurn(label)
                     val text = resolveText(context)
-                    val outcome = streamScreen(chat!!, image = null, text = textPrompt(text), historyText = text)
+                    val outcome = streamScreen(chat!!, image = null, text = textPromptOf(text), historyText = text)
                     if (outcome is StreamOutcome.Failed) failScreen(outcome.message)
                 }
             }
         }
     }
 
-    /** Open the visible turn for a screen query: a friendly user bubble + a streaming assistant bubble. */
-    private fun beginScreenTurn() {
+    /** Open the visible turn for a capture query: a friendly user bubble + a streaming assistant bubble. */
+    private fun beginCaptureTurn(label: String) {
         _state.update {
             it.copy(
                 transcript = it.transcript +
-                    ChatMessage(ChatRole.USER, SCREEN_QUERY_LABEL) +
+                    ChatMessage(ChatRole.USER, label) +
                     ChatMessage(ChatRole.ASSISTANT, ""),
                 input = "",
                 streaming = true,
@@ -419,6 +440,20 @@ private fun effectiveSystemPrompt(profile: ProviderProfile): String =
 /** Builds the text turn for a screen query: the instruction, plus the screen's text when we have it. */
 private fun textPrompt(screenText: String): String =
     if (screenText.isBlank()) SCREEN_PROMPT else "$SCREEN_PROMPT\n\nScreen text:\n$screenText"
+
+// --- Camera-context (point-and-describe) ---
+
+/** The visible user bubble for a camera query. */
+private const val CAMERA_QUERY_LABEL = "What am I looking at?"
+
+/** Instruction sent to the VISION provider alongside the captured camera frame. */
+private const val CAMERA_PROMPT =
+    "This is a photo from the user's camera. Tell them concisely what they are looking at, and read " +
+        "out any important text you can see in it."
+
+/** Builds the text turn for a camera query when only OCR text is available (no image path). */
+private fun cameraTextPrompt(detectedText: String): String =
+    if (detectedText.isBlank()) CAMERA_PROMPT else "$CAMERA_PROMPT\n\nText detected in the image:\n$detectedText"
 
 /** Outcome of one streamed attempt — success carries the reply + any tool calls; failure the error. */
 private sealed interface StreamOutcome {

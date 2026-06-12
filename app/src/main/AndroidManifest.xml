@@ -66,6 +66,15 @@
                 android:resource="@xml/recognition_service" />
         </service>
 
+        <!--
+          Camera capture for the "look through the camera" flow. Launched internally (from the chat
+          mic flow or the assist session) via CameraCaptureCoordinator; not exported.
+        -->
+        <activity
+            android:name=".camera.CameraCaptureActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Equerry" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -3,6 +3,7 @@ package dev.equerry.app.voice
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import dev.equerry.app.camera.CameraCaptureCoordinator
 import dev.equerry.app.data.VoiceSettingsStore
 import dev.equerry.app.providers.ProviderRepository
 
@@ -18,4 +19,5 @@ import dev.equerry.app.providers.ProviderRepository
 interface VoiceComponentsEntryPoint {
     fun voiceSettingsStore(): VoiceSettingsStore
     fun providerRepository(): ProviderRepository
+    fun cameraCaptureCoordinator(): CameraCaptureCoordinator
 }

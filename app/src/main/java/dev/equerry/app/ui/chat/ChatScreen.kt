@@ -76,6 +76,8 @@ fun ChatRoute(viewModel: ChatViewModel = hiltViewModel()) {
             scope = scope,
             isMicGranted = { MicPermission.isGranted(context.applicationContext) },
             isChatConfigured = { entry.providerRepository().observeChatMapping().first() != null },
+            // Spoken camera query: launch the capture activity and await the frame (image + OCR text).
+            cameraContext = { entry.cameraCaptureCoordinator().capture(context.applicationContext) },
             // Consented fallback: on a remote-engine failure, offer a one-tap retry on the system engine.
             systemStt = selector.systemSttEngine(),
             systemTts = selector.systemTtsEngine(),
