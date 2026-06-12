@@ -202,20 +202,12 @@ class EquerryVoiceInteractionSession(context: Context) :
             setViewTreeSavedStateRegistryOwner(this@EquerryVoiceInteractionSession)
             setContent {
                 EquerryTheme {
-                    val state by chatViewModel.state.collectAsState()
+                    // Headless assistant: a minimal status overlay, never the chat window. The whole
+                    // conversation is spoken; screen/camera queries are voice-triggered through the
+                    // controller, so no on-screen buttons or transcript are needed.
+                    val voiceState by controller.state.collectAsState()
                     val guidance by controller.guidance.collectAsState()
-                    AssistSessionContent(
-                        state = state,
-                        guidance = guidance,
-                        // A null capture sends an empty context so the user still gets the
-                        // blank-screen note rather than nothing (c-1).
-                        onAskScreen = {
-                            chatViewModel.askAboutScreen(currentScreenContext() ?: ScreenContext("", null))
-                        },
-                        onInput = chatViewModel::onInputChange,
-                        onSend = chatViewModel::send,
-                        onNewChat = chatViewModel::newChat,
-                    )
+                    AssistOverlay(voiceState = voiceState, guidance = guidance)
                 }
             }
         }
